@@ -1,9 +1,9 @@
-Milestone 1 - Initial Project Setup -(5/17/22 -> 6/31/22) 
+Milestone 1 - Initial Project Setup -(5/17/22 -> 5/31/22) 
 ---------------------------------------------------------
 
 Buildup engine framework to be used for a prototype. Mainly core library which 
 includes containers, math, window, thread, fiber, job system, and sync 
-primitives. Start work on on the GPU abstraction layer.
+primitives. Start work on on the GPU abstraction layer or use temp solution.
 
 TODO:
 * Setup C++ Project
@@ -33,3 +33,6 @@ TODO:
 	- os
 		- Window
 		- Library
+* GPU Abstraction Beginning
+	- DX12 backend
+	- newport based frontend

@@ -1,0 +1,7 @@
+Exploration traversal puzzle game set on an island in the middle of the ocean
+
+Core Features:
+- Many types of traversal (walking, swimming, climbing, surfing, zip lining, grappling)
+- Tools are resources (rope, ladder, zip lines, grapples)
+- Third Person
+- Goal of reaching very top which is viewable
