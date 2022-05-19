@@ -3,8 +3,6 @@
 #include <cstdint>
 #include <cassert> // FIXME: Replace this
 
-namespace core {
-
 using u8 = uint8_t;
 using u16 = uint16_t;
 using u32 = uint32_t;
@@ -44,7 +42,3 @@ using NullPtr = decltype(nullptr);
 #define NO_DISCARD [[nodiscard]]
 #define NO_RETURN [[noreturn]]
 #define ALLOW_UNUSED [[maybe_unused]]
-
-}
-
-using namespace core;

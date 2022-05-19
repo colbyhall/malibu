@@ -1,10 +1,7 @@
 #pragma once
 
 #include "non_null.hpp"
-
 #include <initializer_list>
-
-namespace core {
 
 template <typename T>
 class Slice {
@@ -82,8 +79,8 @@ public:
 
 	explicit operator bool() const { return !is_empty(); }
 
-	NO_DISCARD ALWAYS_INLINE
-		const T& operator[](usize index) const {
+	ALWAYS_INLINE
+	const T& operator[](usize index) const {
 		VERIFY(is_valid_index(index));
 		return m_ptr[index];
 	}
@@ -92,6 +89,3 @@ private:
 	T const* m_ptr;
 	usize m_len;
 };
-
-}
-using namespace core;

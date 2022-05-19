@@ -2,8 +2,6 @@
 
 #include "../primitives.hpp"
 
-namespace core {
-
 template <typename T>
 class NonNull {
 public:
@@ -15,16 +13,16 @@ public:
 		VERIFY(m_ptr != nullptr); // Runtime nullptr check
 	}
 
-	NO_DISCARD ALWAYS_INLINE
+	ALWAYS_INLINE
 	operator T*() const { return m_ptr; }
 
-	NO_DISCARD ALWAYS_INLINE explicit
+	ALWAYS_INLINE 
 	operator void*() const { return m_ptr; }
 
-	NO_DISCARD ALWAYS_INLINE
+	ALWAYS_INLINE
 	T* operator ->() const { return m_ptr; }
 
-	NO_DISCARD ALWAYS_INLINE
+	ALWAYS_INLINE
 	T& operator *() const { return *m_ptr; }
 	
 private:
@@ -42,7 +40,7 @@ public:
 		VERIFY(m_ptr != nullptr); // Runtime nullptr check
 	}
 
-	NO_DISCARD ALWAYS_INLINE
+	ALWAYS_INLINE
 	operator void*() const { return m_ptr; }
 
 private:
@@ -60,12 +58,9 @@ public:
 		VERIFY(m_ptr != nullptr); // Runtime nullptr check
 	}
 
-	NO_DISCARD ALWAYS_INLINE
+	ALWAYS_INLINE
 	operator void const*() const { return m_ptr; }
 
 private:
 	void const* m_ptr;
 };
-
-}
-using namespace core;

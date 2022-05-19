@@ -1,7 +1,7 @@
 workspace "malibu"
 	architecture "x64"
     
-	configurations { "Debug", "Release" }
+	configurations { "debug", "release" }
 
 	targetdir ("bin/%{cfg.buildcfg}")
 	objdir ("bin/%{cfg.buildcfg}")
@@ -10,13 +10,17 @@ workspace "malibu"
 
 	characterset("ASCII")
 
-	filter "configurations:Debug"
+	filter "configurations:debug"
     	defines { "BUILD_DEBUG" }
 		symbols "On"
 
-	filter "configurations:Release"
+	filter "configurations:release"
 		defines { "BUILD_RELEASE" }
 		optimize "On"
 
 	include "src/runtime"
 	include "src/programs"
+
+	cppdialect "C++17"
+
+	flags { "FatalWarnings" }
