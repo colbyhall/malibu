@@ -1,6 +1,5 @@
 #pragma once
 
-#include "containers/result.hpp"
 #include "containers/non_null.hpp"
 
 namespace mem {

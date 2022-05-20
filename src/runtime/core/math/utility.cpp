@@ -67,4 +67,5 @@ namespace math {
 	f64 sqrt(f64 x) {
 		return std::sqrt(x);
 	}
+
 }

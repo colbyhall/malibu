@@ -9,7 +9,7 @@ struct Vec3 {
 		struct { Vec2<T> xy; T z; };
 		struct { T width, height, depth; };
 		struct { T u, v, w; };
-		T xyz[2];
+		T xyz[3];
 	};
 
 	ALWAYS_INLINE constexpr

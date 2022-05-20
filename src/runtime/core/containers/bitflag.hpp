@@ -24,6 +24,6 @@ public:
 		return *this;
 	}
 
-	NO_DISCARD ALWAYS_INLINE explicit
+	ALWAYS_INLINE explicit
 	operator Underlying() const { return bits; }
 };

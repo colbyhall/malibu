@@ -21,6 +21,4 @@ workspace "malibu"
 	include "src/runtime"
 	include "src/programs"
 
-	cppdialect "C++17"
-
 	flags { "FatalWarnings" }

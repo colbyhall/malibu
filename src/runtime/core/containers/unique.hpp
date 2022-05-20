@@ -1,30 +1,34 @@
 #pragma once
 
-#include "type_traits.hpp"
-#include "memory.hpp"
+#include "../type_traits.hpp"
+#include "../memory.hpp"
 
 #include <new>
 
 template <typename T>
 class Unique {
 public:
-	explicit
-	Unique(T&& t) {
-		void* ptr = mem::alloc(mem::Layout::single<T>());
-		new (ptr) T(core::forward(t)); 
+	template <typename D>
+	explicit Unique(D&& t) {
+		static_assert(core::is_base_of<T, D>, "T is not a base of D");
+
+		void* ptr = mem::alloc(mem::Layout::single<D>());
+		new (ptr) D(core::move(t)); 
 		m_ptr = static_cast<T*>(ptr);
 	}
 
-	explicit
-	Unique(const T& t) {
-		T copy = t;
-		void* ptr = mem::malloc(mem::Layout::single<T>());
-		new (ptr) T(core::move(copy));
+	template <typename D>
+	explicit Unique(const D& t) {
+		static_assert(core::is_base_of<T, D>, "T is not a base of D");
+		D copy = t;
+		void* ptr = mem::malloc(mem::Layout::single<D>());
+		new (ptr) D(core::move(copy));
 		m_ptr = static_cast<T*>(ptr);
 	}
 
 	template<typename D>
 	Unique(Unique<D>&& move) noexcept : m_ptr(move.m_ptr) {
+		static_assert(core::is_base_of<T, D>, "T is not a base of D");
 		move.m_ptr = nullptr;
 	}
 
@@ -39,6 +43,8 @@ public:
 		m.m_ptr = nullptr;
 		return *this;
 	}
+
+	// TODO: Destructor
 
 	NO_DISCARD ALWAYS_INLINE explicit
 	operator NonNull<T>() { return m_ptr; }

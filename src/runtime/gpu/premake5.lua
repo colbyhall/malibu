@@ -1,4 +1,4 @@
-project "core"
+project "gpu"
     kind "StaticLib"
     language "C++"
 
@@ -6,4 +6,8 @@ project "core"
 
     vpaths { ["*"] = { "**.hpp", "**.cpp" } }
 
-	cppdialect "C++17"
+    includedirs { "../" }
+
+    links { "core", "d3d12", "dxgi", "d3dcompiler" }
+
+    cppdialect "C++17"

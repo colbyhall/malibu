@@ -1,24 +1,28 @@
-#include "core/core.hpp"
-#include "gpu/context.hpp"
-
-#include <cstdio>
+#include "../window.hpp"
 
 #define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 
 static
 LRESULT CALLBACK window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+	auto callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
+	const WindowHandle window = hWnd;
+
 	switch (Msg) {
-		case WM_DESTROY:
+		case WM_DESTROY: {
+			callback(window, WindowEvent{ WindowEventType::ExitRequested });
+		} break;
 		case WM_CLOSE: {
-			ExitProcess(0);
+			callback(window, WindowEvent{ WindowEventType::Closed });
 		} break;
 	}
 
 	return DefWindowProcA(hWnd, Msg, wParam, lParam);
 }
 
-int main(int argc, char** argv) {
+Option<Window> Window::create(const WindowConfig& config) {
 	HINSTANCE hInstance = GetModuleHandleA(nullptr);
 
 	DWORD dwStyle = WS_OVERLAPPEDWINDOW;
@@ -40,13 +44,10 @@ int main(int argc, char** argv) {
 	// FIXME: Return error when class registration failed
 	const ATOM atom = RegisterClassExA(&window_class);
 	if (atom == 0) {
-		return -1;
+		return Option<Window>();
 	}
 
-	const LONG WINDOW_WIDTH = 1280;
-	const LONG WINDOW_HEIGHT = 720;
-
-	RECT adjusted_rect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
+	RECT adjusted_rect = { 0, 0, (LONG)config.size.width, (LONG)config.size.height };
 	AdjustWindowRect(&adjusted_rect, dwStyle, 0);
 
 	const int width = adjusted_rect.right - adjusted_rect.left;
@@ -58,10 +59,10 @@ int main(int argc, char** argv) {
 	const int x = monitor_width / 2 - width / 2;
 	const int y = monitor_height / 2 - height / 2;
 
-	HWND hwnd = CreateWindowExA(
+	HWND handle = CreateWindowExA(
 		0,
 		window_class.lpszClassName,
-		"Malibu",
+		&config.title.slice()[0],
 		dwStyle,
 		x, y, width, height,
 		nullptr, nullptr,
@@ -69,19 +70,37 @@ int main(int argc, char** argv) {
 		nullptr
 	);
 	// FIXME: Error
-	VERIFY(hwnd != INVALID_HANDLE_VALUE);
+	VERIFY(handle != INVALID_HANDLE_VALUE);
 
-	ShowWindow(hwnd, SW_SHOWDEFAULT);
-
-	const auto& context = gpu::Context::the();
-
-	for (;;) {
-		MSG msg;
-		while (PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessageA(&msg);
-		}
+	int show = 0;
+	switch (config.visibility) {
+		case WindowVisibility::Default:
+			show = SW_SHOWDEFAULT;
+			break;
+		case WindowVisibility::Visible:
+			show = SW_SHOWNORMAL;
+			break;
+		case WindowVisibility::Maximized:
+			show = SW_SHOWMAXIMIZED;
+			break;
+		case WindowVisibility::Minimized:
+			show = SW_SHOWMINIMIZED;
+			break;
 	}
 
-    return 0;
+	if (show != 0) {
+		ShowWindow(handle, show);
+	}
+
+	SetWindowLongPtrA(handle, GWLP_USERDATA, (LONG_PTR)config.callback);
+
+	return Window(handle);
+}
+
+void Window::pump_events() {
+	MSG msg;
+	while (PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE)) {
+		TranslateMessage(&msg);
+		DispatchMessageA(&msg);
+	}
 }

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "slice.hpp"
-#include "memory.hpp"
+#include "../memory.hpp"
+#include "../type_traits.hpp"
 
 #include <initializer_list>
 #include <new>
@@ -42,6 +43,8 @@ public:
 		m.m_cap = 0;
 		return *this;
 	}
+
+	// TODO: Destructor
 
 	NO_DISCARD ALWAYS_INLINE
 	usize len() const { return m_len; }
