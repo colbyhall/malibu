@@ -9,8 +9,7 @@ namespace gpu {
 	}
 
 	Context::Context() 
-		: m_backend (Backend::Dx12)
-		, m_interface (Unique<ContextInterface>(Dx12Context())) 
+		: m_interface (Unique<ContextInterface>(Dx12Context())) 
 	{
 			
 	}

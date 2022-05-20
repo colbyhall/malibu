@@ -2,25 +2,30 @@
 
 #include "vec2.hpp"
 
-template <typename T>
-struct Vec3 {
-	union {
-		struct { T x, y, z; };
-		struct { Vec2<T> xy; T z; };
-		struct { T width, height, depth; };
-		struct { T u, v, w; };
-		T xyz[3];
+namespace core { namespace math {
+	template <typename T>
+	struct Vec3 {
+		union {
+			struct { T x, y, z; };
+			struct { Vec2<T> xy; T z; };
+			struct { T width, height, depth; };
+			struct { T u, v, w; };
+			T xyz[3];
+		};
+
+		ALWAYS_INLINE constexpr
+		Vec3() : x(0), y(0), z(0) { }
+
+		ALWAYS_INLINE constexpr
+		Vec3(T xyz) : x(xyz), y(xyz), z(xyz) { }
+
+		ALWAYS_INLINE constexpr
+		Vec3(T x, T y, T z) : u(x), v(y), w(z) { }
 	};
+}}
 
-	ALWAYS_INLINE constexpr
-	Vec3() : x(0), y(0), z(0) { }
-
-	ALWAYS_INLINE constexpr
-	Vec3(T xyz) : x(xyz), y(xyz), z(xyz) { }
-
-	ALWAYS_INLINE constexpr
-	Vec3(T x, T y, T z) : u(x), v(y), w(z) { }
-};
+template <typename T>
+using Vec3 = core::math::Vec3<T>;
 using Vec3f32 = Vec3<f32>;
 using Vec3f64 = Vec3<f64>;
 using Vec3u32 = Vec3<u32>;

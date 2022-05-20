@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 
-namespace mem {
+namespace core { namespace mem {
 
 	NonNull<void> alloc(Layout layout) {
 		return std::malloc(layout.size);
@@ -29,4 +29,4 @@ namespace mem {
 		return std::memset(ptr, value, count);
 	}
 
-}
+} }

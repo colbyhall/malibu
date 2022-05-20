@@ -10,4 +10,4 @@ project "gpu"
 
     links { "core", "d3d12", "dxgi", "d3dcompiler" }
 
-    cppdialect "C++17"
+	cppdialect "C++20"

@@ -9,4 +9,4 @@ project "game"
 
     links { "core", "gpu", "user32", "kernel32", "shlwapi" }
 
-    cppdialect "C++17"
+    cppdialect "C++20"

@@ -1,16 +1,13 @@
 #pragma once
 
-#include "../type_traits.hpp"
-#include "../memory.hpp"
-
-#include <new>
+#if 0
 
 namespace core { namespace containers {
 	template <typename T>
-	class Unique {
+	class SharedRef {
 	public:
 		template <typename D>
-		explicit Unique(D&& t) {
+		explicit SharedRef(D&& t) {
 			static_assert(core::is_base_of<T, D>, "T is not a base of D");
 
 			void* ptr = mem::alloc(mem::Layout::single<D>());
@@ -19,7 +16,7 @@ namespace core { namespace containers {
 		}
 
 		template <typename D>
-		explicit Unique(const D& t) {
+		explicit SharedRef(const D& t) {
 			static_assert(core::is_base_of<T, D>, "T is not a base of D");
 			D copy = t;
 			void* ptr = mem::alloc(mem::Layout::single<D>());
@@ -28,17 +25,17 @@ namespace core { namespace containers {
 		}
 
 		template<typename D>
-		Unique(Unique<D>&& move) noexcept : m_ptr(move.m_ptr) {
+		SharedRef(SharedRef<D>&& move) noexcept : m_ptr(move.m_ptr) {
 			static_assert(core::is_base_of<T, D>, "T is not a base of D");
 			move.m_ptr = nullptr;
 		}
 
-		NO_COPY(Unique);
+		NO_COPY(SharedRef);
 
-		Unique(Unique<T>&& move) noexcept : m_ptr(move.m_ptr) {
+		SharedRef(SharedRef<T>&& move) noexcept : m_ptr(move.m_ptr) {
 			move.m_ptr = nullptr;
 		}
-		Unique& operator=(Unique<T>&& m) noexcept {
+		SharedRef& operator=(Unique<T>&& m) noexcept {
 			Unique<T> to_destroy = core::move(*this);
 			m_ptr = m.m_ptr;
 			m.m_ptr = nullptr;
@@ -74,9 +71,8 @@ namespace core { namespace containers {
 	private:
 		T* m_ptr;
 
-		Unique() = default;
+		SharedRef() = default;
 	};
 } }
 
-template <typename T>
-using Unique = core::containers::Unique<T>;
+#endif

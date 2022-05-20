@@ -2,7 +2,7 @@
 
 #include "../primitives.hpp"
 
-namespace math {
+namespace core { namespace math {
 
 	f32 cos(f32 x);
 	f64 cos(f64 x);
@@ -27,5 +27,5 @@ namespace math {
 	
 	f32 sqrt(f32 x);
 	f64 sqrt(f64 x);
-
-}
+	
+} }

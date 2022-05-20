@@ -2,24 +2,29 @@
 
 #include "../primitives.hpp"
 
-template <typename T>
-struct Vec2 {
-	union {
-		struct { T x, y; };
-		struct { T width, height; };
-		struct { T u, v; };
-		T xy[2];
+namespace core { namespace math {
+	template <typename T>
+	struct Vec2 {
+		union {
+			struct { T x, y; };
+			struct { T width, height; };
+			struct { T u, v; };
+			T xy[2];
+		};
+
+		ALWAYS_INLINE constexpr
+		Vec2() : x(0), y(0) { }
+		
+		ALWAYS_INLINE constexpr
+		Vec2(T xy) : x(xy), y(xy) { }
+
+		ALWAYS_INLINE constexpr
+		Vec2(T x, T y) : u(x), v(y) { }
 	};
+}}
 
-	ALWAYS_INLINE constexpr
-	Vec2() : x(0), y(0) { }
-	 
-	ALWAYS_INLINE constexpr
-	Vec2(T xy) : x(xy), y(xy) { }
-
-	ALWAYS_INLINE constexpr
-	Vec2(T x, T y) : u(x), v(y) { }
-};
+template <typename T>
+using Vec2 = core::math::Vec2<T>;
 using Vec2f32 = Vec2<f32>;
 using Vec2f64 = Vec2<f64>;
 using Vec2u32 = Vec2<u32>;

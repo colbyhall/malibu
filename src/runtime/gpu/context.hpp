@@ -10,7 +10,7 @@ namespace gpu {
 
 	class ContextInterface {
 	public:
-
+		virtual Backend backend() const = 0;
 	};
 
 	class Context {
@@ -20,7 +20,6 @@ namespace gpu {
 	private:
 		Context();
 
-		Backend m_backend;
 		Unique<ContextInterface> m_interface;
 	};
 

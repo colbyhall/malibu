@@ -2,8 +2,7 @@
 
 #include "containers/non_null.hpp"
 
-namespace mem {
-
+namespace core { namespace mem {
 	struct Layout {
 		usize size;
 		usize alignment;
@@ -26,5 +25,4 @@ namespace mem {
 	NonNull<void> copy(NonNull<void> dest, NonNull<void const> src, usize count);
 	NonNull<void> move(NonNull<void> dest, NonNull<void const> src, usize count);
 	NonNull<void> set(NonNull<void> ptr, u8 value, usize count);
-
-} 
+} }

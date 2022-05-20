@@ -6,4 +6,4 @@ project "core"
 
     vpaths { ["*"] = { "**.hpp", "**.cpp" } }
 
-	cppdialect "C++17"
+	cppdialect "C++20"
