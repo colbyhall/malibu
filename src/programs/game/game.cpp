@@ -2,8 +2,11 @@
 #include "core/platform/window.hpp"
 
 using namespace core::platform;
+using namespace core::time;
 
 #include "gpu/context.hpp"
+
+#include <cstdio>
 
 static bool g_running = true;
 
@@ -23,7 +26,14 @@ int main(int argc, char** argv) {
 
 	const auto& context = gpu::Context::the();
 
+	auto last_frame = Instant::now();
 	while (g_running) {
+		const auto now = Instant::now();
+		const auto delta = now.duration_since(last_frame);
+		last_frame = now;
+
+		printf("%f\n", delta.as_secs_f64());
+
 		Window::pump_events();
 	}
 }

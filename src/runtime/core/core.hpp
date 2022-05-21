@@ -3,6 +3,7 @@
 #include "primitives.hpp"
 #include "type_traits.hpp"
 #include "memory.hpp"
+#include "time.hpp"
 
 #include "containers/array.hpp"
 #include "containers/bitflag.hpp"
