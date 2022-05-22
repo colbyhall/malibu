@@ -2,18 +2,32 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
+
+#define MEMORY_DEBUG 1
 
 namespace core { namespace mem {
 
 	NonNull<void> alloc(Layout layout) {
-		return std::malloc(layout.size);
+		void* result = std::malloc(layout.size);
+#if MEMORY_DEBUG
+		printf("Allocated memory %p\n", result);
+#endif
+		return result;
 	}
 
 	NonNull<void> realloc(NonNull<void> old_ptr, Layout old_layout, Layout new_layout) {
-		return std::realloc(old_ptr, new_layout.size);
+		void* result = std::realloc(old_ptr, new_layout.size);
+#if MEMORY_DEBUG
+		printf("Reallocated memory old: %p, new: %p\n", old_ptr, result);
+#endif
+		return result;
 	}
 
-	void free(NonNull<void> ptr, Layout layout) {
+	void free(NonNull<void> ptr) {
+#if MEMORY_DEBUG
+		printf("Freed memory %p\n", ptr);
+#endif
 		std::free(ptr);
 	}
 

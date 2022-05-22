@@ -1,6 +1,6 @@
 #pragma once
 
-#include "primitives.hpp"
+#include "core/minimal.hpp"
 
 namespace gpu {
 
@@ -49,6 +49,19 @@ namespace gpu {
 		Depth24_Stencil8,
 	};
 
+	class TextureInterface {
+	public:
+		virtual BitFlag<TextureUsage> usage() const = 0;
+		virtual Format format() const = 0;
+		virtual Vec3u32 size() const = 0;
+	};
+
+	class Texture {
+	public:
+	private:
+		SharedRef<TextureInterface> m_interface;
+	};
+
 	enum class BufferUsage : u8 {
 		TransferSrc,
 		TransferDst,
@@ -57,4 +70,7 @@ namespace gpu {
 		Constant,
 	};
 
+	class BufferInterface {
+	public:
+	};
 }

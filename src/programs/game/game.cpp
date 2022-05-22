@@ -1,10 +1,12 @@
-#include "core/core.hpp"
-#include "core/platform/window.hpp"
+#include "core/minimal.hpp"
+#include "core/window.hpp"
+#include "core/sync/mutex.hpp"
 
-using namespace core::platform;
+using namespace core::window;
 using namespace core::time;
+using namespace core::sync;
 
-#include "gpu/context.hpp"
+#include "gpu/minimal.hpp"
 
 #include <cstdio>
 
@@ -19,12 +21,20 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 int main(int argc, char** argv) {
 	auto window = Window::create({
 		.size = {1280, 720},
-		.title = "Hello World",
-		.callback = window_callback,
-		.visibility = WindowVisibility::Visible,
+			.title = "Hello World",
+			.callback = window_callback,
+			.visibility = WindowVisibility::Visible,
 	}).unwrap();
 
-	const auto& context = gpu::Context::the();
+	// const SharedRef<i32> foo { 420 };
+
+	{
+		Array<i32> bar;
+		bar.push(42);
+		bar.push(420);
+	}
+
+	// const auto& context = gpu::Context::the();
 
 	auto last_frame = Instant::now();
 	while (g_running) {
@@ -32,8 +42,9 @@ int main(int argc, char** argv) {
 		const auto delta = now.duration_since(last_frame);
 		last_frame = now;
 
-		printf("%f\n", delta.as_secs_f64());
-
 		Window::pump_events();
 	}
+
+
+	return 0;
 }

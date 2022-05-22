@@ -5,7 +5,7 @@
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 
-namespace core { namespace platform {
+namespace core { namespace window {
 	static
 		LRESULT CALLBACK window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		auto callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);

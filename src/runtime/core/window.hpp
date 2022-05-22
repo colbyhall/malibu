@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../containers/option.hpp"
-#include "../containers/string.hpp"
-#include "../type_traits.hpp"
-#include "../math/vec2.hpp"
+#include "containers/option.hpp"
+#include "containers/string.hpp"
+#include "type_traits.hpp"
+#include "math/vec2.hpp"
 
-namespace core { namespace platform {
+namespace core { namespace window {
 	using WindowHandle = void*;
 
 	enum class WindowEventType {
@@ -55,6 +55,9 @@ namespace core { namespace platform {
 		}
 
 		static void pump_events();
+
+		ALWAYS_INLINE
+		WindowHandle handle() const { return m_handle; }
 
 	private:
 		WindowHandle m_handle;

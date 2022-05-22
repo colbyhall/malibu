@@ -2,6 +2,7 @@
 
 #include "core/containers/array.hpp"
 #include "core/containers/bitflag.hpp"
+#include "core/containers/shared_ref.hpp"
 
 #include "resources.hpp"
 
@@ -10,6 +11,20 @@ namespace gpu {
 	enum class ShaderType : u8 {
 		Vertex,
 		Pixel,
+	};
+
+	class ShaderInterface {
+	public:
+		virtual Slice<const u8> binary() const = 0;
+	};
+
+	class Shader {
+	public:
+		ALWAYS_INLINE 
+		Slice<const u8> binary() const { return m_interface->binary(); }
+
+	private:
+		SharedRef<ShaderInterface> m_interface;
 	};
 
 	enum class DrawMode : u8 {

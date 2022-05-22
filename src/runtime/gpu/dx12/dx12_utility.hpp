@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/core.hpp"
+#include "core/minimal.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -23,3 +23,4 @@ inline void throw_if_failed(HRESULT hr) {
 }
 
 #include <d3d12.h>
+#include <dxgi1_6.h>

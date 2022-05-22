@@ -90,7 +90,7 @@ Dx12Context::Dx12Context() {
 		//    }
 #endif
 
-		device = device1;
+		m_device = device1;
 	}
 
 	// Create the direct command queue
@@ -101,6 +101,6 @@ Dx12Context::Dx12Context() {
 		desc.Flags =    D3D12_COMMAND_QUEUE_FLAG_NONE;
 		desc.NodeMask = 0;
 
-		throw_if_failed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue)));
+		throw_if_failed(m_device->CreateCommandQueue(&desc, IID_PPV_ARGS(&m_queue)));
 	}
 }

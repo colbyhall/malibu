@@ -45,7 +45,16 @@ namespace core { namespace containers {
 			return *this;
 		}
 
-		// TODO: Destructor
+		~Array() {
+			if (m_ptr) {
+				for (usize i = 0; i < m_len; ++i) {
+					T& item = m_ptr[i];
+					item.~T();
+				}
+				mem::free(m_ptr);
+				m_ptr = nullptr;
+			}
+		}
 
 		NO_DISCARD ALWAYS_INLINE
 		usize len() const { return m_len; }

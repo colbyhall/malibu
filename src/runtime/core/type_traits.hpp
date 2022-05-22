@@ -69,8 +69,14 @@ namespace core {
 	template <typename T>
 	inline constexpr bool is_union = std::is_union_v<T>;
 
+	template <typename A, typename B>
+	inline constexpr bool is_same = std::is_same_v<A, B>;
+
 	template <typename Base, typename Derived>
 	inline constexpr bool is_base_of = std::is_base_of_v<Base, Derived>;
+
+	template <typename T>
+	inline constexpr bool is_abstract = std::is_abstract_v<T>;
 	
 	template <typename T>
 	using to_underlying_type = std::underlying_type_t<T>;

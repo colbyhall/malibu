@@ -10,6 +10,12 @@ TODO:
 * Core Library Start
 	- primitives
 	- type_traits
+	- time
+		- Instant
+		- Duration
+	- thread
+		- Thread
+		- Fiber
 	- containers
 		- Arc
 		- Array
@@ -30,9 +36,7 @@ TODO:
 		- Quat
 		- AABB2
 		- AABB3
-	- os
-		- Window
-		- Library
+	
 * GPU Abstraction Beginning
 	- DX12 backend
 	- newport based frontend

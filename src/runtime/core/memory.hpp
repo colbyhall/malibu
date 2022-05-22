@@ -8,9 +8,7 @@ namespace core { namespace mem {
 		usize alignment;
 	
 		template <typename T>
-		static constexpr Layout single() {
-			return Layout{ sizeof(T), alignof(T) };
-		}
+		static inline constexpr Layout single = { sizeof(T), alignof(T) };
 	
 		template <typename T>
 		static constexpr Layout array(usize len) {
@@ -20,7 +18,7 @@ namespace core { namespace mem {
 	
 	NonNull<void> alloc(Layout layout);
 	NonNull<void> realloc(NonNull<void> old_ptr, Layout old_layout, Layout new_layout);
-	void free(NonNull<void> ptr, Layout layout);
+	void free(NonNull<void> ptr);
 	
 	NonNull<void> copy(NonNull<void> dest, NonNull<void const> src, usize count);
 	NonNull<void> move(NonNull<void> dest, NonNull<void const> src, usize count);
