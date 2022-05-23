@@ -49,6 +49,17 @@ namespace gpu {
 		Depth24_Stencil8,
 	};
 
+	enum class Layout : u8 {
+		Undefined,
+		General,
+		ColorAttachment,
+		DepthAttachment,
+		TransferSrc,
+		TransferDst,
+		ShaderReadOnly,
+		Present,
+	};
+
 	class TextureInterface {
 	public:
 		virtual BitFlag<TextureUsage> usage() const = 0;
@@ -70,7 +81,23 @@ namespace gpu {
 		Constant,
 	};
 
+	enum class BufferKind {
+		Storage,
+		Upload,
+		Download,
+	};
+
 	class BufferInterface {
 	public:
+		virtual BitFlag<BufferUsage> usage() const = 0;
+		virtual BufferKind kind() const = 0;
+		virtual usize len() const = 0;
+		virtual usize stride() const = 0;
+	};
+
+	class Buffer {
+	public:
+	private:
+		SharedRef<BufferInterface> m_interface;
 	};
 }

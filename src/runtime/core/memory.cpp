@@ -4,7 +4,7 @@
 #include <cstring>
 #include <cstdio>
 
-#define MEMORY_DEBUG 1
+#define MEMORY_DEBUG 0
 
 namespace core { namespace mem {
 

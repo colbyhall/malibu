@@ -23,6 +23,11 @@ namespace core { namespace containers {
 			return *this;
 		}
 
+		bool is_set(T t) {
+			auto b = underlying(t);
+			return (bits & (1 << b)) != 0;
+		}
+
 		ALWAYS_INLINE explicit
 		operator Underlying() const { return bits; }
 		

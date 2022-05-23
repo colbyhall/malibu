@@ -18,12 +18,10 @@ class Dx12Context : public gpu::ContextInterface {
 public:
 	explicit Dx12Context();
 
-	
 	gpu::Backend backend() const override { return gpu::Backend::Dx12; }
 	bool register_window(const Window& window) const override;
 
-private:
-	ComPtr<ID3D12Device1> m_device;
-	ComPtr<ID3D12CommandQueue> m_queue;
-	Option<Dx12Swapchain> m_swapchain;
+	ComPtr<ID3D12Device1> device;
+	ComPtr<ID3D12CommandQueue> queue;
+	Option<Dx12Swapchain> swapchain;
 };

@@ -8,8 +8,6 @@ using namespace core::sync;
 
 #include "gpu/minimal.hpp"
 
-#include <cstdio>
-
 static bool g_running = true;
 
 void window_callback(WindowHandle window, const WindowEvent& event) {
@@ -25,14 +23,6 @@ int main(int argc, char** argv) {
 			.callback = window_callback,
 			.visibility = WindowVisibility::Visible,
 	}).unwrap();
-
-	// const SharedRef<i32> foo { 420 };
-
-	{
-		Array<i32> bar;
-		bar.push(42);
-		bar.push(420);
-	}
 
 	// const auto& context = gpu::Context::the();
 

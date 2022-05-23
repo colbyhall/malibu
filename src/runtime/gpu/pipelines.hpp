@@ -112,4 +112,14 @@ namespace gpu {
 		CompareOp depth_compare = CompareOp::Always;
 	};
 
+	class GraphicsPipelineInterface {
+	public:
+	};
+
+	class GraphicsPipeline {
+	public:
+	private:
+		SharedRef<GraphicsPipelineInterface> m_interface;
+	};
+
 }
