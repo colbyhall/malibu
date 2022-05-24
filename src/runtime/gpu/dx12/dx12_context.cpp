@@ -1,7 +1,5 @@
 #include "dx12_context.hpp"
-#include <dxgi1_6.h>
-
-#include <cstdio>
+#include "core/window.hpp"
 
 Dx12Context::Dx12Context() {
 	// Always enable the debug layer before doing anything DX12 related
@@ -15,36 +13,35 @@ Dx12Context::Dx12Context() {
 
 	// Find the best adapter. We're not going to use WARP ATM
 	ComPtr<IDXGIAdapter4> adapter;
-	ComPtr<IDXGIFactory4> dxgi_factory;
 	{
 		UINT create_factory_flags = 0;
 #if BUILD_DEBUG
 		create_factory_flags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-		throw_if_failed(CreateDXGIFactory2(create_factory_flags, IID_PPV_ARGS(&dxgi_factory)));
+		throw_if_failed(CreateDXGIFactory2(create_factory_flags, IID_PPV_ARGS(&factory)));
 
-		ComPtr<IDXGIAdapter1> dxgi_adapter1;
-		ComPtr<IDXGIAdapter4> dxgi_adapter4;
+		ComPtr<IDXGIAdapter1> adapter1;
+		ComPtr<IDXGIAdapter4> adapter4;
 
 		usize max_dedicated_video_memory = 0;
-		for (UINT i = 0; dxgi_factory->EnumAdapters1(i, &dxgi_adapter1) != DXGI_ERROR_NOT_FOUND; ++i) {
+		for (UINT i = 0; factory->EnumAdapters1(i, &adapter1) != DXGI_ERROR_NOT_FOUND; ++i) {
 			DXGI_ADAPTER_DESC1 dxgiAdapterDesc1;
-			dxgi_adapter1->GetDesc1(&dxgiAdapterDesc1);
+			adapter1->GetDesc1(&dxgiAdapterDesc1);
 
 			// Check to see if the adapter can create a D3D12 device without actually
 			// creating it. The adapter with the largest dedicated video memory
 			// is favored.
 			if ((dxgiAdapterDesc1.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) == 0 &&
-				SUCCEEDED(D3D12CreateDevice(dxgi_adapter1.Get(),
+				SUCCEEDED(D3D12CreateDevice(adapter1.Get(),
 				D3D_FEATURE_LEVEL_11_0, __uuidof(ID3D12Device), nullptr)) &&
 				dxgiAdapterDesc1.DedicatedVideoMemory > max_dedicated_video_memory) {
 				max_dedicated_video_memory = dxgiAdapterDesc1.DedicatedVideoMemory;
-				throw_if_failed(dxgi_adapter1.As(&dxgi_adapter4));
+				throw_if_failed(adapter1.As(&adapter4));
 			}
 		}
 
-		adapter = dxgi_adapter4;
+		adapter = adapter4;
 	}
 
 	// Create the device
@@ -103,4 +100,90 @@ Dx12Context::Dx12Context() {
 
 		throw_if_failed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue)));
 	}
+
+	// Create the command allocator
+	throw_if_failed(device->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_DIRECT, 
+		IID_PPV_ARGS(&command_allocator)
+	));
+}
+
+bool Dx12Context::register_window(const core::window::Window& window) const {
+	Dx12Context& self = const_cast < Dx12Context& > (*this); // TODO: Thread safety
+
+	if (self.swapchain.is_set()) {
+		return false;
+	}
+
+	const auto size = window.client_size();
+
+	DXGI_SWAP_CHAIN_DESC1 desc = {};
+	desc.BufferCount = Dx12Swapchain::frame_count;
+	desc.Width = size.width;
+	desc.Height = size.height;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	desc.SampleDesc.Count = 1;
+
+	ComPtr<IDXGISwapChain1> swapchain1;
+	throw_if_failed(self.factory->CreateSwapChainForHwnd(
+		self.queue.Get(),
+		(HWND)window.handle(),
+		&desc,
+		nullptr,
+		nullptr,
+		&swapchain1
+	));
+
+	throw_if_failed(self.factory->MakeWindowAssociation(
+		(HWND)window.handle(),
+		DXGI_MWA_NO_ALT_ENTER
+	));
+
+	ComPtr<IDXGISwapChain3> swapchain; 
+	throw_if_failed(swapchain1.As(&swapchain));
+	const auto current = (u8)swapchain->GetCurrentBackBufferIndex();
+
+	ComPtr<ID3D12Fence> fence;
+	throw_if_failed(self.device->CreateFence(
+		0, 
+		D3D12_FENCE_FLAG_NONE, 
+		IID_PPV_ARGS(&fence)
+	));
+	auto fence_event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	VERIFY(fence_event);
+	const int fence_value = 1;
+
+	self.swapchain = Dx12Swapchain {
+		swapchain,
+		// backbuffers,
+		current,
+
+		fence,
+		fence_event,
+		fence_value
+	};
+
+	self.wait_for_previous();
+
+	return true;
+}
+
+void Dx12Context::wait_for_previous() const {
+	Dx12Context& self = const_cast < Dx12Context& > (*this); // TODO: Thread safety
+	Dx12Swapchain& swapchain = self.swapchain.as_ref().unwrap();
+
+	const auto fence_value = swapchain.fence_value;
+	throw_if_failed(self.queue->Signal(swapchain.fence.Get(), fence_value));
+	swapchain.fence_value += 1;
+
+	// Wait until the previous frame is finished.
+	if (swapchain.fence->GetCompletedValue() < fence_value)
+	{
+		throw_if_failed(swapchain.fence->SetEventOnCompletion(fence_value, swapchain.fence_event));
+		WaitForSingleObject(swapchain.fence_event, INFINITE);
+	}
+
+	swapchain.current = swapchain.handle->GetCurrentBackBufferIndex();
 }

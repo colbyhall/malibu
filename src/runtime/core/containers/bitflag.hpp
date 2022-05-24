@@ -1,6 +1,6 @@
 #pragma once
 
-#include "type_traits.hpp"
+#include "../type_traits.hpp"
 
 namespace core { namespace containers {
 	template <typename T>
@@ -13,7 +13,7 @@ namespace core { namespace containers {
 	public:
 		BitFlag() : bits(0) { };
 		ALWAYS_INLINE
-			BitFlag(T t) : bits(0) {
+		BitFlag(T t) : bits(0) {
 			this->set(t);
 		}
 

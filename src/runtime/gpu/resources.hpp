@@ -89,6 +89,12 @@ namespace gpu {
 
 	class BufferInterface {
 	public:
+		explicit BufferInterface(
+			BitFlag<gpu::BufferUsage> usage,
+			gpu::BufferKind kind,
+			usize len,
+			usize stride
+		) {}
 		virtual BitFlag<BufferUsage> usage() const = 0;
 		virtual BufferKind kind() const = 0;
 		virtual usize len() const = 0;
@@ -97,7 +103,16 @@ namespace gpu {
 
 	class Buffer {
 	public:
+		static Buffer create(
+			BitFlag<gpu::BufferUsage> usage,
+			gpu::BufferKind kind,
+			usize len,
+			usize stride
+		);
 	private:
+		ALWAYS_INLINE
+		Buffer(SharedRef<BufferInterface>&& interface) : m_interface(core::move(interface)) { }
+
 		SharedRef<BufferInterface> m_interface;
 	};
 }

@@ -105,4 +105,12 @@ namespace core { namespace window {
 			DispatchMessageA(&msg);
 		}
 	}
+
+	Vec2u32 Window::client_size() const {
+		RECT rect;
+		GetClientRect((HWND)m_handle, &rect);
+		const u32 width = rect.right - rect.left;
+		const u32 height = rect.bottom - rect.top;
+		return { width, height };
+	}
 } }

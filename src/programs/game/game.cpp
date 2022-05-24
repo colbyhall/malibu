@@ -8,6 +8,8 @@ using namespace core::sync;
 
 #include "gpu/minimal.hpp"
 
+#include <cstdio>
+
 static bool g_running = true;
 
 void window_callback(WindowHandle window, const WindowEvent& event) {
@@ -24,7 +26,8 @@ int main(int argc, char** argv) {
 			.visibility = WindowVisibility::Visible,
 	}).unwrap();
 
-	// const auto& context = gpu::Context::the();
+	const auto registered = gpu::Context::the().register_window(window);
+	VERIFY(registered);
 
 	auto last_frame = Instant::now();
 	while (g_running) {

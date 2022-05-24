@@ -59,6 +59,8 @@ namespace core { namespace window {
 		ALWAYS_INLINE
 		WindowHandle handle() const { return m_handle; }
 
+		Vec2u32 client_size() const;
+
 	private:
 		WindowHandle m_handle;
 
