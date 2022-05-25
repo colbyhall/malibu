@@ -35,15 +35,16 @@ namespace core {
     static_assert(sizeof(f64) == 8, "f64 should only be 8 bytes");
 
     using NullPtr = decltype(nullptr);
-
-    #define VERIFY(n) assert(n)
-    #define PANIC(n) assert(n)
-
-    #define ALWAYS_INLINE __forceinline
-    #define NO_DISCARD [[nodiscard]]
-    #define NO_RETURN [[noreturn]]
-    #define ALLOW_UNUSED [[maybe_unused]]
 };
+
+#define VERIFY(n) assert(n)
+#define PANIC(n) assert(n)
+#define TODO(msg) assert(true)
+
+#define ALWAYS_INLINE __forceinline
+#define NO_DISCARD [[nodiscard]]
+#define NO_RETURN [[noreturn]]
+#define ALLOW_UNUSED [[maybe_unused]]
 
 using u8 = core::u8;
 using u16 = core::u16;

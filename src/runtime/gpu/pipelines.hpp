@@ -114,10 +114,13 @@ namespace gpu {
 
 	class GraphicsPipelineInterface {
 	public:
+		virtual const GraphicsPipelineConfig& config() const = 0;
 	};
 
 	class GraphicsPipeline {
 	public:
+		ALWAYS_INLINE
+		const GraphicsPipelineConfig& config() const { return m_interface->config(); }
 	private:
 		SharedRef<GraphicsPipelineInterface> m_interface;
 	};

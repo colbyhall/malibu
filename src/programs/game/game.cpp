@@ -26,7 +26,9 @@ int main(int argc, char** argv) {
 			.visibility = WindowVisibility::Visible,
 	}).unwrap();
 
-	const auto registered = gpu::Context::the().register_window(window);
+	const gpu::Context& context = gpu::Context::the();
+
+	const auto registered = context.register_window(window);
 	VERIFY(registered);
 
 	auto last_frame = Instant::now();
