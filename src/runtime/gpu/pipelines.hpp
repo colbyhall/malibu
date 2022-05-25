@@ -15,15 +15,22 @@ namespace gpu {
 
 	class ShaderInterface {
 	public:
-		virtual Slice<const u8> binary() const = 0;
+		virtual Slice<u8 const> binary() const = 0;
+		virtual ShaderType type() const = 0;
 	};
 
 	class Shader {
 	public:
+		static Shader create(StringView source);
+
 		ALWAYS_INLINE 
 		Slice<const u8> binary() const { return m_interface->binary(); }
+		ALWAYS_INLINE
+		ShaderType type() const { return m_interface->type(); }
 
 	private:
+		Shader(SharedRef<ShaderInterface>&& interface) : m_interface(core::move(interface)) { }
+
 		SharedRef<ShaderInterface> m_interface;
 	};
 
@@ -119,9 +126,14 @@ namespace gpu {
 
 	class GraphicsPipeline {
 	public:
+		static GraphicsPipeline create(GraphicsPipelineConfig&& config);
+
 		ALWAYS_INLINE
 		const GraphicsPipelineConfig& config() const { return m_interface->config(); }
+
 	private:
+		GraphicsPipeline(SharedRef<GraphicsPipelineInterface>&& interface) : m_interface(core::move(interface)) { }
+
 		SharedRef<GraphicsPipelineInterface> m_interface;
 	};
 

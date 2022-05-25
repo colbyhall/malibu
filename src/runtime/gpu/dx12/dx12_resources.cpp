@@ -6,7 +6,7 @@ Dx12Buffer::Dx12Buffer(
 	gpu::BufferKind kind, 
 	usize len, 
 	usize stride
-) : m_usage(usage), m_kind(kind), m_len(len), m_stride(stride), gpu::BufferInterface(usage, kind, len, stride) {
+) : m_usage(usage), m_kind(kind), m_len(len), m_stride(stride) {
 	auto& context = gpu::Context::the().interface<Dx12Context>();
 
 	D3D12_HEAP_PROPERTIES heap = {};

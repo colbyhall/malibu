@@ -89,12 +89,6 @@ namespace gpu {
 
 	class BufferInterface {
 	public:
-		explicit BufferInterface(
-			BitFlag<gpu::BufferUsage> usage,
-			gpu::BufferKind kind,
-			usize len,
-			usize stride
-		) {}
 		virtual BitFlag<BufferUsage> usage() const = 0;
 		virtual BufferKind kind() const = 0;
 		virtual usize len() const = 0;

@@ -90,6 +90,37 @@ namespace core { namespace containers {
 		T const* m_ptr;
 		usize m_len;
 	};
+
+	template <typename T>
+	class Slice<T const&> {
+	public:
+		ALWAYS_INLINE constexpr
+		Slice() : m_ptr(nullptr), m_len(0) {}
+
+		NO_DISCARD ALWAYS_INLINE
+		T const** ptr() const { return m_ptr; }
+
+		NO_DISCARD ALWAYS_INLINE
+		usize len() const { return m_len; }
+
+		NO_DISCARD ALWAYS_INLINE
+		bool is_empty() const { return len() == 0; }
+
+		NO_DISCARD ALWAYS_INLINE
+		bool is_valid_index(usize index) const { return index < len(); }
+
+		explicit operator bool() const { return !is_empty(); }
+
+		ALWAYS_INLINE
+		const T& operator[](usize index) const {
+			VERIFY(is_valid_index(index));
+			return *m_ptr[index];
+		}
+
+	private:
+		T const** m_ptr;
+		usize m_len;
+	};
 } }
 template <typename T>
 using Slice = core::containers::Slice<T>;
