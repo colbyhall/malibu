@@ -21,7 +21,7 @@ namespace gpu {
 
 	class Shader {
 	public:
-		static Shader create(StringView source);
+		static Shader create(StringView source, ShaderType type);
 
 		ALWAYS_INLINE 
 		Slice<const u8> binary() const { return m_interface->binary(); }

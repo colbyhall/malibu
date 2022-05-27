@@ -38,7 +38,7 @@ namespace core {
 };
 
 #define VERIFY(n) assert(n)
-#define PANIC(n) assert(n)
+#define PANIC(msg) assert(true)
 #define TODO(msg) assert(true)
 
 #define ALWAYS_INLINE __forceinline

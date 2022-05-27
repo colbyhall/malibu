@@ -1,5 +1,51 @@
 #include "dx12_context.hpp"
+#include "dx12_resources.hpp"
 #include "core/window.hpp"
+
+Dx12DescriptorHeap::Dx12DescriptorHeap(
+	ComPtr<ID3D12Device1> device,
+	D3D12_DESCRIPTOR_HEAP_TYPE type, 
+	usize cap,
+	bool shader_visible
+) : m_cap(cap) {
+	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+	desc.NumDescriptors = (UINT)cap;
+	desc.Type = type;
+	desc.Flags = (D3D12_DESCRIPTOR_HEAP_FLAGS)shader_visible; // D3D12_DESCRIPTOR_HEAP_FLAG_NONE == 0, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE == 1
+
+	throw_if_failed(device->CreateDescriptorHeap(
+		&desc,
+		IID_PPV_ARGS(&m_heap)
+	));
+
+	m_size = device->GetDescriptorHandleIncrementSize(type);
+	m_free_slots.reserve(cap);
+	// TODO: memcpy this
+	for (int i = 0; i < cap; ++i) {
+		m_free_slots.push(false);
+	}
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE Dx12DescriptorHeap::alloc() {
+	for (int i = 0; i < m_cap; ++i) {
+		auto& slot = m_free_slots[i];
+		if (!slot) {
+			slot = true;
+			D3D12_CPU_DESCRIPTOR_HANDLE handle = m_heap->GetCPUDescriptorHandleForHeapStart();
+			handle.ptr += i * m_size;
+			return handle;
+		}
+	}
+	PANIC("Descriptor Heap Full");
+	return {};
+}
+
+void Dx12DescriptorHeap::free(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+	const D3D12_CPU_DESCRIPTOR_HANDLE start = m_heap->GetCPUDescriptorHandleForHeapStart();
+	const usize index = (handle.ptr - start.ptr) / m_size;
+	VERIFY(m_free_slots[index]);
+	m_free_slots[index] = false;
+}
 
 Dx12Context::Dx12Context() {
 	// Always enable the debug layer before doing anything DX12 related
@@ -106,6 +152,29 @@ Dx12Context::Dx12Context() {
 		D3D12_COMMAND_LIST_TYPE_DIRECT, 
 		IID_PPV_ARGS(&command_allocator)
 	));
+
+	// Resource Descriptors
+	{
+		D3D12_ROOT_SIGNATURE_DESC desc = {};
+		desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+		ComPtr<ID3DBlob> signature;
+		ComPtr<ID3DBlob> error;
+		throw_if_failed(D3D12SerializeRootSignature(
+			&desc,
+			D3D_ROOT_SIGNATURE_VERSION_1,
+			&signature,
+			&error
+		));
+		throw_if_failed(device->CreateRootSignature(
+			0,
+			signature->GetBufferPointer(), 
+			signature->GetBufferSize(), 
+			IID_PPV_ARGS(&root_signature)
+		));
+
+		rtv_heap = Dx12DescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2048, false);
+	}
 }
 
 bool Dx12Context::register_window(const core::window::Window& window) const {
@@ -155,9 +224,28 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 	VERIFY(fence_event);
 	const int fence_value = 1;
 
+	Array<gpu::Texture> backbuffers;
+	for (int i = 0; i < Dx12Swapchain::frame_count; ++i) {
+		ComPtr<ID3D12Resource> resource;
+		throw_if_failed(swapchain->GetBuffer(i, IID_PPV_ARGS(&resource)));
+
+		BitFlag<gpu::TextureUsage> usage = gpu::TextureUsage::Color_Attachment;
+		usage.set(gpu::TextureUsage::SwapChain);
+
+		const Vec3u32 buffer_size = { size.width, size.height, 1 };
+
+		auto interface = SharedRef<gpu::TextureInterface>(Dx12Texture(
+			usage, 
+			gpu::Format::RGBA_U8, 
+			buffer_size, 
+			resource)
+		);
+		backbuffers.push(gpu::Texture(core::move(interface)));
+	}
+
 	self.swapchain = Dx12Swapchain {
 		swapchain,
-		// backbuffers,
+		core::move(backbuffers),
 		current,
 
 		fence,

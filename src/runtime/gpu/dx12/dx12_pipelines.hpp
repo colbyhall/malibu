@@ -19,7 +19,7 @@ class Dx12GraphicsPipeline : public gpu::GraphicsPipelineInterface {
 public:
 	explicit Dx12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config);
 
-	const GraphicsPipelineConfig& config() const override { return m_config }
+	const gpu::GraphicsPipelineConfig& config() const override { return m_config; }
 
 private:
 	gpu::GraphicsPipelineConfig m_config;

@@ -17,8 +17,7 @@ using namespace Microsoft::WRL;
 inline void throw_if_failed(HRESULT hr) {
 	if (FAILED(hr))
 	{
-		PANIC(true);
-		printf("Error\n");
+		PANIC("Dx12 Crash");
 	}
 }
 

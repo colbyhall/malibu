@@ -69,6 +69,13 @@ namespace gpu {
 
 	class Texture {
 	public:
+		static Texture create(
+			BitFlag<TextureUsage> usage,
+			Format format,
+			Vec3u32 size
+		);
+		Texture(SharedRef<TextureInterface>&& interface) : m_interface(core::move(interface)) { }
+
 	private:
 		SharedRef<TextureInterface> m_interface;
 	};

@@ -15,12 +15,32 @@ struct Dx12Swapchain {
 
 	ComPtr<IDXGISwapChain3> handle;
 	
-	// gpu::Texture backbuffers[frame_count];
+	Array<gpu::Texture> backbuffers;
 	u8 current;
 	
 	ComPtr<ID3D12Fence> fence;
 	HANDLE fence_event;
 	u64 fence_value;
+};
+
+class Dx12DescriptorHeap {
+public:
+	explicit Dx12DescriptorHeap() = default;
+	explicit Dx12DescriptorHeap(
+		ComPtr<ID3D12Device1> device,
+		D3D12_DESCRIPTOR_HEAP_TYPE type, 
+		usize cap, 
+		bool shader_visible
+	);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE alloc();
+	void free(D3D12_CPU_DESCRIPTOR_HANDLE handle);
+
+private:
+	ComPtr<ID3D12DescriptorHeap> m_heap;
+	Array<bool> m_free_slots;
+	usize m_size;
+	usize m_cap;
 };
 
 class Dx12Context : public gpu::ContextInterface {
@@ -35,6 +55,9 @@ public:
 	ComPtr<IDXGIFactory4> factory;
 	ComPtr<ID3D12CommandQueue> queue;
 	ComPtr<ID3D12CommandAllocator> command_allocator;
+	ComPtr<ID3D12RootSignature> root_signature;
+	mutable Dx12DescriptorHeap rtv_heap; // TODO: Bindless under lock
 
 	Option<Dx12Swapchain> swapchain;
+
 };

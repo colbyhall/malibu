@@ -5,9 +5,24 @@
 
 class Dx12Texture : public gpu::TextureInterface {
 public:
+	explicit Dx12Texture(
+		BitFlag<gpu::TextureUsage> usage,
+		gpu::Format format,
+		Vec3u32 size,
+		ComPtr<ID3D12Resource> resource = nullptr
+	);
+
+	BitFlag<gpu::TextureUsage> usage() const override { return m_usage; }
+	gpu::Format format() const override { return m_format; }
+	Vec3u32 size() const override { return m_size; }
 
 private:
 	ComPtr<ID3D12Resource> m_resource;
+	BitFlag<gpu::TextureUsage> m_usage;
+	gpu::Format m_format;
+	Vec3u32 m_size;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE m_rtv_handle;
 };
 
 class Dx12Buffer : public gpu::BufferInterface {

@@ -1,6 +1,86 @@
 #include "dx12_resources.hpp"
 #include "dx12_context.hpp"
 
+Dx12Texture::Dx12Texture(
+	BitFlag<gpu::TextureUsage> usage,
+	gpu::Format format,
+	Vec3u32 size,
+	ComPtr<ID3D12Resource> resource
+) : m_usage(usage), m_format(format), m_size(size) {
+	VERIFY(size.width > 0);
+	VERIFY(size.height > 0);
+	VERIFY(size.depth > 0);
+
+	auto& context = gpu::Context::the().interface<Dx12Context>();
+
+	D3D12_RESOURCE_DIMENSION dimension = D3D12_RESOURCE_DIMENSION_UNKNOWN;
+	if (size.width > 1) {
+		dimension = D3D12_RESOURCE_DIMENSION_TEXTURE1D;
+		if (size.height > 1) {
+			dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+			if (size.depth > 1) {
+				dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
+			}
+		}
+	}
+	VERIFY(dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
+
+
+	DXGI_FORMAT dxgi_format = DXGI_FORMAT_UNKNOWN;
+	switch (format) {
+		// RGB_U8,
+		// RGB_U8_SRGB,
+		case gpu::Format::RGBA_U8:
+			dxgi_format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			break;
+		case gpu::Format::RGBA_U8_SRGB:
+			dxgi_format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+			break;
+		case gpu::Format::RGBA_F16:
+			dxgi_format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			break;
+		case gpu::Format::RGBA_F32:
+			dxgi_format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			break;
+		// BGR_U8_SRGB,
+		// Depth16,
+		// Depth24_Stencil8,
+	}
+	VERIFY(dxgi_format != DXGI_FORMAT_UNKNOWN);
+
+	if (resource != nullptr) {
+		D3D12_RESOURCE_DESC desc = {};
+		desc.Dimension = dimension;
+		desc.Width = size.width;
+		desc.Height = size.height;
+		desc.DepthOrArraySize = size.depth;
+		desc.MipLevels = 1;
+		desc.Format = dxgi_format;
+		desc.SampleDesc.Count = 1;
+		desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		const D3D12_RESOURCE_STATES initial_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+
+		D3D12_HEAP_PROPERTIES heap = {};
+		heap.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+		throw_if_failed(context.device->CreateCommittedResource(
+			&heap,
+			D3D12_HEAP_FLAG_NONE,
+			&desc,
+			initial_state,
+			nullptr,
+			IID_PPV_ARGS(&m_resource)
+		));		
+	} else {
+		m_resource = resource;
+	}
+
+	if (usage.is_set(gpu::TextureUsage::Color_Attachment)) {
+		m_rtv_handle = context.rtv_heap.alloc();
+	}
+}
+
 Dx12Buffer::Dx12Buffer(
 	BitFlag<gpu::BufferUsage> usage, 
 	gpu::BufferKind kind, 

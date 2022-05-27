@@ -4,13 +4,13 @@
 #include "dx12/dx12_pipelines.hpp"
 
 namespace gpu {
-	Shader Shader::create(StringView source) {
+	Shader Shader::create(StringView source, ShaderType type) {
 		auto& context = Context::the();
 
 		Option<SharedRef<ShaderInterface>> interface;
 		switch (context.backend()) {
 			case Backend::Dx12:
-				interface = SharedRef<ShaderInterface>(Dx12Shader(source));
+				interface = SharedRef<ShaderInterface>(Dx12Shader(source, type));
 				break;
 		}
 

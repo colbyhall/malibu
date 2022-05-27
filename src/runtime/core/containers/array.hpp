@@ -39,7 +39,7 @@ namespace core { namespace containers {
 			m_ptr = m.m_ptr;
 			m_len = m.m_len;
 			m_cap = m.m_cap;
-			m.m_data = nullptr;
+			m.m_ptr = nullptr;
 			m.m_len = 0;
 			m.m_cap = 0;
 			return *this;
