@@ -21,9 +21,9 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 int main(int argc, char** argv) {
 	auto window = Window::create({
 		.size = {1280, 720},
-			.title = "Hello World",
-			.callback = window_callback,
-			.visibility = WindowVisibility::Visible,
+		.title = "Hello World",
+		.callback = window_callback,
+		.visibility = WindowVisibility::Visible,
 	}).unwrap();
 
 	const gpu::Context& context = gpu::Context::the();

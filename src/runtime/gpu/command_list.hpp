@@ -1,9 +1,24 @@
 #pragma once
 
-#include "pipelines.hpp"
-#include "resources.hpp"
+#include "core/minimal.hpp"
 
 namespace gpu {
+
+	class Texture;
+	class Buffer;
+	class GraphicsPipeline;
+
+	enum class Layout : u8 {
+		Undefined,
+		General,
+		ColorAttachment,
+		DepthAttachment,
+		TransferSrc,
+		TransferDst,
+		ShaderReadOnly,
+		Present,
+	};
+
 	class GraphicsCommandListInterface {
 	public:
 		virtual void begin_recording() = 0;

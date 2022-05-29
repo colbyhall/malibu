@@ -1,9 +1,5 @@
 #pragma once
 
-#include "core/containers/array.hpp"
-#include "core/containers/bitflag.hpp"
-#include "core/containers/shared_ref.hpp"
-
 #include "resources.hpp"
 
 namespace gpu {

@@ -49,17 +49,6 @@ namespace gpu {
 		Depth24_Stencil8,
 	};
 
-	enum class Layout : u8 {
-		Undefined,
-		General,
-		ColorAttachment,
-		DepthAttachment,
-		TransferSrc,
-		TransferDst,
-		ShaderReadOnly,
-		Present,
-	};
-
 	class TextureInterface {
 	public:
 		virtual BitFlag<TextureUsage> usage() const = 0;
