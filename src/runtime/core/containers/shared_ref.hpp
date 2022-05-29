@@ -14,12 +14,14 @@ namespace core { namespace containers {
 		};
 	public:
 		template <typename Derived>
-		explicit SharedRef(Derived&& derived) { init(core::move(derived)); }
+		static SharedRef<Base> make(Derived&& derived) {
+			return SharedRef<Base>(core::forward<Derived>(derived));
+		}
 
 		template <typename Derived>
-		explicit SharedRef(const Derived& derived) {
-			Derived copy = derived;
-			init(core::move(copy));
+		static SharedRef<Base> make(const Derived& derived) {
+			auto copy = derived;
+			return SharedRef<Base>(core::move(copy));
 		}
 
 		NO_COPY(SharedRef);
@@ -67,7 +69,7 @@ namespace core { namespace containers {
 		SharedRef() = default;
 
 		template <typename Derived>
-		void init(Derived&& derived) {
+		explicit SharedRef(Derived&& derived) { 
 			static_assert(core::is_base_of<Base, Derived> || core::is_same<Base, Derived>, "Base is not a base of Derived");
 			static_assert(!core::is_abstract<Derived>, "Derived must not be abstract");
 

@@ -5,7 +5,7 @@
 
 namespace gpu {
 
-	Texture Texture::create(
+	Texture Texture::make(
 		BitFlag<TextureUsage> usage,
 		Format format,
 		Vec3u32 size
@@ -15,14 +15,14 @@ namespace gpu {
 		Option<SharedRef<TextureInterface>> interface;
 		switch (context.backend()) {
 			case Backend::Dx12:
-				interface = SharedRef<TextureInterface>(Dx12Texture(usage, format, size));
+				interface = SharedRef<TextureInterface>::make(Dx12Texture(usage, format, size));
 				break;
 		}
 
 		return Texture { interface.unwrap() };
 	}
 
-	Buffer Buffer::create(
+	Buffer Buffer::make(
 		BitFlag<gpu::BufferUsage> usage,
 		gpu::BufferKind kind,
 		usize len,
@@ -33,7 +33,7 @@ namespace gpu {
 		Option<SharedRef<BufferInterface>> interface;
 		switch (context.backend()) {
 		case Backend::Dx12:
-			interface = SharedRef<BufferInterface>(Dx12Buffer(usage, kind, len, stride));
+			interface = SharedRef<BufferInterface>::make(Dx12Buffer(usage, kind, len, stride));
 			break;
 		}
 

@@ -15,6 +15,7 @@ namespace gpu {
 	public:
 		virtual Backend backend() const = 0;
 		virtual bool register_window(const Window& window) const = 0;
+		virtual void present() const = 0;
 	};
 
 	class Context {
@@ -28,6 +29,7 @@ namespace gpu {
 		bool register_window(const Window& window) const { 
 			return m_interface->register_window(window);
 		}
+
 		template <typename T = ContextInterface>
 		T const& interface() const { 
 			static_assert(core::is_base_of<ContextInterface, T>, "T is not derived of ContextInterface");

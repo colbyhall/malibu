@@ -3,6 +3,29 @@
 #include "../command_list.hpp"
 #include "dx12_resources.hpp"
 
+inline
+D3D12_RESOURCE_STATES layout_to_resource_states(gpu::Layout layout) {
+	D3D12_RESOURCE_STATES state;
+	switch (layout) {
+		case gpu::Layout::Undefined:
+			break;
+		case gpu::Layout::General:
+			state = D3D12_RESOURCE_STATE_COMMON;
+			break;
+		case gpu::Layout::ColorAttachment:
+			state = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			break;
+		// case gpu::Layout::DepthAttachment:
+		// case gpu::Layout::TransferSrc:
+		// case gpu::Layout::TransferDst:
+		// case gpu::Layout::ShaderReadOnly:
+		case gpu::Layout::Present:
+			state = D3D12_RESOURCE_STATE_PRESENT;
+			break;
+	}
+	return state;
+}
+
 class Dx12GraphicsCommandList : public gpu::GraphicsCommandListInterface {
 public:
 	explicit Dx12GraphicsCommandList();

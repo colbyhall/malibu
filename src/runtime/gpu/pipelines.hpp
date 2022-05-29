@@ -17,7 +17,7 @@ namespace gpu {
 
 	class Shader {
 	public:
-		static Shader create(StringView source, ShaderType type);
+		static Shader make(Array<u8>&& binary, ShaderType type);
 
 		ALWAYS_INLINE 
 		Slice<const u8> binary() const { return m_interface->binary(); }
@@ -92,8 +92,12 @@ namespace gpu {
 	};
 
 	struct GraphicsPipelineConfig {
-		Array<Format> attachments;
-		Array<Shader> shaders;
+		Array<Format> color_attachments;
+		Option<Format> depth_attachment;
+
+		Option<Shader> vertex_shader;
+		Option<Shader> pixel_shader;
+
 		Array<Primitive> vertex_primitives;
 
 		DrawMode draw_mode = DrawMode::Fill;
@@ -122,10 +126,16 @@ namespace gpu {
 
 	class GraphicsPipeline {
 	public:
-		static GraphicsPipeline create(GraphicsPipelineConfig&& config);
+		static GraphicsPipeline make(GraphicsPipelineConfig&& config);
 
 		ALWAYS_INLINE
 		const GraphicsPipelineConfig& config() const { return m_interface->config(); }
+
+		template <typename T = GraphicsPipelineInterface>
+		T const& interface() const { 
+			static_assert(core::is_base_of<GraphicsPipelineInterface, T>, "T is not derived of GraphicsPipelineInterface");
+			return static_cast<const T&>(*m_interface);
+		}
 
 	private:
 		GraphicsPipeline(SharedRef<GraphicsPipelineInterface>&& interface) : m_interface(core::move(interface)) { }

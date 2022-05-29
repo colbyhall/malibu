@@ -58,12 +58,24 @@ namespace gpu {
 
 	class Texture {
 	public:
-		static Texture create(
+		// FIXME: Make this private
+		Texture(SharedRef<TextureInterface>&& interface) : m_interface(core::move(interface)) { }
+
+		static Texture make(
 			BitFlag<TextureUsage> usage,
 			Format format,
 			Vec3u32 size
 		);
-		Texture(SharedRef<TextureInterface>&& interface) : m_interface(core::move(interface)) { }
+
+		BitFlag<TextureUsage> usage() const { return m_interface->usage(); }
+		Format format() const { return m_interface->format(); }
+		Vec3u32 size() const { return m_interface->size(); }
+
+		template <typename T = TextureInterface>
+		T const& interface() const { 
+			static_assert(core::is_base_of<TextureInterface, T>, "T is not derived of TextureInterface");
+			return static_cast<const T&>(*m_interface);
+		}
 
 	private:
 		SharedRef<TextureInterface> m_interface;
@@ -93,12 +105,24 @@ namespace gpu {
 
 	class Buffer {
 	public:
-		static Buffer create(
+		static Buffer make(
 			BitFlag<gpu::BufferUsage> usage,
 			gpu::BufferKind kind,
 			usize len,
 			usize stride
 		);
+
+		BitFlag<BufferUsage> usage() const { return m_interface->usage(); }
+		BufferKind kind() const { return m_interface->kind(); }
+		usize len() const { return m_interface->len(); }
+		usize stride() const { return m_interface->stride(); }
+
+		template <typename T = BufferInterface>
+		T const& interface() const { 
+			static_assert(core::is_base_of<BufferInterface, T>, "T is not derived of BufferInterface");
+			return static_cast<const T&>(*m_interface);
+		}
+
 	private:
 		Buffer(SharedRef<BufferInterface>&& interface) : m_interface(core::move(interface)) { }
 

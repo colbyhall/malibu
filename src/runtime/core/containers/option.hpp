@@ -52,7 +52,7 @@ namespace core { namespace containers {
 		NO_DISCARD ALWAYS_INLINE
 		Option<T const&> as_ref() const {
 			if (is_set()) {
-				auto* p = reinterpret_cast<T*>(&m_data[0]);
+				auto* p = reinterpret_cast<T const*>(&m_data[0]);
 				return Option<T const&>(*p);
 			} else {
 				return Option<T const&>();

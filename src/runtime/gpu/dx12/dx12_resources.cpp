@@ -26,26 +26,7 @@ Dx12Texture::Dx12Texture(
 	VERIFY(dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
 
 
-	DXGI_FORMAT dxgi_format = DXGI_FORMAT_UNKNOWN;
-	switch (format) {
-		// RGB_U8,
-		// RGB_U8_SRGB,
-		case gpu::Format::RGBA_U8:
-			dxgi_format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			break;
-		case gpu::Format::RGBA_U8_SRGB:
-			dxgi_format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-			break;
-		case gpu::Format::RGBA_F16:
-			dxgi_format = DXGI_FORMAT_R16G16B16A16_FLOAT;
-			break;
-		case gpu::Format::RGBA_F32:
-			dxgi_format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-			break;
-		// BGR_U8_SRGB,
-		// Depth16,
-		// Depth24_Stencil8,
-	}
+	const DXGI_FORMAT dxgi_format = format_to_dxgi(format);
 	VERIFY(dxgi_format != DXGI_FORMAT_UNKNOWN);
 
 	if (resource != nullptr) {

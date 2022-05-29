@@ -10,27 +10,14 @@ namespace core { namespace containers {
 	class Unique {
 	public:
 		template <typename Derived>
-		explicit Unique(Derived&& t) {
-			static_assert(core::is_base_of<Base, Derived>, "Base is not a base of Derived");
-
-			void* ptr = mem::alloc(mem::Layout::single<Derived>);
-			new (ptr) Derived(core::move(t)); 
-			m_ptr = static_cast<Base*>(ptr);
+		static Unique<Base> make(Derived&& derived) {
+			return Unique<Base>(core::forward<Derived>(derived));
 		}
 
 		template <typename Derived>
-		explicit Unique(const Derived& t) {
-			static_assert(core::is_base_of<Base, Derived>, "Base is not a base of Derived");
-			Derived copy = t;
-			void* ptr = mem::alloc(mem::Layout::single<Derived>);
-			new (ptr) Derived(core::move(copy));
-			m_ptr = static_cast<Base*>(ptr);
-		}
-
-		template<typename Derived>
-		Unique(Unique<Derived>&& move) noexcept : m_ptr(move.m_ptr) {
-			static_assert(core::is_base_of<Base, Derived>, "Base is not a base of Derived");
-			move.m_ptr = nullptr;
+		static Unique<Base> make(const Derived& derived) {
+			auto copy = derived;
+			return Unique<Base>(core::move(copy));
 		}
 
 		NO_COPY(Unique);
@@ -78,9 +65,18 @@ namespace core { namespace containers {
 		Base const& operator *() const { return *m_ptr; }
 
 	private:
-		Base* m_ptr;
-
 		Unique() = default;
+
+		template <typename Derived>
+		explicit Unique(Derived&& derived) {
+			static_assert(core::is_base_of<Base, Derived>, "Base is not a base of Derived");
+
+			void* ptr = mem::alloc(mem::Layout::single<Derived>);
+			new (ptr) Derived(core::forward<Derived>(derived)); 
+			m_ptr = static_cast<Base*>(ptr);
+		}
+
+		Base* m_ptr;
 	};
 } }
 

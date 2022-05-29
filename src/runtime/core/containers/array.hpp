@@ -134,6 +134,11 @@ namespace core { namespace containers {
 			insert(index, core::move(item));
 			return index;
 		}
+		ALWAYS_INLINE
+		usize push(const T& item) {
+			T copy = item;
+			return push(core::move(copy));
+		}
 
 	private:
 		T* m_ptr;

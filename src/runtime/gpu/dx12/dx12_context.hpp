@@ -49,6 +49,8 @@ public:
 
 	gpu::Backend backend() const override { return gpu::Backend::Dx12; }
 	bool register_window(const core::window::Window& window) const override;
+	void present() const override;
+
 	void wait_for_previous() const;
 
 	ComPtr<ID3D12Device1> device;

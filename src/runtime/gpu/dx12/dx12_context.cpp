@@ -234,7 +234,7 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 
 		const Vec3u32 buffer_size = { size.width, size.height, 1 };
 
-		auto interface = SharedRef<gpu::TextureInterface>(Dx12Texture(
+		auto interface = SharedRef<gpu::TextureInterface>::make(Dx12Texture(
 			usage, 
 			gpu::Format::RGBA_U8, 
 			buffer_size, 
@@ -256,6 +256,12 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 	self.wait_for_previous();
 
 	return true;
+}
+
+void Dx12Context::present() const {
+	auto& local = swapchain.as_ref().unwrap();
+	throw_if_failed(local.handle->Present(1, 0));
+	wait_for_previous();
 }
 
 void Dx12Context::wait_for_previous() const {
