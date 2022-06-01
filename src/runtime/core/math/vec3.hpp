@@ -13,14 +13,9 @@ namespace core { namespace math {
 			T xyz[3];
 		};
 
-		ALWAYS_INLINE constexpr
-		Vec3() : x(0), y(0), z(0) { }
-
-		ALWAYS_INLINE constexpr
-		Vec3(T xyz) : x(xyz), y(xyz), z(xyz) { }
-
-		ALWAYS_INLINE constexpr
-		Vec3(T x, T y, T z) : u(x), v(y), w(z) { }
+		ALWAYS_INLINE constexpr Vec3() : x(0), y(0), z(0) { }
+		ALWAYS_INLINE constexpr Vec3(T xyz) : x(xyz), y(xyz), z(xyz) { }
+		ALWAYS_INLINE constexpr Vec3(T x, T y, T z) : u(x), v(y), w(z) { }
 	};
 }}
 

@@ -19,7 +19,7 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 }
 
 int main(int argc, char** argv) {
-	auto window = Window::create({
+	auto window = Window::make({
 		.size = {1280, 720},
 		.title = "Hello World",
 		.callback = window_callback,
@@ -39,7 +39,6 @@ int main(int argc, char** argv) {
 
 		Window::pump_events();
 	}
-
 
 	return 0;
 }

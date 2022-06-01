@@ -67,12 +67,12 @@ namespace gpu {
 			Vec3u32 size
 		);
 
-		BitFlag<TextureUsage> usage() const { return m_interface->usage(); }
-		Format format() const { return m_interface->format(); }
-		Vec3u32 size() const { return m_interface->size(); }
+		NO_DISCARD ALWAYS_INLINE BitFlag<TextureUsage> usage() const { return m_interface->usage(); }
+		NO_DISCARD ALWAYS_INLINE Format format() const { return m_interface->format(); }
+		NO_DISCARD ALWAYS_INLINE Vec3u32 size() const { return m_interface->size(); }
 
 		template <typename T = TextureInterface>
-		T const& interface() const { 
+		NO_DISCARD ALWAYS_INLINE T const& interface() const { 
 			static_assert(core::is_base_of<TextureInterface, T>, "T is not derived of TextureInterface");
 			return static_cast<const T&>(*m_interface);
 		}
@@ -112,10 +112,10 @@ namespace gpu {
 			usize stride
 		);
 
-		BitFlag<BufferUsage> usage() const { return m_interface->usage(); }
-		BufferKind kind() const { return m_interface->kind(); }
-		usize len() const { return m_interface->len(); }
-		usize stride() const { return m_interface->stride(); }
+		NO_DISCARD ALWAYS_INLINE BitFlag<BufferUsage> usage() const { return m_interface->usage(); }
+		NO_DISCARD ALWAYS_INLINE BufferKind kind() const { return m_interface->kind(); }
+		NO_DISCARD ALWAYS_INLINE usize len() const { return m_interface->len(); }
+		NO_DISCARD ALWAYS_INLINE usize stride() const { return m_interface->stride(); }
 
 		template <typename T = BufferInterface>
 		T const& interface() const { 

@@ -56,14 +56,9 @@ namespace core { namespace containers {
 			}
 		}
 
-		NO_DISCARD ALWAYS_INLINE explicit
-		operator Base const *() const { return m_ptr; }
-
-		NO_DISCARD ALWAYS_INLINE
-		Base const* operator ->() const { return m_ptr; }
-
-		NO_DISCARD ALWAYS_INLINE
-		Base const& operator *() const { return *m_ptr; }
+		NO_DISCARD ALWAYS_INLINE explicit operator Base const *() const { return m_ptr; }
+		NO_DISCARD ALWAYS_INLINE Base const* operator ->() const { return m_ptr; }
+		NO_DISCARD ALWAYS_INLINE Base const& operator *() const { return *m_ptr; }
 
 	private:
 		SharedRef() = default;

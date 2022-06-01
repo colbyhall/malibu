@@ -11,11 +11,9 @@ namespace core { namespace containers {
 	template <typename T>
 	class Array {
 	public:
-		ALWAYS_INLINE constexpr
-		Array() : m_ptr(nullptr), m_len(0), m_cap(0) {}
+		ALWAYS_INLINE constexpr Array() : m_ptr(nullptr), m_len(0), m_cap(0) {}
 
-		ALWAYS_INLINE explicit
-		Array(Slice<const T> slice) : m_len(slice.len()) {
+		ALWAYS_INLINE explicit Array(Slice<const T> slice) : m_len(slice.len()) {
 			reserve(slice.len());
 			for (int i = 0; i < slice.len(); ++i) {
 				T copy = slice[i];
@@ -25,15 +23,13 @@ namespace core { namespace containers {
 
 		NO_COPY(Array);
 
-		ALWAYS_INLINE
-		Array(Array<T>&& move) noexcept : m_ptr(move.m_ptr), m_len(move.m_len), m_cap(move.m_cap) {
+		ALWAYS_INLINE Array(Array<T>&& move) noexcept : m_ptr(move.m_ptr), m_len(move.m_len), m_cap(move.m_cap) {
 			move.m_ptr = nullptr;
 			move.m_len = 0;
 			move.m_cap = 0;
 		}
 
-		ALWAYS_INLINE
-		Array& operator=(Array<T>&& m) noexcept {
+		ALWAYS_INLINE Array& operator=(Array<T>&& m) noexcept {
 			// FIXME: Is this the best way to do this
 			Array<T> to_destroy = move(*this);
 			m_ptr = m.m_ptr;
@@ -56,34 +52,26 @@ namespace core { namespace containers {
 			}
 		}
 
-		NO_DISCARD ALWAYS_INLINE
-		usize len() const { return m_len; }
+		NO_DISCARD ALWAYS_INLINE usize len() const { return m_len; }
 
-		NO_DISCARD ALWAYS_INLINE
-		usize cap() const { return m_cap; }
+		NO_DISCARD ALWAYS_INLINE usize cap() const { return m_cap; }
 
-		NO_DISCARD ALWAYS_INLINE
-		bool is_empty() const { return len() == 0; }
+		NO_DISCARD ALWAYS_INLINE bool is_empty() const { return len() == 0; }
 
 		explicit operator bool() const { return !is_empty(); }
 		
-		NO_DISCARD ALWAYS_INLINE
-		Slice<T> slice() { return Slice<T>(m_ptr, m_len); }
+		NO_DISCARD ALWAYS_INLINE Slice<T> slice() { return Slice<T>(m_ptr, m_len); }
 
-		NO_DISCARD ALWAYS_INLINE
-		Slice<T const> slice() const { return Slice<T>(m_ptr, m_len); }
+		NO_DISCARD ALWAYS_INLINE Slice<T const> slice() const { return Slice<T>(m_ptr, m_len); }
 
-		NO_DISCARD ALWAYS_INLINE
-		bool is_valid_index(usize index) const { return index < len(); }
+		NO_DISCARD ALWAYS_INLINE bool is_valid_index(usize index) const { return index < len(); }
 
-		NO_DISCARD ALWAYS_INLINE
-		T& operator[](usize index) {
+		NO_DISCARD ALWAYS_INLINE T& operator[](usize index) {
 			VERIFY(is_valid_index(index));
 			return m_ptr[index];
 		}
 
-		NO_DISCARD ALWAYS_INLINE
-		const T& operator[](usize index) const {
+		NO_DISCARD ALWAYS_INLINE const T& operator[](usize index) const {
 			VERIFY(is_valid_index(index));
 			return m_ptr[index];
 		}
@@ -122,20 +110,17 @@ namespace core { namespace containers {
 			m_len += 1;
 		}
 
-		ALWAYS_INLINE
-		void insert(usize index, const T& item) {
+		ALWAYS_INLINE void insert(usize index, const T& item) {
 			T copy = item;
 			insert(index, core::move(copy));
 		}
 
-		ALWAYS_INLINE
-		usize push(T&& item) {
+		ALWAYS_INLINE usize push(T&& item) {
 			const auto index = len();
 			insert(index, core::move(item));
 			return index;
 		}
-		ALWAYS_INLINE
-		usize push(const T& item) {
+		ALWAYS_INLINE usize push(const T& item) {
 			T copy = item;
 			return push(core::move(copy));
 		}

@@ -23,10 +23,8 @@ namespace gpu {
 	public:
 		static const Context& the();
 
-		ALWAYS_INLINE
-		Backend backend() const { return m_interface->backend(); }
-		ALWAYS_INLINE
-		bool register_window(const Window& window) const { 
+		ALWAYS_INLINE Backend backend() const { return m_interface->backend(); }
+		ALWAYS_INLINE bool register_window(const Window& window) const { 
 			return m_interface->register_window(window);
 		}
 

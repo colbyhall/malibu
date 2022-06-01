@@ -12,14 +12,12 @@ namespace core { namespace time {
 
 	class Duration {
 	public:
-		ALWAYS_INLINE constexpr explicit
-		Duration(u64 secs, u32 nanos) : m_secs(secs), m_nanos(nanos) { }
+		ALWAYS_INLINE constexpr explicit Duration(u64 secs, u32 nanos) : m_secs(secs), m_nanos(nanos) { }
 
 		f32 as_secs_f32() const;
 		f64 as_secs_f64() const;
 
 	private:
-
 		u64 m_secs;
 		u32 m_nanos;
 	};
@@ -32,8 +30,7 @@ namespace core { namespace time {
 		Duration elapsed() const;
 
 	private:
-		ALWAYS_INLINE constexpr
-		Instant(u64 ticks) : m_tick(ticks) { }
+		ALWAYS_INLINE constexpr Instant(u64 ticks) : m_tick(ticks) { }
 
 		u64 m_tick;
 	};

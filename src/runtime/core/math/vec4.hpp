@@ -12,14 +12,11 @@ namespace core { namespace math {
 			T xyzw[4];
 		};
 
-		ALWAYS_INLINE constexpr
-		Vec4() : x(0), y(0), z(0), w(0) { }
+		ALWAYS_INLINE constexpr Vec4() : x(0), y(0), z(0), w(0) { }
 
-		ALWAYS_INLINE constexpr
-		Vec4(T xyzw) : x(xyzw), y(xyzw), z(xyzw), w(xyzw) { }
+		ALWAYS_INLINE constexpr Vec4(T xyzw) : x(xyzw), y(xyzw), z(xyzw), w(xyzw) { }
 
-		ALWAYS_INLINE constexpr
-		Vec4(T x, T y, T z, T w) : r(x), g(y), b(z), a(w) { }
+		ALWAYS_INLINE constexpr Vec4(T x, T y, T z, T w) : r(x), g(y), b(z), a(w) { }
 	};
 } }
 

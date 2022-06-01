@@ -36,18 +36,18 @@ namespace core { namespace window {
 
 	class Window {
 	public:
-		static Option<Window> create(const WindowConfig& config);
+		static Option<Window> make(const WindowConfig& config);
 
 		NO_COPY(Window);
 
 		ALWAYS_INLINE
-		Window(Window && m)
+		Window(Window && m) noexcept
 		: m_handle(m.m_handle) {
 			m.m_handle = nullptr;
 		}
 
 		ALWAYS_INLINE
-		Window& operator=(Window && m) {
+		Window& operator=(Window && m) noexcept {
 			Window w = core::move(*this);
 			m_handle = m.m_handle;
 			m.m_handle = 0;

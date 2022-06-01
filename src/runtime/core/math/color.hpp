@@ -4,8 +4,7 @@ namespace core { namespace math {
 	struct LinearColor {
 		f32 r, g, b, a;
 
-		ALWAYS_INLINE constexpr
-		LinearColor() : r(1), g(1), b(1), a(1) { }
+		ALWAYS_INLINE constexpr LinearColor() : r(1), g(1), b(1), a(1) { }
 	};
 
 	struct Color {

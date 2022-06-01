@@ -40,29 +40,14 @@ namespace core { namespace containers {
 			}
 		}
 
-		NO_DISCARD ALWAYS_INLINE explicit
-		operator NonNull<Base>() { return m_ptr; }
-
-		NO_DISCARD ALWAYS_INLINE explicit
-		operator NonNull<Base const>() const { return m_ptr; }
-
-		NO_DISCARD ALWAYS_INLINE explicit
-		operator Base*() { return m_ptr; }
-
-		NO_DISCARD ALWAYS_INLINE explicit
-		operator Base const *() const { return m_ptr; }
-
-		NO_DISCARD ALWAYS_INLINE
-		Base* operator ->() { return m_ptr; }
-
-		NO_DISCARD ALWAYS_INLINE
-		Base const* operator ->() const { return m_ptr; }
-
-		NO_DISCARD ALWAYS_INLINE
-		Base& operator *() { return *m_ptr; }
-
-		NO_DISCARD ALWAYS_INLINE
-		Base const& operator *() const { return *m_ptr; }
+		NO_DISCARD ALWAYS_INLINE explicit operator NonNull<Base>() { return m_ptr; }
+		NO_DISCARD ALWAYS_INLINE explicit operator NonNull<Base const>() const { return m_ptr; }
+		NO_DISCARD ALWAYS_INLINE explicit operator Base*() { return m_ptr; }
+		NO_DISCARD ALWAYS_INLINE explicit operator Base const *() const { return m_ptr; }
+		NO_DISCARD ALWAYS_INLINE Base* operator ->() { return m_ptr; }
+		NO_DISCARD ALWAYS_INLINE Base const* operator ->() const { return m_ptr; }
+		NO_DISCARD ALWAYS_INLINE Base& operator *() { return *m_ptr; }
+		NO_DISCARD ALWAYS_INLINE Base const& operator *() const { return *m_ptr; }
 
 	private:
 		Unique() = default;

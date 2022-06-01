@@ -23,7 +23,7 @@ namespace core { namespace window {
 		return DefWindowProcA(hWnd, Msg, wParam, lParam);
 	}
 
-	Option<Window> Window::create(const WindowConfig& config) {
+	Option<Window> Window::make(const WindowConfig& config) {
 		HINSTANCE hInstance = GetModuleHandleA(nullptr);
 
 		DWORD dwStyle = WS_OVERLAPPEDWINDOW;
