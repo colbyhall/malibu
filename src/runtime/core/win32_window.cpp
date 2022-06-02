@@ -63,7 +63,7 @@ namespace core { namespace window {
 		HWND handle = CreateWindowExA(
 			0,
 			window_class.lpszClassName,
-			&config.title.slice()[0],
+			config.title.ptr(),
 			dwStyle,
 			x, y, width, height,
 			nullptr, nullptr,

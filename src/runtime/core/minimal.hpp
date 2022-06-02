@@ -10,6 +10,7 @@
 #include "containers/bitflag.hpp"
 #include "containers/non_null.hpp"
 #include "containers/option.hpp"
+#include "containers/result.hpp"
 #include "containers/shared_ref.hpp"
 #include "containers/slice.hpp"
 #include "containers/string.hpp"

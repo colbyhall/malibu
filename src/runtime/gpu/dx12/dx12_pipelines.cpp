@@ -123,7 +123,7 @@ Dx12GraphicsPipeline::Dx12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config)
 		input_layout.push(input);
 		offset += size_in_bytes;
 	}
-	desc.InputLayout.pInputElementDescs = input_layout.slice().ptr();
+	desc.InputLayout.pInputElementDescs = input_layout.ptr();
 	desc.InputLayout.NumElements = (UINT)input_layout.len();
 
 	desc.NumRenderTargets = (UINT)m_config.color_attachments.len();

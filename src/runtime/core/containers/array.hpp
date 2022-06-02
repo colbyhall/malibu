@@ -52,25 +52,26 @@ namespace core { namespace containers {
 			}
 		}
 
+		NO_DISCARD ALWAYS_INLINE T* ptr() const { return m_ptr; }
 		NO_DISCARD ALWAYS_INLINE usize len() const { return m_len; }
-
 		NO_DISCARD ALWAYS_INLINE usize cap() const { return m_cap; }
 
 		NO_DISCARD ALWAYS_INLINE bool is_empty() const { return len() == 0; }
-
 		explicit operator bool() const { return !is_empty(); }
-		
-		NO_DISCARD ALWAYS_INLINE Slice<T> slice() { return Slice<T>(m_ptr, m_len); }
-
-		NO_DISCARD ALWAYS_INLINE Slice<T const> slice() const { return Slice<T>(m_ptr, m_len); }
-
 		NO_DISCARD ALWAYS_INLINE bool is_valid_index(usize index) const { return index < len(); }
+		
+		ALWAYS_INLINE operator Slice<T>() { return { m_ptr, m_len }; }
+		ALWAYS_INLINE operator Slice<T const>() const { return { m_ptr, m_len }; }
+
+		ALWAYS_INLINE T* begin() { return m_ptr; }
+		ALWAYS_INLINE T* end() { return m_ptr + m_len;}
+		ALWAYS_INLINE const T* cbegin() const { return m_ptr; }
+		ALWAYS_INLINE const T* cend() const { return m_ptr + m_len; }
 
 		NO_DISCARD ALWAYS_INLINE T& operator[](usize index) {
 			VERIFY(is_valid_index(index));
 			return m_ptr[index];
 		}
-
 		NO_DISCARD ALWAYS_INLINE const T& operator[](usize index) const {
 			VERIFY(is_valid_index(index));
 			return m_ptr[index];

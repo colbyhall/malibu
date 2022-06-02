@@ -20,7 +20,7 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 
 int main(int argc, char** argv) {
 	auto window = Window::make({
-		.size = {1280, 720},
+		.size = { 1280, 720 },
 		.title = "Hello World",
 		.callback = window_callback,
 		.visibility = WindowVisibility::Visible,
@@ -30,6 +30,13 @@ int main(int argc, char** argv) {
 
 	const auto registered = context.register_window(window);
 	VERIFY(registered);
+
+	StringView foo = "Hello World Ļ";
+	for (auto chars = foo.chars(); chars; ++chars) {
+		const Char c = *chars;
+		printf("%d, ", c);
+	}
+	printf("\n");
 
 	auto last_frame = Instant::now();
 	while (g_running) {
