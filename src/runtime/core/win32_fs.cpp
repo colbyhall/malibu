@@ -6,7 +6,6 @@
 #include <windows.h>
 
 namespace core { namespace fs {
-#if 0
 	Result<File, FileOpenError> File::open(PathView view, BitFlag<FileFlags> flags) {
 		const bool read = flags.is_set(FileFlags::Read);
 		const bool write = flags.is_set(FileFlags::Write);
@@ -23,5 +22,4 @@ namespace core { namespace fs {
 		// TODO: UTF8 to UTF16
 		// void* handle = CreateFileA();
 	}
-#endif
 } }

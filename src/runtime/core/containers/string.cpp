@@ -82,4 +82,52 @@ namespace core { namespace containers {
 		}
 		return get_codepoint;
 	}
+
+	WString WString::from(StringView string) {
+		WString result;
+		result.reserve(string.len());
+
+		const auto utf32_to_utf16 = [](Char c) {
+			u32 h;
+			u32 l;
+
+			if (c < 0x10000)
+			{
+				h = 0;
+				l = c;
+				return c;
+			}
+			Char t = c - 0x10000;
+			h = (((t<<12)>>22) + 0xD800);
+			l = (((t<<22)>>22) + 0xDC00);
+			Char ret = ((h<<16) | ( l & 0x0000FFFF));
+			return ret;
+		};
+
+		for (auto chars = string.chars(); chars; ++chars) {
+			const Char c = *chars;
+			result.push(utf32_to_utf16(c));
+		}
+
+		return result;
+	}
+
+	usize WString::push(wchar_t w) {
+		const auto result = m_chars.len();
+		if (result == 0) {
+			m_chars.push(w);
+			m_chars.push(0);
+		} else {
+			m_chars.insert(result - 1, w);
+		}
+		return result;
+	}
+
+	void WString::push(WStringView string) {
+		const usize slag = m_chars.cap() - m_chars.len();
+
+		if (slag < string.len()) m_chars.reserve(string.len());
+		if (m_chars.len() == 0) m_chars.push(0);
+		for (wchar_t w : string) m_chars.insert(m_chars.len() - 1, w);
+	}
 } }

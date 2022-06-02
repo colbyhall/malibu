@@ -21,7 +21,7 @@ namespace core { namespace containers {
 		NO_DISCARD ALWAYS_INLINE operator Slice<const T>() const { return Slice<const T>(m_ptr, m_len); }
 
 		ALWAYS_INLINE T* begin() { return m_ptr; }
-		ALWAYS_INLINE T* end() { return m_ptr + m_len;}
+		ALWAYS_INLINE T* end() { return m_ptr + m_len; }
 		ALWAYS_INLINE const T* cbegin() const { return m_ptr; }
 		ALWAYS_INLINE const T* cend() const { return m_ptr + m_len; }
 
@@ -32,6 +32,11 @@ namespace core { namespace containers {
 		NO_DISCARD ALWAYS_INLINE const T& operator[](usize index) const {
 			VERIFY(index < len());
 			return m_ptr[index];
+		}
+
+		NO_DISCARD Slice<T> shrink(usize amount) const {
+			VERIFY(amount <= m_len);
+			return { m_ptr, m_len - amount };
 		}
 
 	private:
@@ -57,6 +62,11 @@ namespace core { namespace containers {
 		NO_DISCARD ALWAYS_INLINE bool is_empty() const { return len() == 0; }
 		NO_DISCARD ALWAYS_INLINE bool is_valid_index(usize index) const { return index < len(); }
 		explicit operator bool() const { return !is_empty(); }
+
+		NO_DISCARD Slice<T const> shrink(usize amount) const {
+			VERIFY(amount <= m_len);
+			return { m_ptr, m_len - amount };
+		}
 
 		ALWAYS_INLINE const T* cbegin() const { return m_ptr; }
 		ALWAYS_INLINE const T* cend() const { return m_ptr + m_len; }

@@ -54,13 +54,21 @@ namespace core { namespace containers {
 	class String {
 	public:
 		ALWAYS_INLINE constexpr String() : m_bytes() {}
-		explicit ALWAYS_INLINE String(StringView view) : m_bytes(Array<char>(view)) {}
+		explicit ALWAYS_INLINE String(StringView view) : m_bytes(Array<char>(view)) {
+			m_bytes.push(0);
+		}
 
-		ALWAYS_INLINE operator Slice<char const>() const { return m_bytes; }
+		ALWAYS_INLINE operator Slice<char const>() const { 
+			Slice<char const> result = m_bytes;
+			if (m_bytes.len() > 0) {
+				result = result.shrink(1);
+			}
+			return result; 
+		}
 		ALWAYS_INLINE operator StringView() const { return StringView(m_bytes); }
 
 		NO_DISCARD ALWAYS_INLINE char const* ptr() const { return m_bytes.ptr(); }
-		NO_DISCARD ALWAYS_INLINE usize len() const { return m_bytes.len(); }
+		NO_DISCARD ALWAYS_INLINE usize len() const { return m_bytes.len() > 0 ? m_bytes.len() - 1 : 0; }
 
 		NO_DISCARD ALWAYS_INLINE Chars chars() const { return Chars(m_bytes); }
 		
@@ -68,25 +76,56 @@ namespace core { namespace containers {
 		Array<char> m_bytes;
 	};
 
-	class WideStringView {
+	class WStringView {
 	public:
-		ALWAYS_INLINE constexpr WideStringView() : m_chars() {}
-		ALWAYS_INLINE constexpr WideStringView(Slice<wchar_t const> bytes) : m_chars(bytes) {}
-		ALWAYS_INLINE constexpr WideStringView(const wchar_t* ptr) : m_chars({ ptr, string_length(ptr) }) {}
+		ALWAYS_INLINE constexpr WStringView() : m_chars() {}
+		ALWAYS_INLINE constexpr WStringView(Slice<wchar_t const> bytes) : m_chars(bytes) {}
+		ALWAYS_INLINE constexpr WStringView(const wchar_t* ptr) : m_chars({ ptr, string_length(ptr) }) {}
 
 		ALWAYS_INLINE operator Slice<wchar_t const>() const { return m_chars; }
+		NO_DISCARD ALWAYS_INLINE wchar_t const* ptr() const { return m_chars.ptr(); }
+		NO_DISCARD ALWAYS_INLINE usize len() const { return m_chars.len(); }
+
+		ALWAYS_INLINE const wchar_t* begin() const { return m_chars.cbegin(); }
+		ALWAYS_INLINE const wchar_t* end() const { return m_chars.cend(); }
+		ALWAYS_INLINE const wchar_t* cbegin() const { return m_chars.cbegin(); }
+		ALWAYS_INLINE const wchar_t* cend() const { return m_chars.cend(); }
+
+		NO_DISCARD ALWAYS_INLINE wchar_t operator[](usize index) const { return m_chars[index]; }
 
 	private:
 		Slice<wchar_t const> m_chars;
 	};
 
-	class WideString {
+	class WString {
 	public:
-		ALWAYS_INLINE constexpr WideString() : m_chars() {}
-		ALWAYS_INLINE explicit WideString(WideStringView view) : m_chars(Array<wchar_t>(view)) {}
+		ALWAYS_INLINE constexpr WString() : m_chars() {}
+		ALWAYS_INLINE explicit WString(WStringView view) : m_chars(Array<wchar_t>(view)) {}
 
-		ALWAYS_INLINE operator Slice<wchar_t const>() const { return m_chars; }
-		ALWAYS_INLINE operator WideStringView() const { return WideStringView(m_chars); }
+		static WString from(StringView string);
+
+		ALWAYS_INLINE operator Slice<wchar_t const>() const { 
+			Slice<wchar_t const> result = m_chars;
+			if (m_chars.len() > 0) {
+				result = result.shrink(1);
+			}
+			return result; 
+		}
+		NO_DISCARD ALWAYS_INLINE wchar_t const* ptr() const { return m_chars.ptr(); }
+		NO_DISCARD ALWAYS_INLINE usize len() const { return m_chars.len() > 0 ? m_chars.len() - 1 : 0; }
+		ALWAYS_INLINE operator WStringView() const { return WStringView(m_chars); }
+
+		ALWAYS_INLINE wchar_t* begin() { return m_chars.begin(); }
+		ALWAYS_INLINE wchar_t* end() { return m_chars.end(); }
+		ALWAYS_INLINE const wchar_t* cbegin() const { return m_chars.cbegin(); }
+		ALWAYS_INLINE const wchar_t* cend() const { return m_chars.cend(); }
+
+		NO_DISCARD ALWAYS_INLINE wchar_t& operator[](usize index) { return m_chars[index]; }
+		NO_DISCARD ALWAYS_INLINE wchar_t operator[](usize index) const { return m_chars[index]; }
+
+		ALWAYS_INLINE void reserve(usize amount) { return m_chars.reserve(amount); }
+		usize push(wchar_t w);
+		void push(WStringView string);
 
 	private:
 		Array<wchar_t> m_chars;
@@ -97,3 +136,5 @@ using Char = core::containers::Char;
 using Chars = core::containers::Chars;
 using StringView = core::containers::StringView;
 using String = core::containers::String;
+using WStringView = core::containers::WStringView;
+using WString = core::containers::WString;

@@ -1,4 +1,4 @@
-#include "core/minimal.hpp"
+﻿#include "core/minimal.hpp"
 #include "core/window.hpp"
 #include "core/sync/mutex.hpp"
 
@@ -30,13 +30,6 @@ int main(int argc, char** argv) {
 
 	const auto registered = context.register_window(window);
 	VERIFY(registered);
-
-	StringView foo = "Hello World Ļ";
-	for (auto chars = foo.chars(); chars; ++chars) {
-		const Char c = *chars;
-		printf("%d, ", c);
-	}
-	printf("\n");
 
 	auto last_frame = Instant::now();
 	while (g_running) {

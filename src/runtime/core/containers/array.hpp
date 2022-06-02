@@ -1,6 +1,7 @@
 #pragma once
 
 #include "slice.hpp"
+#include "option.hpp"
 #include "../memory.hpp"
 #include "../type_traits.hpp"
 
@@ -64,7 +65,7 @@ namespace core { namespace containers {
 		ALWAYS_INLINE operator Slice<T const>() const { return { m_ptr, m_len }; }
 
 		ALWAYS_INLINE T* begin() { return m_ptr; }
-		ALWAYS_INLINE T* end() { return m_ptr + m_len;}
+		ALWAYS_INLINE T* end() { return m_ptr + m_len; }
 		ALWAYS_INLINE const T* cbegin() const { return m_ptr; }
 		ALWAYS_INLINE const T* cend() const { return m_ptr + m_len; }
 
@@ -75,6 +76,15 @@ namespace core { namespace containers {
 		NO_DISCARD ALWAYS_INLINE const T& operator[](usize index) const {
 			VERIFY(is_valid_index(index));
 			return m_ptr[index];
+		}
+
+		NO_DISCARD ALWAYS_INLINE Option<T&> last() {
+			if (len() > 0) return m_ptr[len() - 1];
+			return {};
+		}
+		NO_DISCARD ALWAYS_INLINE Option<T const&> last() const {
+			if (len() > 0) return m_ptr[len() - 1];
+			return {};
 		}
 
 		void reserve(usize amount) {
