@@ -33,14 +33,8 @@ int main(int argc, char** argv) {
 	const auto registered = context.register_window(window);
 	VERIFY(registered);
 
-	fs::File foo = fs::File::open("foo.txt", BitFlag<fs::FileFlags>(fs::FileFlags::Create).set(fs::FileFlags::Read)).unwrap();
-	const auto foo_size = foo.size();
-	
-	Array<u8> buffer;
-	buffer.reserve(foo_size);
-	buffer.set_len(foo_size);
-	foo.read(buffer);
-	buffer.push(0);
+	String foo = fs::read_to_string("foo.txt").unwrap();
+	auto binary = gpu::compile_hlsl(foo, gpu::ShaderType::Vertex).unwrap();
 
 	auto last_frame = Instant::now();
 	while (g_running) {

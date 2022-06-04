@@ -79,6 +79,11 @@ namespace core { namespace containers {
 	public:
 		ALWAYS_INLINE constexpr String() : m_bytes() {}
 		explicit ALWAYS_INLINE String(StringView view) : m_bytes(Array<char>(view)) { m_bytes.push(0); }
+		explicit ALWAYS_INLINE String(Array<char>&& bytes) : m_bytes(core::forward<Array<char>>(bytes)) {
+			if (m_bytes.len() > 0 && m_bytes[m_bytes.len() - 1] != 0) {
+				m_bytes.push(0);
+			}
+		}
 
 		static String from(WStringView string);
 

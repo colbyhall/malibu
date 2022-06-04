@@ -92,4 +92,5 @@ namespace core { namespace fs {
 		usize m_cursor;
 	};
 
+	Result<String, FileOpenError> read_to_string(PathView path);
 } }

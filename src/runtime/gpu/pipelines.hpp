@@ -28,6 +28,8 @@ namespace gpu {
 		SharedRef<ShaderInterface> m_interface;
 	};
 
+	Result<Array<u8>, String> compile_hlsl(StringView source, ShaderType type);
+
 	enum class DrawMode : u8 {
 		Fill,
 		Line,

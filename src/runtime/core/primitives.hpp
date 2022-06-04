@@ -1,14 +1,25 @@
 #pragma once
 
-#include <cstdint>
-#include <cassert> // FIXME: Replace this
+namespace core { namespace primitives {
+    using u8 = unsigned char;
+	constexpr u8 U8_MIN = 0;
+	constexpr u8 U8_MAX = 0xffui8;
 
-namespace core {
-    using u8 = uint8_t;
-    using u16 = uint16_t;
-    using u32 = uint32_t;
-    using u64 = uint64_t;
+    using u16 = unsigned short;
+	constexpr u16 U16_MIN = 0;
+	constexpr u16 U16_MAX = 0xffffui8;
+
+    using u32 = unsigned int;
+	constexpr u32 U32_MIN = 0;
+	constexpr u32 U32_MAX = 0xffffffffui32;
+
+    using u64 = unsigned long long;
+	constexpr u64 U64_MIN = 0;
+	constexpr u64 U64_MAX = 0xffffffffffffffffui64;
+
     using usize = u64;
+	constexpr usize USIZE_MIN = U64_MIN;
+	constexpr usize USIZE_MAX = U64_MAX;
 
     static_assert(sizeof(u8) == 1, "u8 should only be 1 byte");
     static_assert(sizeof(u16) == 2, "u16 should only be 2 bytes");
@@ -16,11 +27,25 @@ namespace core {
     static_assert(sizeof(u64) == 8, "u64 should only be 8 bytes");
     static_assert(sizeof(usize) == 8, "usize should only be 8 bytes");
 
-    using i8 = int8_t;
-    using i16 = int16_t;
-    using i32 = int32_t;
-    using i64 = int64_t;
+    using i8 = signed char;
+	constexpr i8 I8_MIN = (-127i8 - 1);
+	constexpr i8 I8_MAX = 127i8;
+
+    using i16 = short;
+	constexpr i16 I16_MIN = (-32767i16 - 1);
+	constexpr i16 I16_MAX = 32767i16;
+
+    using i32 = int;
+	constexpr i32 I32_MIN = (-2147483647i32 - 1);
+	constexpr i32 I32_MAX = 2147483647i32;
+
+    using i64 = long long;
+	constexpr i64 I64_MIN = (-9223372036854775807i64 - 1);
+	constexpr i64 I64_MAX = 9223372036854775807i64;
+
     using isize = i64;
+	constexpr isize ISIZE_MIN = I64_MIN;
+	constexpr isize ISIZE_MAX = I64_MAX;
 
     static_assert(sizeof(i8) == 1, "i8 should only be 1 byte");
     static_assert(sizeof(i16) == 2, "i16 should only be 2 bytes");
@@ -35,7 +60,24 @@ namespace core {
     static_assert(sizeof(f64) == 8, "f64 should only be 8 bytes");
 
     using NullPtr = decltype(nullptr);
-};
+} }
+
+using u8 = core::primitives::u8;
+using u16 = core::primitives::u16;
+using u32 = core::primitives::u32;
+using u64 = core::primitives::u64;
+using usize = core::primitives::usize;
+
+using i8 = core::primitives::i8;
+using i16 = core::primitives::i16;
+using i32 = core::primitives::i32;
+using i64 = core::primitives::i64;
+using isize = core::primitives::isize;
+
+using f32 = core::primitives::f32;
+using f64 = core::primitives::f64;
+
+using NullPtr = core::primitives::NullPtr;
 
 #define ALWAYS_INLINE __forceinline
 #define NO_DISCARD [[nodiscard]]
@@ -105,22 +147,12 @@ namespace core {
 	#define DEBUG_TRAP __builtin_trap()
 #endif
 
-#define VERIFY(n) assert(n)
-#define PANIC(msg) assert(true)
-#define TODO(msg) assert(true)
+ALWAYS_INLINE constexpr bool core_assert(bool val) {
+	if (!val) DEBUG_TRAP;
+	return true;
+}
+
+#define VERIFY(n) core_assert(n)
+#define PANIC(msg) core_assert(true)
+#define TODO(msg) core_assert(true)
 #define INVALID_CODE_PATH DEBUG_TRAP
-
-using u8 = core::u8;
-using u16 = core::u16;
-using u32 = core::u32;
-using u64 = core::u64;
-using usize = core::usize;
-
-using i8 = core::i8;
-using i16 = core::i16;
-using i32 = core::i32;
-using i64 = core::i64;
-using isize = core::isize;
-
-using f32 = core::f32;
-using f64 = core::f64;

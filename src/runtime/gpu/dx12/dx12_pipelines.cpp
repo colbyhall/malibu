@@ -2,6 +2,83 @@
 #include "dx12_context.hpp"
 #include "dx12_resources.hpp"
 
+#include "core/library.hpp"
+using namespace core::library;
+
+struct Dx12ShaderCompiler {
+	Library d3dcompiler;
+	pD3DCompile compile;
+
+	static Dx12ShaderCompiler make() {
+		Dx12ShaderCompiler ret;
+		ret.d3dcompiler = Library::open("d3dcompiler_47.dll").unwrap();
+		ret.compile = (pD3DCompile)ret.d3dcompiler.find("D3DCompile");
+		return ret;
+	}
+};
+
+Result<Array<u8>, String> gpu::compile_hlsl(StringView source, gpu::ShaderType type) {
+	static Dx12ShaderCompiler compiler = Dx12ShaderCompiler::make();
+
+	const char* entry_point = nullptr;
+	switch (type) {
+		case gpu::ShaderType::Vertex:
+			entry_point = "vs_main";
+			break;
+		case gpu::ShaderType::Pixel:
+			entry_point = "ps_main";
+			break;
+		default:
+			INVALID_CODE_PATH;
+			break;
+	}
+
+	const char* target = nullptr;
+	switch (type) {
+		case gpu::ShaderType::Vertex:
+			target = "vs_5_0";
+			break;
+		case gpu::ShaderType::Pixel:
+			target = "ps_5_0";
+			break;
+		default:
+			INVALID_CODE_PATH;
+			break;
+	}
+
+	ComPtr<ID3DBlob> binary;
+	ComPtr<ID3DBlob> error;
+	HRESULT result = (compiler.compile)(
+		source.ptr(),
+		source.len(),
+		nullptr,
+		nullptr,
+		nullptr,
+		entry_point,
+		target,
+		0,
+		0,
+		&binary,
+		&error
+	);
+
+	if (result != S_OK) {
+		String error_string;
+		error_string.reserve(error->GetBufferSize());
+		error_string.set_len(error->GetBufferSize());
+		core::mem::copy(error_string.ptr(), error->GetBufferPointer(), error_string.len());
+		error_string.ptr()[error_string.len()] = 0;
+		return error_string;
+	}
+
+	Array<u8> binary_buffer;
+	binary_buffer.reserve(binary->GetBufferSize());
+	binary_buffer.set_len(binary->GetBufferSize());
+	core::mem::copy(binary_buffer.ptr(), binary->GetBufferPointer(), binary_buffer.len());
+	
+	return binary_buffer;
+}
+
 Dx12GraphicsPipeline::Dx12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config) 
 : m_config(core::forward<gpu::GraphicsPipelineConfig>(config)) {
 	auto& context = gpu::Context::the().interface<Dx12Context>();

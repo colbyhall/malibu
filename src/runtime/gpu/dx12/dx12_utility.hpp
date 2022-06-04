@@ -6,8 +6,6 @@
 #define NOMINMAX
 #include <windows.h>
 
-#include <cstdio>
-
 // Windows Runtime Library. Needed for Microsoft::WRL::ComPtr<> template class.
 #include <wrl.h>
 using namespace Microsoft::WRL;
@@ -23,5 +21,6 @@ inline void throw_if_failed(HRESULT hr) {
 
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include <d3dcompiler.h>
 
 #undef interface
