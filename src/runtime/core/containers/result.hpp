@@ -34,11 +34,17 @@ namespace core { namespace containers {
 			auto* p = reinterpret_cast<E*>(&m_data[0]);
 			return core::move(*p);
 		}
+
+		~Result() { /* TODO */ }
 	private:
 		u8 m_set : 1;
-		u8 m_ok : 1;
+		u8 m_ok : 1; // Results technically can also be null after move
 		
-		union Internal { T t; E e; };
+		union Internal { 
+			T t; 
+			E e;
+			~Internal() {} // This prevents warning C4624
+		};
 		alignas(Internal) u8 m_data[sizeof(Internal)];
 	};
 } }

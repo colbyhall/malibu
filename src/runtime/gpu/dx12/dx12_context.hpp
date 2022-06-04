@@ -5,6 +5,7 @@
 #include "dx12_utility.hpp"
 
 #include "core/sync/mutex.hpp"
+#include "core/library.hpp"
 
 namespace core { namespace window { 
 	class Window;
@@ -44,14 +45,22 @@ private:
 };
 
 class Dx12Context : public gpu::ContextInterface {
+	using Library = core::library::Library;
+
+	using CreateDevice = PFN_D3D12_CREATE_DEVICE;
+	using SerializeRootSignature = PFN_D3D12_SERIALIZE_ROOT_SIGNATURE;
+
 public:
-	explicit Dx12Context();
 
 	gpu::Backend backend() const override { return gpu::Backend::Dx12; }
 	bool register_window(const core::window::Window& window) const override;
 	void present() const override;
 
 	void wait_for_previous() const;
+
+	Library d3d12_library;
+	CreateDevice create_device;
+	SerializeRootSignature serialize_root_signature;
 
 	ComPtr<ID3D12Device1> device;
 	ComPtr<IDXGIFactory4> factory;
@@ -62,4 +71,5 @@ public:
 
 	Option<Dx12Swapchain> swapchain;
 
+	explicit Dx12Context();
 };

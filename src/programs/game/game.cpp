@@ -1,7 +1,9 @@
 ﻿#include "core/minimal.hpp"
 #include "core/window.hpp"
 #include "core/sync/mutex.hpp"
+#include "core/fs.hpp"
 
+using namespace core;
 using namespace core::window;
 using namespace core::time;
 using namespace core::sync;
@@ -30,6 +32,15 @@ int main(int argc, char** argv) {
 
 	const auto registered = context.register_window(window);
 	VERIFY(registered);
+
+	fs::File foo = fs::File::open("foo.txt", BitFlag<fs::FileFlags>(fs::FileFlags::Create).set(fs::FileFlags::Read)).unwrap();
+	const auto foo_size = foo.size();
+	
+	Array<u8> buffer;
+	buffer.reserve(foo_size);
+	buffer.set_len(foo_size);
+	foo.read(buffer);
+	buffer.push(0);
 
 	auto last_frame = Instant::now();
 	while (g_running) {

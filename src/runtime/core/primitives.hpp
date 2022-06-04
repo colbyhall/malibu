@@ -37,14 +37,78 @@ namespace core {
     using NullPtr = decltype(nullptr);
 };
 
-#define VERIFY(n) assert(n)
-#define PANIC(msg) assert(true)
-#define TODO(msg) assert(true)
-
 #define ALWAYS_INLINE __forceinline
 #define NO_DISCARD [[nodiscard]]
 #define NO_RETURN [[noreturn]]
 #define ALLOW_UNUSED [[maybe_unused]]
+
+#if defined(_WIN32) || defined(_WIN64)
+	#define PLATFORM_WIN32 1
+#elif defined(__APPLE__) && defined(__MACH__)
+	#define PLATFORM_OSX 1
+#elif defined(__unix__)
+	#define PLATFORM_UNIX 1
+	#if defined(__linux__)
+		#define PLATFORM_LINUX 1
+	#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+		#define PLATFORM_FREEBSD 1
+	#else
+		#error This UNIX Operating System is not supported
+	#endif
+#else
+	#error Operating System is not supported
+#endif
+
+#ifndef PLATFORM_WIN32
+	#define PLATFORM_WIN32 0
+#endif
+#ifndef PLATFORM_OSX
+	#define PLATFORM_OSX 0
+#endif
+#ifndef PLATFORM_UNIX
+	#define PLATFORM_UNIX 0
+#endif
+#ifndef PLATFORM_LINUX
+	#define PLATFORM_LINUX 0
+#endif
+#ifndef PLATFORM_FREEBSD
+	#define PLATFORM_FREEBSD 0
+#endif
+
+#if defined(_MSC_VER)
+	#define COMPILER_MSVC 1
+#elif defined(__GNUC__)
+	#define COMPILER_GCC 1
+#elif defined(__clang__)
+	#define COMPILER_CLANG 1
+#else
+	#error Compiler is not supported
+#endif
+
+#ifndef COMPILER_MSVC
+	#define COMPILER_MSVC 0
+#endif
+#ifndef COMPILER_GCC
+	#define COMPILER_GCC 0
+#endif
+#ifndef COMPILER_CLANG
+	#define COMPILER_CLANG 0
+#endif
+
+#if COMPILER_MSVC
+	#if _MSC_VER < 1300 
+		#define DEBUG_TRAP __asm int 3
+	#else
+		#define DEBUG_TRAP __debugbreak()
+	#endif
+#else
+	#define DEBUG_TRAP __builtin_trap()
+#endif
+
+#define VERIFY(n) assert(n)
+#define PANIC(msg) assert(true)
+#define TODO(msg) assert(true)
+#define INVALID_CODE_PATH DEBUG_TRAP
 
 using u8 = core::u8;
 using u16 = core::u16;

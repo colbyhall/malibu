@@ -3,7 +3,6 @@
 #include <type_traits>
 
 namespace core {
-
 	template<typename T>
 	struct RemoveReference {
 		using Type = T;
@@ -83,5 +82,4 @@ namespace core {
 	
 	template <typename T>
 	using to_unsigned = std::make_unsigned_t<T>;
-
 }

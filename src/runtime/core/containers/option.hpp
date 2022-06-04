@@ -8,12 +8,12 @@ namespace core { namespace containers {
 	template <typename T>
 	class Option {
 	public:
-		ALWAYS_INLINE constexpr explicit Option() : m_set(false) {}
-		ALWAYS_INLINE Option(T&& t) : m_set(true) {
+		ALWAYS_INLINE constexpr explicit Option() : m_set(false), m_data() {}
+		ALWAYS_INLINE Option(T&& t) : m_set(true), m_data() {
 			auto* p = &m_data[0];
 			new (p) T(core::forward<T>(t));
 		}
-		ALWAYS_INLINE Option(const T& t) : m_set(true) {
+		ALWAYS_INLINE Option(const T& t) : m_set(true), m_data() {
 			T copy = t;
 			auto* p = &m_data[0];
 			new (p) T(core::move(copy));

@@ -3,7 +3,6 @@
 #include "primitives.hpp"
 
 namespace core { namespace time {
-
 	constexpr u64 NANOS_PER_SEC = 1000000000;
 	constexpr u64 NANOS_PER_MILLI = 1000000;
 	constexpr u64 NANOS_PER_MICRO = 1000;

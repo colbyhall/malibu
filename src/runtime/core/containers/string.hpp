@@ -46,34 +46,10 @@ namespace core { namespace containers {
 		NO_DISCARD ALWAYS_INLINE char const* ptr() const { return m_bytes.ptr(); }
 		NO_DISCARD ALWAYS_INLINE usize len() const { return m_bytes.len(); }
 		NO_DISCARD ALWAYS_INLINE Chars chars() const { return Chars(m_bytes); }
+		ALWAYS_INLINE const char* operator*() const { return m_bytes.ptr(); }
 
 	private:
 		Slice<char const> m_bytes;
-	};
-
-	class String {
-	public:
-		ALWAYS_INLINE constexpr String() : m_bytes() {}
-		explicit ALWAYS_INLINE String(StringView view) : m_bytes(Array<char>(view)) {
-			m_bytes.push(0);
-		}
-
-		ALWAYS_INLINE operator Slice<char const>() const { 
-			Slice<char const> result = m_bytes;
-			if (m_bytes.len() > 0) {
-				result = result.shrink(1);
-			}
-			return result; 
-		}
-		ALWAYS_INLINE operator StringView() const { return StringView(m_bytes); }
-
-		NO_DISCARD ALWAYS_INLINE char const* ptr() const { return m_bytes.ptr(); }
-		NO_DISCARD ALWAYS_INLINE usize len() const { return m_bytes.len() > 0 ? m_bytes.len() - 1 : 0; }
-
-		NO_DISCARD ALWAYS_INLINE Chars chars() const { return Chars(m_bytes); }
-		
-	private:
-		Array<char> m_bytes;
 	};
 
 	class WStringView {
@@ -83,8 +59,10 @@ namespace core { namespace containers {
 		ALWAYS_INLINE constexpr WStringView(const wchar_t* ptr) : m_chars({ ptr, string_length(ptr) }) {}
 
 		ALWAYS_INLINE operator Slice<wchar_t const>() const { return m_chars; }
+
 		NO_DISCARD ALWAYS_INLINE wchar_t const* ptr() const { return m_chars.ptr(); }
 		NO_DISCARD ALWAYS_INLINE usize len() const { return m_chars.len(); }
+		ALWAYS_INLINE const wchar_t* operator*() const { return m_chars.ptr(); }
 
 		ALWAYS_INLINE const wchar_t* begin() const { return m_chars.cbegin(); }
 		ALWAYS_INLINE const wchar_t* end() const { return m_chars.cend(); }
@@ -95,6 +73,40 @@ namespace core { namespace containers {
 
 	private:
 		Slice<wchar_t const> m_chars;
+	};
+
+	class String {
+	public:
+		ALWAYS_INLINE constexpr String() : m_bytes() {}
+		explicit ALWAYS_INLINE String(StringView view) : m_bytes(Array<char>(view)) { m_bytes.push(0); }
+
+		static String from(WStringView string);
+
+		ALWAYS_INLINE operator Slice<char const>() const { 
+			Slice<char const> result = m_bytes;
+			if (m_bytes.len() > 0) {
+				result = result.shrink(1);
+			}
+			return result; 
+		}
+		ALWAYS_INLINE operator StringView() const { return StringView(m_bytes); }
+
+		NO_DISCARD ALWAYS_INLINE char* ptr() { return m_bytes.ptr(); }
+		NO_DISCARD ALWAYS_INLINE char const* ptr() const { return m_bytes.ptr(); }
+		ALWAYS_INLINE const char* operator*() const { return m_bytes.ptr(); }
+
+		NO_DISCARD ALWAYS_INLINE usize len() const { return m_bytes.len() > 0 ? m_bytes.len() - 1 : 0; }
+		NO_DISCARD ALWAYS_INLINE usize cap() const { return m_bytes.cap(); }
+		ALWAYS_INLINE void set_len(usize len) { m_bytes.set_len(len + 1); }
+
+		NO_DISCARD ALWAYS_INLINE Chars chars() const { return Chars(m_bytes); }
+
+		ALWAYS_INLINE void reserve(usize amount) { m_bytes.reserve(amount); }
+		String& push(Char c);
+		String& push(StringView string);
+		
+	private:
+		Array<char> m_bytes;
 	};
 
 	class WString {
@@ -111,9 +123,15 @@ namespace core { namespace containers {
 			}
 			return result; 
 		}
-		NO_DISCARD ALWAYS_INLINE wchar_t const* ptr() const { return m_chars.ptr(); }
-		NO_DISCARD ALWAYS_INLINE usize len() const { return m_chars.len() > 0 ? m_chars.len() - 1 : 0; }
 		ALWAYS_INLINE operator WStringView() const { return WStringView(m_chars); }
+
+		NO_DISCARD ALWAYS_INLINE wchar_t* ptr() { return m_chars.ptr(); }
+		NO_DISCARD ALWAYS_INLINE wchar_t const* ptr() const { return m_chars.ptr(); }
+		ALWAYS_INLINE const wchar_t* operator*() const { return m_chars.ptr(); }
+
+		NO_DISCARD ALWAYS_INLINE usize len() const { return m_chars.len() > 0 ? m_chars.len() - 1 : 0; }
+		NO_DISCARD ALWAYS_INLINE usize cap() const { return m_chars.cap(); }
+		ALWAYS_INLINE void set_len(usize len) { m_chars.set_len(len + 1); }
 
 		ALWAYS_INLINE wchar_t* begin() { return m_chars.begin(); }
 		ALWAYS_INLINE wchar_t* end() { return m_chars.end(); }
@@ -124,8 +142,9 @@ namespace core { namespace containers {
 		NO_DISCARD ALWAYS_INLINE wchar_t operator[](usize index) const { return m_chars[index]; }
 
 		ALWAYS_INLINE void reserve(usize amount) { return m_chars.reserve(amount); }
-		usize push(wchar_t w);
-		void push(WStringView string);
+		WString& push(wchar_t w);
+		WString& push(WStringView string);
+		WString& push(StringView string);
 
 	private:
 		Array<wchar_t> m_chars;

@@ -13,7 +13,6 @@ namespace core { namespace containers {
 	class Array {
 	public:
 		ALWAYS_INLINE constexpr Array() : m_ptr(nullptr), m_len(0), m_cap(0) {}
-
 		ALWAYS_INLINE explicit Array(Slice<const T> slice) : m_len(slice.len()) {
 			reserve(slice.len());
 			for (int i = 0; i < slice.len(); ++i) {
@@ -21,27 +20,6 @@ namespace core { namespace containers {
 				new (m_ptr + i) T(core::move(copy));
 			}
 		}
-
-		NO_COPY(Array);
-
-		ALWAYS_INLINE Array(Array<T>&& move) noexcept : m_ptr(move.m_ptr), m_len(move.m_len), m_cap(move.m_cap) {
-			move.m_ptr = nullptr;
-			move.m_len = 0;
-			move.m_cap = 0;
-		}
-
-		ALWAYS_INLINE Array& operator=(Array<T>&& m) noexcept {
-			// FIXME: Is this the best way to do this
-			Array<T> to_destroy = move(*this);
-			m_ptr = m.m_ptr;
-			m_len = m.m_len;
-			m_cap = m.m_cap;
-			m.m_ptr = nullptr;
-			m.m_len = 0;
-			m.m_cap = 0;
-			return *this;
-		}
-
 		~Array() {
 			if (m_ptr) {
 				for (usize i = 0; i < m_len; ++i) {
@@ -53,9 +31,34 @@ namespace core { namespace containers {
 			}
 		}
 
+		NO_COPY(Array);
+
+		ALWAYS_INLINE Array(Array<T>&& move) noexcept 
+			: m_ptr(move.m_ptr), m_len(move.m_len), m_cap(move.m_cap) {
+			move.m_ptr = nullptr;
+			move.m_len = 0;
+			move.m_cap = 0;
+		}
+		ALWAYS_INLINE Array& operator=(Array<T>&& move) noexcept {
+			// FIXME: Is this the best way to do this
+			Array<T> to_destroy = core::move(*this);
+			m_ptr = move.m_ptr;
+			m_len = move.m_len;
+			m_cap = move.m_cap;
+			move.m_ptr = nullptr;
+			move.m_len = 0;
+			move.m_cap = 0;
+			return *this;
+		}
+
 		NO_DISCARD ALWAYS_INLINE T* ptr() const { return m_ptr; }
 		NO_DISCARD ALWAYS_INLINE usize len() const { return m_len; }
 		NO_DISCARD ALWAYS_INLINE usize cap() const { return m_cap; }
+		
+		ALWAYS_INLINE void set_len(usize len) {
+			VERIFY(len <= m_cap);
+			m_len = len;
+		}
 
 		NO_DISCARD ALWAYS_INLINE bool is_empty() const { return len() == 0; }
 		explicit operator bool() const { return !is_empty(); }

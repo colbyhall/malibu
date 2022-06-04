@@ -10,6 +10,8 @@ project "gpu"
 
 	systemversion "latest"
 
-    links { "core", "d3d12", "dxgi", "d3dcompiler" }
+    links { "core", "dxgi" }
 
 	cppdialect "C++20"
+
+	flags { "FatalWarnings" }

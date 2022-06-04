@@ -7,3 +7,5 @@ project "core"
     vpaths { ["*"] = { "**.hpp", "**.cpp" } }
 
 	cppdialect "C++20"
+
+	flags { "FatalWarnings" }

@@ -10,3 +10,5 @@ project "game"
     links { "core", "gpu" }
 
     cppdialect "C++20"
+
+	flags { "FatalWarnings" }
