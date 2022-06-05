@@ -62,6 +62,8 @@ public:
 	gpu::BufferKind kind() const override { return m_kind; }
 	usize len() const override { return m_len; }
 	usize stride() const override { return m_stride; }
+	Slice<u8> write() const override;
+	void unmap() const override;
 
 	BitFlag<gpu::BufferUsage> m_usage;
 	gpu::BufferKind m_kind;

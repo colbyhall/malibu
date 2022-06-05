@@ -147,6 +147,14 @@ using NullPtr = core::primitives::NullPtr;
 	#define DEBUG_TRAP __builtin_trap()
 #endif
 
+#ifndef BUILD_DEBUG
+	#define BUILD_DEBUG 0
+#endif
+
+#ifndef BUILD_RELEASE
+	#define BUILD_RELEASE 0
+#endif
+
 ALWAYS_INLINE constexpr bool core_assert(bool val) {
 	if (!val) DEBUG_TRAP;
 	return true;

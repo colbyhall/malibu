@@ -8,6 +8,11 @@ using namespace core::window;
 using namespace core::time;
 using namespace core::sync;
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#define WIN32_MEAN_AND_LEAN
+#include <windows.h>
+
 #include "gpu/minimal.hpp"
 
 #include <cstdio>
@@ -20,7 +25,12 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 	}
 }
 
-int main(int argc, char** argv) {
+struct Vertex {
+	Vec3f32 position;
+	LinearColor color;
+};
+
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	auto window = Window::make({
 		.size = { 1280, 720 },
 		.title = "Hello World",
@@ -45,10 +55,24 @@ int main(int argc, char** argv) {
 	config.vertex_shader = core::move(vertex_shader);
 	config.pixel_shader = core::move(pixel_shader);
 	
-	config.vertex_primitives.push(gpu::Primitive::Vec4f32);
+	config.vertex_primitives.push(gpu::Primitive::Vec3f32);
 	config.vertex_primitives.push(gpu::Primitive::Vec4f32);
 
 	auto pipeline = gpu::GraphicsPipeline::make(core::move(config));
+
+	auto triangle = gpu::Buffer::make(
+		gpu::BufferUsage::Vertex, 
+		gpu::BufferKind::Upload, 
+		3, sizeof(Vertex)
+	);
+	triangle.write([](Slice<u8> slice){
+		Vertex vertices[3] = {
+			{ { 0.f, 0.25f, 0.f }, LinearColor::RED },
+			{ { 0.25f, -0.25f, 0.f }, LinearColor::GREEN },
+			{ { -0.25f, -0.25f, 0.f }, LinearColor::BLUE },
+		};
+		core::mem::copy(slice.ptr(), vertices, slice.len());
+	});
 
 	auto last_frame = Instant::now();
 	while (g_running) {
@@ -57,6 +81,8 @@ int main(int argc, char** argv) {
 		last_frame = now;
 
 		Window::pump_events();
+
+		auto command_list = gpu::GraphicsCommandList::make();
 	}
 
 	return 0;

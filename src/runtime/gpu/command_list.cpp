@@ -4,7 +4,7 @@
 #include "dx12/dx12_command_list.hpp"
 
 namespace gpu {
-	GraphicsCommandList GraphicsCommandList::create() {
+	GraphicsCommandList GraphicsCommandList::make() {
 		auto& context = Context::the();
 
 		Option<Unique<GraphicsCommandListInterface>> interface;

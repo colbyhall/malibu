@@ -101,6 +101,9 @@ namespace gpu {
 		virtual BufferKind kind() const = 0;
 		virtual usize len() const = 0;
 		virtual usize stride() const = 0;
+		virtual Slice<u8> write() const = 0;
+		// virtual Slice<u8 const> read() const = 0;
+		virtual void unmap() const = 0;
 	};
 
 	class Buffer {
@@ -116,6 +119,13 @@ namespace gpu {
 		NO_DISCARD ALWAYS_INLINE BufferKind kind() const { return m_interface->kind(); }
 		NO_DISCARD ALWAYS_INLINE usize len() const { return m_interface->len(); }
 		NO_DISCARD ALWAYS_INLINE usize stride() const { return m_interface->stride(); }
+
+		template <typename Callable>
+		void write(Callable&& callable) {
+			Slice<u8> slice = m_interface->write();
+			callable(slice);
+			m_interface->unmap();
+		}
 
 		template <typename T = BufferInterface>
 		T const& interface() const { 

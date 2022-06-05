@@ -49,6 +49,7 @@ class Dx12Context : public gpu::ContextInterface {
 
 	using CreateDevice = PFN_D3D12_CREATE_DEVICE;
 	using SerializeRootSignature = PFN_D3D12_SERIALIZE_ROOT_SIGNATURE;
+	using GetDebugInterface = PFN_D3D12_GET_DEBUG_INTERFACE;
 
 public:
 
@@ -61,6 +62,7 @@ public:
 	Library d3d12_library;
 	CreateDevice create_device;
 	SerializeRootSignature serialize_root_signature;
+	GetDebugInterface get_debug_interface;
 
 	ComPtr<ID3D12Device1> device;
 	ComPtr<IDXGIFactory4> factory;
@@ -68,6 +70,10 @@ public:
 	ComPtr<ID3D12CommandAllocator> command_allocator;
 	ComPtr<ID3D12RootSignature> root_signature;
 	mutable Dx12DescriptorHeap rtv_heap; // TODO: Bindless under lock
+
+#if BUILD_DEBUG
+	ComPtr<ID3D12Debug> debug_interface;
+#endif
 
 	Option<Dx12Swapchain> swapchain;
 

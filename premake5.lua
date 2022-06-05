@@ -11,11 +11,11 @@ workspace "malibu"
 	characterset("ASCII")
 
 	filter "configurations:debug"
-    	defines { "BUILD_DEBUG" }
+    	defines { "BUILD_DEBUG#1" }
 		symbols "On"
 
 	filter "configurations:release"
-		defines { "BUILD_RELEASE" }
+		defines { "BUILD_RELEASE#1" }
 		optimize "On"
 
 	include "src/runtime"

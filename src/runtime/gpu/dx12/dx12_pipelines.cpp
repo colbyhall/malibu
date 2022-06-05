@@ -158,12 +158,21 @@ Dx12GraphicsPipeline::Dx12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config)
 		desc.DepthStencilState.StencilEnable = FALSE;
 	}
 
+	// TEMP FIX
+	const char* SemanticNames[] = {
+		"POSITION",
+		"COLOR"
+	};
+
 	// InputLayout
 	Array<D3D12_INPUT_ELEMENT_DESC> input_layout;
 	input_layout.reserve(m_config.vertex_primitives.len());
 	usize offset = 0;
 	for (int i = 0; i < m_config.vertex_primitives.len(); ++i) {
 		D3D12_INPUT_ELEMENT_DESC input = {};
+		// input.SemanticIndex = i;
+		input.SemanticName = SemanticNames[i];
+
 		usize size_in_bytes = 0;
 		switch (m_config.vertex_primitives[i]) {
 			case gpu::Primitive::Uint32:

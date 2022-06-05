@@ -106,3 +106,14 @@ Dx12Buffer::Dx12Buffer(
 		IID_PPV_ARGS(&m_resource)
 	));
 }
+
+Slice<u8> Dx12Buffer::write() const {
+	D3D12_RANGE range = {};
+	void* ptr;
+	throw_if_failed(m_resource->Map(0, &range, &ptr));
+	return Slice { reinterpret_cast<u8*>(ptr), m_len * m_stride };
+}
+
+void Dx12Buffer::unmap() const {
+	m_resource->Unmap(0, nullptr);
+}

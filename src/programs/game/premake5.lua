@@ -1,5 +1,5 @@
 project "game"
-	kind "ConsoleApp"
+	kind "WindowedApp"
     language "C++"
 
     files { "**.hpp", "**.cpp" }

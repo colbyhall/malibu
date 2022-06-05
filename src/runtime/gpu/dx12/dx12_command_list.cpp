@@ -20,6 +20,7 @@ void Dx12GraphicsCommandList::begin_recording() {
 	auto& context = gpu::Context::the().interface<Dx12Context>();
 
 	throw_if_failed(m_command_list->Reset(context.command_allocator.Get(), nullptr));
+	m_command_list->SetGraphicsRootSignature(context.root_signature.Get());
 }
 
 void Dx12GraphicsCommandList::copy_buffer_to_texture(const gpu::Texture& dst, const gpu::Buffer& src) {

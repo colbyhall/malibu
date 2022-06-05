@@ -50,16 +50,15 @@ void Dx12DescriptorHeap::free(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
 Dx12Context::Dx12Context() {
 	d3d12_library = Library::open("d3d12.dll").unwrap();
 	create_device = (CreateDevice)d3d12_library.find("D3D12CreateDevice");
-	auto last_error = GetLastError();
 	serialize_root_signature = (SerializeRootSignature)d3d12_library.find("D3D12SerializeRootSignature");
+	get_debug_interface = (GetDebugInterface)d3d12_library.find("D3D12GetDebugInterface");
 
 	// Always enable the debug layer before doing anything DX12 related
 	// so all possible errors generated while creating DX12 objects
 	// are caught by the debug layer.
 #if BUILD_DEBUG
-	//    ComPtr<ID3D12Debug> debug_interface;
-	//    throw -(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
-	//    debugInterface->EnableDebugLayer();
+	(get_debug_interface)(IID_PPV_ARGS(&debug_interface));
+	debug_interface->EnableDebugLayer();
 #endif
 
 	// Find the best adapter. We're not going to use WARP ATM
@@ -103,39 +102,39 @@ Dx12Context::Dx12Context() {
 
 		// Enable debug messages in debug mode.
 #if BUILD_DEBUG
-		//    ComPtr<ID3D12InfoQueue> pInfoQueue;
-		//    if (SUCCEEDED(device1.As(&pInfoQueue)))
-		//    {
-		//        pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
-		//        pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
-		//        pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
-		//
-		//        // Suppress whole categories of messages
-		//        //D3D12_MESSAGE_CATEGORY Categories[] = {};
-		//
-		//        // Suppress messages based on their severity level
-		//        D3D12_MESSAGE_SEVERITY Severities[] =
-		//        {
-		//            D3D12_MESSAGE_SEVERITY_INFO
-		//        };
-		//
-		//        // Suppress individual messages by their ID
-		//        D3D12_MESSAGE_ID DenyIds[] = {
-		//            D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,   // I'm really not sure how to avoid this message.
-		//            D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,                         // This warning occurs when using capture frame while graphics debugging.
-		//            D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,                       // This warning occurs when using capture frame while graphics debugging.
-		//        };
-		//
-		//        D3D12_INFO_QUEUE_FILTER NewFilter = {};
-		//        //NewFilter.DenyList.NumCategories = _countof(Categories);
-		//        //NewFilter.DenyList.pCategoryList = Categories;
-		//        NewFilter.DenyList.NumSeverities = _countof(Severities);
-		//        NewFilter.DenyList.pSeverityList = Severities;
-		//        NewFilter.DenyList.NumIDs = _countof(DenyIds);
-		//        NewFilter.DenyList.pIDList = DenyIds;
-		//
-		//        ThrowIfFailed(pInfoQueue->PushStorageFilter(&NewFilter));
-		//    }
+		ComPtr<ID3D12InfoQueue> pInfoQueue;
+		if (SUCCEEDED(device1.As(&pInfoQueue)))
+		{
+			pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+			pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+			pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+	
+			// Suppress whole categories of messages
+			//D3D12_MESSAGE_CATEGORY Categories[] = {};
+	
+			// Suppress messages based on their severity level
+			D3D12_MESSAGE_SEVERITY Severities[] =
+			{
+				D3D12_MESSAGE_SEVERITY_INFO
+			};
+	
+			// Suppress individual messages by their ID
+			D3D12_MESSAGE_ID DenyIds[] = {
+				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,   // I'm really not sure how to avoid this message.
+				D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,                         // This warning occurs when using capture frame while graphics debugging.
+				D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE,                       // This warning occurs when using capture frame while graphics debugging.
+			};
+	
+			D3D12_INFO_QUEUE_FILTER NewFilter = {};
+			//NewFilter.DenyList.NumCategories = _countof(Categories);
+			//NewFilter.DenyList.pCategoryList = Categories;
+			NewFilter.DenyList.NumSeverities = _countof(Severities);
+			NewFilter.DenyList.pSeverityList = Severities;
+			NewFilter.DenyList.NumIDs = _countof(DenyIds);
+			NewFilter.DenyList.pIDList = DenyIds;
+	
+			throw_if_failed(pInfoQueue->PushStorageFilter(&NewFilter));
+		}
 #endif
 
 		device = device1;
