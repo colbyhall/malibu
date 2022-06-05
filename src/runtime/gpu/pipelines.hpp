@@ -93,10 +93,10 @@ namespace gpu {
 
 	struct GraphicsPipelineConfig {
 		Array<Format> color_attachments;
-		Option<Format> depth_attachment;
+		Option<Format> depth_attachment = Option<Format>{};
 
-		Option<Shader> vertex_shader;
-		Option<Shader> pixel_shader;
+		Option<Shader> vertex_shader = Option<Shader>{};
+		Option<Shader> pixel_shader = Option<Shader>{};
 
 		Array<Primitive> vertex_primitives;
 

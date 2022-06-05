@@ -33,8 +33,22 @@ int main(int argc, char** argv) {
 	const auto registered = context.register_window(window);
 	VERIFY(registered);
 
-	String foo = fs::read_to_string("foo.txt").unwrap();
-	auto binary = gpu::compile_hlsl(foo, gpu::ShaderType::Vertex).unwrap();
+	String shader = fs::read_to_string("foo.txt").unwrap();
+	auto vertex_binary = gpu::compile_hlsl(shader, gpu::ShaderType::Vertex).unwrap();
+	auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
+
+	auto pixel_binary = gpu::compile_hlsl(shader, gpu::ShaderType::Pixel).unwrap();
+	auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
+
+	gpu::GraphicsPipelineConfig config = {};
+	config.color_attachments.push(gpu::Format::RGBA_U8);
+	config.vertex_shader = core::move(vertex_shader);
+	config.pixel_shader = core::move(pixel_shader);
+	
+	config.vertex_primitives.push(gpu::Primitive::Vec4f32);
+	config.vertex_primitives.push(gpu::Primitive::Vec4f32);
+
+	auto pipeline = gpu::GraphicsPipeline::make(core::move(config));
 
 	auto last_frame = Instant::now();
 	while (g_running) {
