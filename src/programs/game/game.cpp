@@ -67,12 +67,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	);
 	triangle.write([](Slice<u8> slice){
 		Vertex vertices[3] = {
-			{ { 0.f, 0.25f, 0.f }, LinearColor::RED },
-			{ { 0.25f, -0.25f, 0.f }, LinearColor::GREEN },
-			{ { -0.25f, -0.25f, 0.f }, LinearColor::BLUE },
+			{ { 0.f, 0.25f, 0.1f }, LinearColor::RED },
+			{ { 0.25f, -0.25f, 0.1f }, LinearColor::GREEN },
+			{ { -0.25f, -0.25f, 0.1f }, LinearColor::BLUE },
 		};
 		core::mem::copy(slice.ptr(), vertices, slice.len());
 	});
+
+	auto command_list = gpu::GraphicsCommandList::make();
 
 	auto last_frame = Instant::now();
 	while (g_running) {
@@ -82,7 +84,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		Window::pump_events();
 
-		auto command_list = gpu::GraphicsCommandList::make();
+		command_list.record([&](gpu::GraphicsCommandRecorder& recorder){
+			auto& backbuffer = context.backbuffer();
+			recorder.texture_barrier(backbuffer, gpu::Layout::Present, gpu::Layout::ColorAttachment);
+			recorder.render_pass(backbuffer, [&](gpu::RenderPassRecorder& render_pass) {
+				// render_pass.clear_color(LinearColor::BLACK);
+				render_pass.bind_pipeline(pipeline);
+				render_pass.bind_vertices(triangle);
+				render_pass.draw(triangle.len());
+			});
+			recorder.texture_barrier(backbuffer, gpu::Layout::ColorAttachment, gpu::Layout::Present);
+		});
+
+		command_list.submit();
+		context.present();
 	}
 
 	return 0;

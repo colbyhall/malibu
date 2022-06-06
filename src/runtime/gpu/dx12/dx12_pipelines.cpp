@@ -139,7 +139,7 @@ Dx12GraphicsPipeline::Dx12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config)
 		// TODO: Finish this
 		D3D12_RASTERIZER_DESC rasterizer_state = {};
 		rasterizer_state.FillMode = D3D12_FILL_MODE_SOLID;
-		rasterizer_state.CullMode = D3D12_CULL_MODE_BACK;
+		rasterizer_state.CullMode = D3D12_CULL_MODE_NONE;
 		rasterizer_state.FrontCounterClockwise = FALSE;
 		rasterizer_state.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
 		rasterizer_state.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;

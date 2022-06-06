@@ -27,7 +27,7 @@ namespace gpu {
 
 		virtual void texture_barrier(const Texture& texture, Layout old_layout, Layout new_layout) = 0;
 
-		virtual void begin_render_pass(Slice<Texture const&> attachments) = 0;
+		virtual void begin_render_pass(const Texture& attachment) = 0;
 
 		virtual void set_scissor(Option<Rect2f32> scissor) = 0;
 		virtual void clear_color(LinearColor color) = 0;
@@ -79,9 +79,15 @@ namespace gpu {
 
 	class GraphicsCommandRecorder {
 	public:
+
+		ALWAYS_INLINE GraphicsCommandRecorder& texture_barrier(const Texture& texture, Layout old_layout, Layout new_layout) {
+			m_interface.texture_barrier(texture, old_layout, new_layout);
+			return *this;
+		}
+
 		template <typename Callable>
-		ALWAYS_INLINE GraphicsCommandRecorder& render_pass(Slice<Texture const&> attachments, Callable&& callable) {
-			m_interface.begin_render_pass(attachments);
+		ALWAYS_INLINE GraphicsCommandRecorder& render_pass(const Texture& attachment, Callable&& callable) {
+			m_interface.begin_render_pass(attachment);
 			RenderPassRecorder recorder(m_interface);
 			callable(recorder);
 			m_interface.end_render_pass();
@@ -89,7 +95,7 @@ namespace gpu {
 		}
 
 	private:
-		ALWAYS_INLINE GraphicsRecorder(GraphicsCommandListInterface& interface) : m_interface(interface) {}
+		ALWAYS_INLINE GraphicsCommandRecorder(GraphicsCommandListInterface& interface) : m_interface(interface) {}
 		friend class GraphicsCommandList;
 
 		GraphicsCommandListInterface& m_interface;
@@ -101,11 +107,16 @@ namespace gpu {
 
 		template <typename Callable>
 		ALWAYS_INLINE void record(Callable&& callable) {
-			Unique<GraphicsCommandListInterface>& interface = m_interface.as_ref().unwrap()
+			Unique<GraphicsCommandListInterface>& interface = m_interface.as_ref().unwrap();
 			interface->begin_recording();
 			GraphicsCommandRecorder recorder(*interface);
 			callable(recorder);
 			interface->end_recording();
+		}
+
+		ALWAYS_INLINE void submit() {
+			Unique<GraphicsCommandListInterface>& interface = m_interface.as_ref().unwrap();
+			interface->submit();
 		}
 
 	private:

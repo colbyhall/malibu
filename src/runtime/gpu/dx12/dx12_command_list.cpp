@@ -36,30 +36,38 @@ void Dx12GraphicsCommandList::texture_barrier(const gpu::Texture& texture, gpu::
 
 	D3D12_RESOURCE_BARRIER barrier = {};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	barrier.Transition.pResource = interface.m_resource.Get();
 	barrier.Transition.StateBefore = layout_to_resource_states(old_layout);
 	barrier.Transition.StateAfter = layout_to_resource_states(new_layout);
 	m_command_list->ResourceBarrier(1, &barrier);
 }
 
-void Dx12GraphicsCommandList::begin_render_pass(Slice<gpu::Texture const&> attachments) {
-	for (int i = 0; i < attachments.len(); ++i) {
-		const Dx12Texture& interface = attachments[i].interface<Dx12Texture>();
+void Dx12GraphicsCommandList::begin_render_pass(const gpu::Texture& attachment) {
+	{
+		const Dx12Texture& interface = attachment.interface<Dx12Texture>();
 		m_command_list->OMSetRenderTargets(1, &interface.m_rtv_handle, 0, nullptr);
 	}
 
 	D3D12_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = (f32)attachments[0].size().width;
-	viewport.Height = (f32)attachments[0].size().height;
+	viewport.Width = (f32)attachment.size().width;
+	viewport.Height = (f32)attachment.size().height;
+	viewport.MinDepth = D3D12_MIN_DEPTH;
+	viewport.MaxDepth = D3D12_MAX_DEPTH;
 	m_command_list->RSSetViewports(1, &viewport);
 
-	for (int i = 0; i < attachments.len(); ++i) {
-		const f32 clear_color[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-		const Dx12Texture& interface = attachments[i].interface<Dx12Texture>();
-		m_command_list->ClearRenderTargetView(interface.m_rtv_handle, clear_color, 0, nullptr);
-	}
+	D3D12_RECT rect = {};
+	rect.left = 0;
+	rect.top = 0;
+	rect.bottom = (LONG)attachment.size().height;
+	rect.right = (LONG)attachment.size().width;
+	m_command_list->RSSetScissorRects(1, &rect);
+
+	const f32 clear_color[] = { 0.05f, 0.05f, 0.05f, 1.0f };
+	const Dx12Texture& interface = attachment.interface<Dx12Texture>();
+	m_command_list->ClearRenderTargetView(interface.m_rtv_handle, clear_color, 0, nullptr);
 }
 
 void Dx12GraphicsCommandList::set_scissor(Option<Rect2f32> scissor) {
@@ -95,7 +103,7 @@ void Dx12GraphicsCommandList::bind_indices(const gpu::Buffer& buffer) {
 }
 
 void Dx12GraphicsCommandList::draw(usize vertex_count, usize first_vertex) {
-	m_command_list->DrawInstanced((UINT)vertex_count, 0, (UINT)first_vertex, 0);
+	m_command_list->DrawInstanced((UINT)vertex_count, 1, (UINT)first_vertex, 0);
 }
 
 void Dx12GraphicsCommandList::draw_indexed(usize index_count, usize first_index) {

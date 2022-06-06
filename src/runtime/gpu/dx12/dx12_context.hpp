@@ -56,6 +56,7 @@ public:
 	gpu::Backend backend() const override { return gpu::Backend::Dx12; }
 	bool register_window(const core::window::Window& window) const override;
 	void present() const override;
+	const gpu::Texture& backbuffer() const override;
 
 	void wait_for_previous() const;
 
@@ -75,7 +76,7 @@ public:
 	ComPtr<ID3D12Debug> debug_interface;
 #endif
 
-	Option<Dx12Swapchain> swapchain;
+	mutable Option<Dx12Swapchain> swapchain;
 
 	explicit Dx12Context();
 };

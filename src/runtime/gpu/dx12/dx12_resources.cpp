@@ -29,7 +29,7 @@ Dx12Texture::Dx12Texture(
 	const DXGI_FORMAT dxgi_format = format_to_dxgi(format);
 	VERIFY(dxgi_format != DXGI_FORMAT_UNKNOWN);
 
-	if (resource != nullptr) {
+	if (resource == nullptr) {
 		D3D12_RESOURCE_DESC desc = {};
 		desc.Dimension = dimension;
 		desc.Width = size.width;
@@ -59,6 +59,7 @@ Dx12Texture::Dx12Texture(
 
 	if (usage.is_set(gpu::TextureUsage::Color_Attachment)) {
 		m_rtv_handle = context.rtv_heap.alloc();
+		context.device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtv_handle);
 	}
 }
 

@@ -5,6 +5,8 @@
 
 namespace gpu {
 
+	class Texture;
+
 	enum class Backend {
 		Dx12,
 	};
@@ -16,6 +18,7 @@ namespace gpu {
 		virtual Backend backend() const = 0;
 		virtual bool register_window(const Window& window) const = 0;
 		virtual void present() const = 0;
+		virtual const Texture& backbuffer() const = 0;
 	};
 
 	class Context {
@@ -24,9 +27,9 @@ namespace gpu {
 		static const Context& the();
 
 		ALWAYS_INLINE Backend backend() const { return m_interface->backend(); }
-		ALWAYS_INLINE bool register_window(const Window& window) const { 
-			return m_interface->register_window(window);
-		}
+		ALWAYS_INLINE bool register_window(const Window& window) const { return m_interface->register_window(window); }
+		ALWAYS_INLINE const Texture& backbuffer() const { return m_interface->backbuffer(); }
+		ALWAYS_INLINE void present() const { return m_interface->present(); }
 
 		template <typename T = ContextInterface>
 		T const& interface() const { 

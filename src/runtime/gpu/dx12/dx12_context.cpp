@@ -182,9 +182,7 @@ Dx12Context::Dx12Context() {
 }
 
 bool Dx12Context::register_window(const core::window::Window& window) const {
-	Dx12Context& self = const_cast < Dx12Context& > (*this); // TODO: Thread safety
-
-	if (self.swapchain.is_set()) {
+	if (swapchain.is_set()) {
 		return false;
 	}
 
@@ -200,8 +198,8 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 	desc.SampleDesc.Count = 1;
 
 	ComPtr<IDXGISwapChain1> swapchain1;
-	throw_if_failed(self.factory->CreateSwapChainForHwnd(
-		self.queue.Get(),
+	throw_if_failed(factory->CreateSwapChainForHwnd(
+		queue.Get(),
 		(HWND)window.handle(),
 		&desc,
 		nullptr,
@@ -209,17 +207,17 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 		&swapchain1
 	));
 
-	throw_if_failed(self.factory->MakeWindowAssociation(
+	throw_if_failed(factory->MakeWindowAssociation(
 		(HWND)window.handle(),
 		DXGI_MWA_NO_ALT_ENTER
 	));
 
-	ComPtr<IDXGISwapChain3> swapchain; 
-	throw_if_failed(swapchain1.As(&swapchain));
-	const auto current = (u8)swapchain->GetCurrentBackBufferIndex();
+	ComPtr<IDXGISwapChain3> local_swapchain; 
+	throw_if_failed(swapchain1.As(&local_swapchain));
+	const auto current = (u8)local_swapchain->GetCurrentBackBufferIndex();
 
 	ComPtr<ID3D12Fence> fence;
-	throw_if_failed(self.device->CreateFence(
+	throw_if_failed(device->CreateFence(
 		0, 
 		D3D12_FENCE_FLAG_NONE, 
 		IID_PPV_ARGS(&fence)
@@ -231,7 +229,7 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 	Array<gpu::Texture> backbuffers;
 	for (int i = 0; i < Dx12Swapchain::frame_count; ++i) {
 		ComPtr<ID3D12Resource> resource;
-		throw_if_failed(swapchain->GetBuffer(i, IID_PPV_ARGS(&resource)));
+		throw_if_failed(local_swapchain->GetBuffer(i, IID_PPV_ARGS(&resource)));
 
 		BitFlag<gpu::TextureUsage> usage = gpu::TextureUsage::Color_Attachment;
 		usage.set(gpu::TextureUsage::SwapChain);
@@ -242,13 +240,13 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 			usage, 
 			gpu::Format::RGBA_U8, 
 			buffer_size, 
-			resource)
-		);
+			resource
+		));
 		backbuffers.push(gpu::Texture(core::move(interface)));
 	}
 
-	self.swapchain = Dx12Swapchain {
-		swapchain,
+	swapchain = Dx12Swapchain {
+		local_swapchain,
 		core::move(backbuffers),
 		current,
 
@@ -257,7 +255,7 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 		fence_value
 	};
 
-	self.wait_for_previous();
+	wait_for_previous();
 
 	return true;
 }
@@ -266,6 +264,11 @@ void Dx12Context::present() const {
 	auto& local = swapchain.as_ref().unwrap();
 	throw_if_failed(local.handle->Present(1, 0));
 	wait_for_previous();
+}
+
+const gpu::Texture& Dx12Context::backbuffer() const {
+	Dx12Swapchain& local = swapchain.as_ref().unwrap();
+	return local.backbuffers[local.current];
 }
 
 void Dx12Context::wait_for_previous() const {

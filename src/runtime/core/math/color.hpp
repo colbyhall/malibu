@@ -12,6 +12,9 @@ namespace core { namespace math {
 		static const LinearColor RED;
 		static const LinearColor GREEN;
 		static const LinearColor BLUE;
+
+		static const LinearColor WHITE;
+		static const LinearColor BLACK;
 	};
 
 	struct Color {
