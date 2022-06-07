@@ -57,7 +57,7 @@ Dx12Texture::Dx12Texture(
 		m_resource = resource;
 	}
 
-	if (usage.is_set(gpu::TextureUsage::Color_Attachment)) {
+	if (usage.is_set(gpu::TextureUsage::ColorAttachment)) {
 		m_rtv_handle = context.rtv_heap.alloc();
 		context.device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtv_handle);
 	}

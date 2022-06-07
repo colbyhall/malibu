@@ -231,7 +231,7 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 		ComPtr<ID3D12Resource> resource;
 		throw_if_failed(local_swapchain->GetBuffer(i, IID_PPV_ARGS(&resource)));
 
-		BitFlag<gpu::TextureUsage> usage = gpu::TextureUsage::Color_Attachment;
+		BitFlag<gpu::TextureUsage> usage = gpu::TextureUsage::ColorAttachment;
 		usage.set(gpu::TextureUsage::SwapChain);
 
 		const Vec3u32 buffer_size = { size.width, size.height, 1 };

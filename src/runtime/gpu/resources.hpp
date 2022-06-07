@@ -26,8 +26,8 @@ namespace gpu {
 		TransferSrc,
 		TransferDst,
 		Sampled,
-		Color_Attachment,
-		Depth_Attachment,
+		ColorAttachment,
+		DepthAttachment,
 		SwapChain,
 	};
 

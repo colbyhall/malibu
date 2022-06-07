@@ -19,6 +19,7 @@ Dx12GraphicsCommandList::Dx12GraphicsCommandList() {
 void Dx12GraphicsCommandList::begin_recording() {
 	auto& context = gpu::Context::the().interface<Dx12Context>();
 
+	throw_if_failed(context.command_allocator->Reset());
 	throw_if_failed(m_command_list->Reset(context.command_allocator.Get(), nullptr));
 	m_command_list->SetGraphicsRootSignature(context.root_signature.Get());
 }
