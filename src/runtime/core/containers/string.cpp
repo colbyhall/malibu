@@ -92,7 +92,7 @@ namespace core::containers {
 	}
 
 	String& String::push(Char c) {
-		// Encode the utf32 character to a utf8 multi width character
+		// Encode the utf32 character to an utf8 multi width character
 		u8 local[4] = {};
 		u32 error;
 		const usize char_len = utf8_encode(c, local, &error);

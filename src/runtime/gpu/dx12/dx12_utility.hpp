@@ -2,7 +2,7 @@
 
 #include "core.hpp"
 
-#define WIN32_LEAN_AND_MEAN
+#define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 
 // Windows Runtime Library. Needed for Microsoft::WRL::ComPtr<> template class.

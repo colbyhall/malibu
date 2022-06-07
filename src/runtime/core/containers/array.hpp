@@ -91,7 +91,6 @@ namespace core { namespace containers {
 
 		void reserve(usize amount) {
 			// FIXME: Find proper way of allocating in larger blocks to prevent allocation per push
-			auto c = cap();
 			const auto old_cap = m_cap;
 			auto new_cap = old_cap + amount;
 			while (m_cap < new_cap) {
