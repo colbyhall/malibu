@@ -1,7 +1,8 @@
 #pragma once
 
+#include "containers/unique.hpp"
 #include "resources.hpp"
-#include "core/minimal.hpp"
+
 
 namespace gpu {
 

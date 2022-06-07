@@ -1,21 +1,21 @@
 #pragma once
 
-namespace core { namespace primitives {
+namespace core::primitives {
     using u8 = unsigned char;
 	constexpr u8 U8_MIN = 0;
-	constexpr u8 U8_MAX = 0xffui8;
+	constexpr u8 U8_MAX = 0xff;
 
     using u16 = unsigned short;
 	constexpr u16 U16_MIN = 0;
-	constexpr u16 U16_MAX = 0xffffui8;
+	constexpr u16 U16_MAX = 0xffff;
 
     using u32 = unsigned int;
 	constexpr u32 U32_MIN = 0;
-	constexpr u32 U32_MAX = 0xffffffffui32;
+	constexpr u32 U32_MAX = 0xffffffff;
 
     using u64 = unsigned long long;
 	constexpr u64 U64_MIN = 0;
-	constexpr u64 U64_MAX = 0xffffffffffffffffui64;
+	constexpr u64 U64_MAX = 0xffffffffffffffff;
 
     using usize = u64;
 	constexpr usize USIZE_MIN = U64_MIN;
@@ -28,20 +28,20 @@ namespace core { namespace primitives {
     static_assert(sizeof(usize) == 8, "usize should only be 8 bytes");
 
     using i8 = signed char;
-	constexpr i8 I8_MIN = (-127i8 - 1);
-	constexpr i8 I8_MAX = 127i8;
+	constexpr i8 I8_MIN = (-127 - 1);
+	constexpr i8 I8_MAX = 127;
 
     using i16 = short;
-	constexpr i16 I16_MIN = (-32767i16 - 1);
-	constexpr i16 I16_MAX = 32767i16;
+	constexpr i16 I16_MIN = (-32767 - 1);
+	constexpr i16 I16_MAX = 32767;
 
     using i32 = int;
-	constexpr i32 I32_MIN = (-2147483647i32 - 1);
-	constexpr i32 I32_MAX = 2147483647i32;
+	constexpr i32 I32_MIN = (-2147483647 - 1);
+	constexpr i32 I32_MAX = 2147483647;
 
     using i64 = long long;
-	constexpr i64 I64_MIN = (-9223372036854775807i64 - 1);
-	constexpr i64 I64_MAX = 9223372036854775807i64;
+	constexpr i64 I64_MIN = (-9223372036854775807 - 1);
+	constexpr i64 I64_MAX = 9223372036854775807;
 
     using isize = i64;
 	constexpr isize ISIZE_MIN = I64_MIN;
@@ -60,7 +60,7 @@ namespace core { namespace primitives {
     static_assert(sizeof(f64) == 8, "f64 should only be 8 bytes");
 
     using NullPtr = decltype(nullptr);
-} }
+}
 
 using u8 = core::primitives::u8;
 using u16 = core::primitives::u16;
@@ -78,11 +78,6 @@ using f32 = core::primitives::f32;
 using f64 = core::primitives::f64;
 
 using NullPtr = core::primitives::NullPtr;
-
-#define ALWAYS_INLINE __forceinline
-#define NO_DISCARD [[nodiscard]]
-#define NO_RETURN [[noreturn]]
-#define ALLOW_UNUSED [[maybe_unused]]
 
 #if defined(_WIN32) || defined(_WIN64)
 	#define PLATFORM_WIN32 1
@@ -137,6 +132,16 @@ using NullPtr = core::primitives::NullPtr;
 	#define COMPILER_CLANG 0
 #endif
 
+#if COMPILER_GCC
+    #define ALWAYS_INLINE __attribute__((always_inline))
+#else
+    #define ALWAYS_INLINE __forceinline
+#endif
+
+#define NO_DISCARD [[nodiscard]]
+#define NO_RETURN [[noreturn]]
+#define ALLOW_UNUSED [[maybe_unused]]
+
 #if COMPILER_MSVC
 	#if _MSC_VER < 1300 
 		#define DEBUG_TRAP __asm int 3
@@ -148,7 +153,7 @@ using NullPtr = core::primitives::NullPtr;
 #endif
 
 #ifndef BUILD_DEBUG
-	#define BUILD_DEBUG 0
+	#define BUILD_DEBUG 1
 #endif
 
 #ifndef BUILD_RELEASE

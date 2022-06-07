@@ -7,9 +7,9 @@ namespace core { namespace math {
 	struct Vec3 {
 		union {
 			struct { T x, y, z; };
-			struct { Vec2<T> xy; T z; };
 			struct { T width, height, depth; };
 			struct { T u, v, w; };
+            Vec2<T> xy;
 			T xyz[3];
 		};
 

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "core/minimal.hpp"
+#include "core.hpp"
 
 #define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 
 // Windows Runtime Library. Needed for Microsoft::WRL::ComPtr<> template class.

@@ -1,13 +1,11 @@
 #include "time.hpp"
-#include "type_traits.hpp"
 #include "containers/option.hpp"
 
-#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 
-namespace core { namespace time {
+namespace core::time {
 
 	// Thread local so we don't have to lock
 	static thread_local Option<u64> g_timer_frequency;
@@ -16,7 +14,7 @@ namespace core { namespace time {
 		LARGE_INTEGER ticks;
 		const auto result = QueryPerformanceCounter(&ticks);
 		VERIFY(result);
-		return Instant(ticks.QuadPart);
+		return { static_cast<u64>(ticks.QuadPart) };
 	}
 
 	Duration Instant::duration_since(Instant earlier) const {
@@ -39,4 +37,4 @@ namespace core { namespace time {
 	Duration Instant::elapsed() const {
 		return Instant::now().duration_since(*this);
 	}
-} }
+}

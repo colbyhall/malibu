@@ -1,14 +1,13 @@
 #include "fs.hpp"
 
-#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 
-namespace core { namespace fs {
+namespace core::fs {
 	Path cwd() {
 		// Query the length of the path
-		const usize len = (usize)GetCurrentDirectoryW(0, nullptr); 
+		const auto len = (usize)GetCurrentDirectoryW(0, nullptr);
 		VERIFY(len > 0);
 
 		// Create a wide string buffer to get the cwd path
@@ -18,7 +17,7 @@ namespace core { namespace fs {
 		buffer.set_len(len);
 
 		// Copy all data to String
-		return Path(String::from(buffer));
+		return {String::from(buffer) };
 	}
 
 	Result<File, FileOpenError> File::open(PathView path, BitFlag<FileFlags> flags) {
@@ -65,7 +64,7 @@ namespace core { namespace fs {
 	}
 
 	usize File::seek(Seek method, isize distance) {
-		DWORD win32_method = static_cast<DWORD>(method);
+		auto win32_method = static_cast<DWORD>(method);
 		
 		LARGE_INTEGER win32_distance;
 		win32_distance.QuadPart = distance;
@@ -128,4 +127,4 @@ namespace core { namespace fs {
 			m_handle = nullptr;
 		}
 	}
-} }
+}

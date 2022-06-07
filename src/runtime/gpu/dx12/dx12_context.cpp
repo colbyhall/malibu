@@ -1,6 +1,6 @@
 #include "dx12_context.hpp"
 #include "dx12_resources.hpp"
-#include "core/window.hpp"
+#include "window.hpp"
 
 Dx12DescriptorHeap::Dx12DescriptorHeap(
 	ComPtr<ID3D12Device1> device,

@@ -4,7 +4,7 @@
 #include "../type_traits.hpp"
 #include <new>
 
-namespace core { namespace containers {
+namespace core::containers {
 	template <typename T>
 	class Option {
 	public:
@@ -74,7 +74,7 @@ namespace core { namespace containers {
 	private:
 		T* m_ptr;
 	};
-} }
+}
 
 template <typename T>
 using Option = core::containers::Option<T>;

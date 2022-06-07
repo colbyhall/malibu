@@ -2,7 +2,7 @@
 
 #include "primitives.hpp"
 
-namespace core { namespace time {
+namespace core::time {
 	constexpr u64 NANOS_PER_SEC = 1000000000;
 	constexpr u64 NANOS_PER_MILLI = 1000000;
 	constexpr u64 NANOS_PER_MICRO = 1000;
@@ -13,8 +13,8 @@ namespace core { namespace time {
 	public:
 		ALWAYS_INLINE constexpr explicit Duration(u64 secs, u32 nanos) : m_secs(secs), m_nanos(nanos) { }
 
-		f32 as_secs_f32() const;
-		f64 as_secs_f64() const;
+		NO_DISCARD f32 as_secs_f32() const;
+        NO_DISCARD f64 as_secs_f64() const;
 
 	private:
 		u64 m_secs;
@@ -33,4 +33,4 @@ namespace core { namespace time {
 
 		u64 m_tick;
 	};
-} }
+}

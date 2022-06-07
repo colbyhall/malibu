@@ -1,7 +1,6 @@
 #pragma once
 
 #include "non_null.hpp"
-#include <initializer_list>
 
 namespace core { namespace containers {
 	template <typename T>
@@ -53,9 +52,6 @@ namespace core { namespace containers {
 			// Ensure that if we get no data that we have no len
 			VERIFY(data != nullptr|| (data == nullptr && len == 0));
 		}
-
-		ALWAYS_INLINE Slice(const std::initializer_list<T>& list) 
-			: m_ptr(list.begin()), m_len(list.size()) {}
 
 		NO_DISCARD ALWAYS_INLINE T const* ptr() const { return m_ptr; }
 		NO_DISCARD ALWAYS_INLINE usize len() const { return m_len; }

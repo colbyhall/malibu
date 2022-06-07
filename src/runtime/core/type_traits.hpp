@@ -88,24 +88,24 @@ namespace core {
 	using True = BoolConstant<true>;
 	using False = BoolConstant<false>;
 
-	namespace priv {
+	namespace hidden {
 		template <bool first_value, typename First, typename... Rest>
-		struct _Disjunction { using Type = First; };
+		struct Disjunction1 { using Type = First; };
 
 		template <typename False, typename Next, typename... Rest>
-		struct _Disjunction<false, False, Next, Rest...> {
-			using Type = typename _Disjunction<Next::VALUE, Next, Rest...>::Type;
+		struct Disjunction1<false, False, Next, Rest...> {
+			using Type = typename Disjunction1<Next::VALUE, Next, Rest...>::Type;
 		};
 
 		template <typename... Traits>
-		struct Disjunction : False {};
+		struct Disjunction2 : False {};
 
 		template <typename First, typename... Rest>
-		struct Disjunction<First, Rest...> : _Disjunction<First::VALUE, First, Rest...>::Type { };
+		struct Disjunction2<First, Rest...> : Disjunction1<First::VALUE, First, Rest...>::Type { };
 	}
 
 	template <typename... Traits>
-	inline constexpr bool disjunction = priv::Disjunction<Traits...>::VALUE;
+	inline constexpr bool disjunction = hidden::Disjunction2<Traits...>::VALUE;
 
 	template <typename, typename>
 	inline constexpr bool is_same = false;
@@ -149,43 +149,43 @@ namespace core {
 	template <typename T>
 	using to_underlying_type = __underlying_type(T);
 
-	namespace priv {
+	namespace hidden {
 		template <usize>
-		struct _MakeUnsigned;
+		struct MakeUnsigned1;
 
 		template <>
-		struct _MakeUnsigned<1> {
+		struct MakeUnsigned1<1> {
 			template <typename>
 			using Type = u8;
 		};
 
 		template <>
-		struct _MakeUnsigned<2> {
+		struct MakeUnsigned1<2> {
 			template <typename>
 			using Type = u16;
 		};
 
 		template <>
-		struct _MakeUnsigned<4> {
+		struct MakeUnsigned1<4> {
 			template <typename>
 			using Type = u32;
 		};
 
 		template <>
-		struct _MakeUnsigned<8> {
+		struct MakeUnsigned1<8> {
 			template <typename>
 			using Type = u64;
 		};
 
 		template <typename T>
-		using __MakeUnsigned = typename _MakeUnsigned<sizeof(T)>::template Type<T>;
+		using MakeUnsigned2 = typename MakeUnsigned1<sizeof(T)>::template Type<T>;
 
 		template <typename T>
 		struct MakeUnsigned {
-			using Type = typename __MakeUnsigned<T>;
+			using Type = MakeUnsigned2<T>;
 		};
 	}
 	
 	template <typename T>
-	using to_unsigned = typename priv::MakeUnsigned<CVRemoved<T>>::Type;
+	using to_unsigned = typename hidden::MakeUnsigned<CVRemoved<T>>::Type;
 }

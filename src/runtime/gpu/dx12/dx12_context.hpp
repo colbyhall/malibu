@@ -4,8 +4,8 @@
 #include "../resources.hpp"
 #include "dx12_utility.hpp"
 
-#include "core/sync/mutex.hpp"
-#include "core/library.hpp"
+#include "sync/mutex.hpp"
+#include "library.hpp"
 
 namespace core { namespace window { 
 	class Window;
@@ -43,6 +43,8 @@ private:
 	usize m_size;
 	usize m_cap;
 };
+
+typedef HRESULT (__stdcall *PFN_D3D12_SERIALIZE_ROOT_SIGNATURE)(const D3D12_ROOT_SIGNATURE_DESC *root_signature_desc,D3D_ROOT_SIGNATURE_VERSION version,ID3DBlob **blob,ID3DBlob **error_blob);
 
 class Dx12Context : public gpu::ContextInterface {
 	using Library = core::library::Library;

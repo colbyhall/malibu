@@ -5,7 +5,7 @@
 
 inline
 D3D12_RESOURCE_STATES layout_to_resource_states(gpu::Layout layout) {
-	D3D12_RESOURCE_STATES state;
+	D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_COMMON;
 	switch (layout) {
 		case gpu::Layout::Undefined:
 			break;
@@ -21,6 +21,9 @@ D3D12_RESOURCE_STATES layout_to_resource_states(gpu::Layout layout) {
 		// case gpu::Layout::ShaderReadOnly:
 		case gpu::Layout::Present:
 			state = D3D12_RESOURCE_STATE_PRESENT;
+			break;
+		default:
+			TODO("");
 			break;
 	}
 	return state;

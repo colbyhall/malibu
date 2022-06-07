@@ -1,6 +1,9 @@
 #pragma once
 
-#include "core/minimal.hpp"
+#include "core.hpp"
+#include "containers/bitflag.hpp"
+#include "containers/shared_ref.hpp"
+#include "math.hpp"
 
 namespace gpu {
 

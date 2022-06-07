@@ -55,8 +55,8 @@ void Dx12GraphicsCommandList::begin_render_pass(const gpu::Texture& attachment) 
 	viewport.TopLeftY = 0;
 	viewport.Width = (f32)attachment.size().width;
 	viewport.Height = (f32)attachment.size().height;
-	viewport.MinDepth = D3D12_MIN_DEPTH;
-	viewport.MaxDepth = D3D12_MAX_DEPTH;
+	viewport.MinDepth = 0.f;
+	viewport.MaxDepth = 1.f;
 	m_command_list->RSSetViewports(1, &viewport);
 
 	D3D12_RECT rect = {};

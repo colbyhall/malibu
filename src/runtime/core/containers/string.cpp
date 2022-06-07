@@ -1,6 +1,6 @@
 #include "string.hpp"
 
-namespace core { namespace containers {
+namespace core::containers {
 	static const u8 utf8d[] = {
 		// The first part of the table maps bytes to character classes that
 		// to reduce the size of the transition table and create bitmasks.
@@ -186,4 +186,4 @@ namespace core { namespace containers {
 
 		return *this;
 	}
-} }
+}

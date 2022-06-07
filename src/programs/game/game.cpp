@@ -1,21 +1,21 @@
-﻿#include "core/minimal.hpp"
-#include "core/window.hpp"
-#include "core/sync/mutex.hpp"
-#include "core/fs.hpp"
+﻿#include "core.hpp"
+#include "window.hpp"
+#include "sync/mutex.hpp"
+#include "fs.hpp"
+#include "time.hpp"
+#include "math.hpp"
 
 using namespace core;
 using namespace core::window;
 using namespace core::time;
 using namespace core::sync;
 
-#define NOMINMAX
+#include "gpu.hpp"
+
+// #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
-
-#include "gpu/minimal.hpp"
-
-#include <cstdio>
 
 static bool g_running = true;
 
@@ -30,7 +30,12 @@ struct Vertex {
 	LinearColor color;
 };
 
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+int WINAPI WinMain(
+	_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPSTR lpCmdLine,
+	_In_ int nShowCmd
+) {
 	auto window = Window::make({
 		.size = { 1280, 720 },
 		.title = "Hello World",
@@ -43,7 +48,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const auto registered = context.register_window(window);
 	VERIFY(registered);
 
-	String shader = fs::read_to_string("foo.txt").unwrap();
+	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();
 	auto vertex_binary = gpu::compile_hlsl(shader, gpu::ShaderType::Vertex).unwrap();
 	auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
 
@@ -54,15 +59,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	config.color_attachments.push(gpu::Format::RGBA_U8);
 	config.vertex_shader = core::move(vertex_shader);
 	config.pixel_shader = core::move(pixel_shader);
-	
+
 	config.vertex_primitives.push(gpu::Primitive::Vec3f32);
 	config.vertex_primitives.push(gpu::Primitive::Vec4f32);
 
 	auto pipeline = gpu::GraphicsPipeline::make(core::move(config));
 
 	auto triangle = gpu::Buffer::make(
-		gpu::BufferUsage::Vertex, 
-		gpu::BufferKind::Upload, 
+		gpu::BufferUsage::Vertex,
+		gpu::BufferKind::Upload,
 		3, sizeof(Vertex)
 	);
 	triangle.write([](Slice<u8> slice){

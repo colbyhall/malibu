@@ -2,7 +2,7 @@
 
 #include "array.hpp"
 
-namespace core { namespace containers {
+namespace core::containers {
 	template<typename T>
 	constexpr usize string_length(const T* string) {
 		if (*string == 0) return 0;
@@ -154,7 +154,7 @@ namespace core { namespace containers {
 	private:
 		Array<wchar_t> m_chars;
 	};
-} }
+}
 
 using Char = core::containers::Char;
 using Chars = core::containers::Chars;
