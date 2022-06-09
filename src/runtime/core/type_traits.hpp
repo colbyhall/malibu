@@ -49,6 +49,7 @@ namespace core {
 	}
 	
 	#define NO_COPY(type) type(const type& t) = delete; type& operator=(const type& c) = delete
+    #define NO_MOVE(type) type(type&& t) noexcept = delete; type& operator=(type&& c) noexcept = delete
 
 	template <typename T>
 	struct RemoveCV {

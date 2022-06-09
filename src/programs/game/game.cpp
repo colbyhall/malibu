@@ -4,6 +4,7 @@
 #include "fs.hpp"
 #include "time.hpp"
 #include "math.hpp"
+#include "thread.hpp"
 
 using namespace core;
 using namespace core::window;
@@ -11,6 +12,8 @@ using namespace core::time;
 using namespace core::sync;
 
 #include "gpu.hpp"
+
+#include <cstdio>
 
 // #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -30,6 +33,10 @@ struct Vertex {
 	LinearColor color;
 };
 
+void thread_proc(void* param) {
+    printf("Hello from other thread");
+}
+
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -44,6 +51,8 @@ int WINAPI WinMain(
 	}).unwrap();
 
 	const gpu::Context& context = gpu::Context::the();
+
+    thread::spawn({ &thread_proc,  });
 
 	const auto registered = context.register_window(window);
 	VERIFY(registered);
