@@ -21,7 +21,7 @@ namespace core::containers {
 	public:
 		ALWAYS_INLINE explicit Chars(Slice<char const> string) : m_string(string), m_index(0), m_decoder_state(0), m_codepoint(0) {}
 
-		ALWAYS_INLINE operator bool() const { return should_continue(); }
+		ALWAYS_INLINE explicit operator bool() const { return should_continue(); }
 		ALWAYS_INLINE Chars& operator++() { next(); return *this; }
 		ALWAYS_INLINE Char operator*() const { return get(); }
 
@@ -64,10 +64,10 @@ namespace core::containers {
 		NO_DISCARD ALWAYS_INLINE usize len() const { return m_chars.len(); }
 		ALWAYS_INLINE const wchar_t* operator*() const { return m_chars.ptr(); }
 
-		ALWAYS_INLINE const wchar_t* begin() const { return m_chars.cbegin(); }
-		ALWAYS_INLINE const wchar_t* end() const { return m_chars.cend(); }
-		ALWAYS_INLINE const wchar_t* cbegin() const { return m_chars.cbegin(); }
-		ALWAYS_INLINE const wchar_t* cend() const { return m_chars.cend(); }
+		NO_DISCARD ALWAYS_INLINE const wchar_t* begin() const { return m_chars.cbegin(); }
+        NO_DISCARD ALWAYS_INLINE const wchar_t* end() const { return m_chars.cend(); }
+        NO_DISCARD ALWAYS_INLINE const wchar_t* cbegin() const { return m_chars.cbegin(); }
+		NO_DISCARD ALLOW_UNUSED const wchar_t* cend() const { return m_chars.cend(); }
 
 		NO_DISCARD ALWAYS_INLINE wchar_t operator[](usize index) const { return m_chars[index]; }
 
@@ -87,7 +87,7 @@ namespace core::containers {
 
 		static String from(WStringView string);
 
-		ALWAYS_INLINE operator Slice<char const>() const { 
+		ALWAYS_INLINE operator Slice<char const>() const {
 			Slice<char const> result = m_bytes;
 			if (m_bytes.len() > 0) {
 				result = result.shrink(1);

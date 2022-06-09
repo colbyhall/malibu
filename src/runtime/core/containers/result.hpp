@@ -3,7 +3,7 @@
 #include "../type_traits.hpp"
 #include <new>
 
-namespace core { namespace containers {
+namespace core::containers {
 	template <typename T, typename E>
 	class Result {
 	public:
@@ -47,7 +47,7 @@ namespace core { namespace containers {
 		};
 		alignas(Internal) u8 m_data[sizeof(Internal)];
 	};
-} }
+}
 
 template <typename T, typename E>
 using Result = core::containers::Result<T, E>;

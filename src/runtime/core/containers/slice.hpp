@@ -2,7 +2,7 @@
 
 #include "non_null.hpp"
 
-namespace core { namespace containers {
+namespace core::containers {
 	template <typename T>
 	class Slice {
 	public:
@@ -17,7 +17,7 @@ namespace core { namespace containers {
 		NO_DISCARD ALWAYS_INLINE bool is_empty() const { return len() == 0; }
 		NO_DISCARD ALWAYS_INLINE bool is_valid_index(usize index) const { return index < len(); }
 		explicit operator bool() const { return !is_empty(); }
-		NO_DISCARD ALWAYS_INLINE operator Slice<const T>() const { return Slice<const T>(m_ptr, m_len); }
+		NO_DISCARD ALWAYS_INLINE explicit operator Slice<const T>() const { return Slice<const T>(m_ptr, m_len); }
 
 		ALWAYS_INLINE T* begin() { return m_ptr; }
 		ALWAYS_INLINE T* end() { return m_ptr + m_len; }
@@ -100,6 +100,6 @@ namespace core { namespace containers {
 		T const** m_ptr;
 		usize m_len;
 	};
-} }
+}
 template <typename T>
 using Slice = core::containers::Slice<T>;

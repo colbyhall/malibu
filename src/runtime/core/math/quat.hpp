@@ -2,7 +2,7 @@
 
 #include "math_utility.hpp"
 
-namespace core { namespace math {
+namespace core::math {
 	template <typename T>
 	struct Quat {
 		T x, y, z, w;

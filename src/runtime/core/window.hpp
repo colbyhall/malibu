@@ -5,7 +5,7 @@
 #include "type_traits.hpp"
 #include "math/vec2.hpp"
 
-namespace core { namespace window {
+namespace core::window {
 	using WindowHandle = void*;
 
 	enum class WindowEventType {
@@ -63,4 +63,4 @@ namespace core { namespace window {
 
 		ALWAYS_INLINE explicit Window(WindowHandle handle) : m_handle(handle) {}
 	};
-} }
+}

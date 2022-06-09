@@ -2,7 +2,7 @@
 
 #include "../type_traits.hpp"
 
-namespace core { namespace sync {
+namespace core::sync {
 
 	template <typename T>
 	class Mutex;
@@ -36,4 +36,4 @@ namespace core { namespace sync {
 		T m_value;
 	};
 
-} }
+}

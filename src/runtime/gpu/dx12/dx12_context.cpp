@@ -266,9 +266,9 @@ void Dx12Context::present() const {
 	wait_for_previous();
 }
 
-const gpu::Texture& Dx12Context::backbuffer() const {
+const gpu::Texture& Dx12Context::back_buffer() const {
 	Dx12Swapchain& local = swapchain.as_ref().unwrap();
-	return local.backbuffers[local.current];
+	return local.back_buffers[local.current];
 }
 
 void Dx12Context::wait_for_previous() const {

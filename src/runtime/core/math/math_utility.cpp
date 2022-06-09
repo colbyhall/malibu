@@ -2,8 +2,7 @@
 
 #include <cmath>
 
-namespace math {
-
+namespace core::math {
 	f32 cos(f32 x) {
 		return std::cos(x);
 	}
@@ -67,5 +66,4 @@ namespace math {
 	f64 sqrt(f64 x) {
 		return std::sqrt(x);
 	}
-
 }

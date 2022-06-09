@@ -5,7 +5,7 @@
 #include "containers/result.hpp"
 #include "containers/string.hpp"
 
-namespace core { namespace fs {
+namespace core::fs {
 	class PathView {
 	public:
 		ALWAYS_INLINE constexpr PathView() : m_string() {}
@@ -93,4 +93,4 @@ namespace core { namespace fs {
 	};
 
 	Result<String, FileOpenError> read_to_string(PathView path);
-} }
+}

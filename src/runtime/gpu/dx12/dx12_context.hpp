@@ -7,16 +7,16 @@
 #include "sync/mutex.hpp"
 #include "library.hpp"
 
-namespace core { namespace window { 
+namespace core::window {
 	class Window;
-} }
+}
 
 struct Dx12Swapchain {
 	static constexpr usize frame_count = 2;
 
 	ComPtr<IDXGISwapChain3> handle;
 	
-	Array<gpu::Texture> backbuffers;
+	Array<gpu::Texture> back_buffers;
 	u8 current;
 	
 	ComPtr<ID3D12Fence> fence;
@@ -40,8 +40,8 @@ public:
 private:
 	ComPtr<ID3D12DescriptorHeap> m_heap;
 	Array<bool> m_free_slots;
-	usize m_size;
-	usize m_cap;
+	usize m_size = 0;
+	usize m_cap = 0;
 };
 
 typedef HRESULT (__stdcall *PFN_D3D12_SERIALIZE_ROOT_SIGNATURE)(const D3D12_ROOT_SIGNATURE_DESC *root_signature_desc,D3D_ROOT_SIGNATURE_VERSION version,ID3DBlob **blob,ID3DBlob **error_blob);
@@ -58,7 +58,7 @@ public:
 	gpu::Backend backend() const override { return gpu::Backend::Dx12; }
 	bool register_window(const core::window::Window& window) const override;
 	void present() const override;
-	const gpu::Texture& backbuffer() const override;
+	const gpu::Texture& back_buffer() const override;
 
 	void wait_for_previous() const;
 

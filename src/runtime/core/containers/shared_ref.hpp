@@ -5,7 +5,7 @@
 
 #include <new>
 
-namespace core { namespace containers {
+namespace core::containers {
 	template <typename Base>
 	class SharedRef {
 		struct Counter {
@@ -78,7 +78,7 @@ namespace core { namespace containers {
 		Counter* m_counter;
 		Base* m_ptr;
 	};
-} }
+}
 
 template <typename T>
 using SharedRef = core::containers::SharedRef<T>;

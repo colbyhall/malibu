@@ -2,7 +2,7 @@
 
 #include "../primitives.hpp"
 
-namespace core { namespace math {
+namespace core::math {
 	template <typename T>
 	struct Vec2 {
 		union {
@@ -18,7 +18,7 @@ namespace core { namespace math {
 
 		ALWAYS_INLINE constexpr Vec2(T x, T y) : u(x), v(y) { }
 	};
-}}
+}
 
 template <typename T>
 using Vec2 = core::math::Vec2<T>;

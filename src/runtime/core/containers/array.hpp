@@ -7,12 +7,12 @@
 
 #include <new>
 
-namespace core { namespace containers {
+namespace core::containers {
 	template <typename T>
 	class Array {
 	public:
 		ALWAYS_INLINE constexpr Array() : m_ptr(nullptr), m_len(0), m_cap(0) {}
-		ALWAYS_INLINE explicit Array(Slice<const T> slice) : m_len(slice.len()) {
+		ALWAYS_INLINE explicit Array(Slice<const T> slice) : m_len(slice.len()), m_cap(0) {
 			reserve(slice.len());
 			for (int i = 0; i < slice.len(); ++i) {
 				T copy = slice[i];
@@ -142,7 +142,7 @@ namespace core { namespace containers {
 		usize m_len;
 		usize m_cap;
 	};
-} }
+}
 
 template <typename T>
 using Array = core::containers::Array<T>;

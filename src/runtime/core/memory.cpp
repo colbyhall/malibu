@@ -6,7 +6,7 @@
 
 #define MEMORY_DEBUG 0
 
-namespace core { namespace mem {
+namespace core::mem {
 
 	NonNull<void> alloc(Layout layout) {
 		void* result = std::malloc(layout.size);
@@ -43,4 +43,4 @@ namespace core { namespace mem {
 		return std::memset(ptr, value, count);
 	}
 
-} }
+}

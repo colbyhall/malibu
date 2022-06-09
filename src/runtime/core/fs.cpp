@@ -1,6 +1,6 @@
 #include "fs.hpp"
 
-namespace core { namespace fs {
+namespace core::fs {
 	Result<String, FileOpenError> read_to_string(PathView path) {
 		auto result = fs::File::open(path, FileFlags::Read);
 		if (!result.is_ok()) return result.unwrap_err();
@@ -14,4 +14,4 @@ namespace core { namespace fs {
 		bytes.push(0);
 		return String(core::move(bytes));
 	}
-} }
+}

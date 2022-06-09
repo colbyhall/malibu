@@ -2,7 +2,7 @@
 
 #include "../primitives.hpp"
 
-namespace core { namespace math {
+namespace core::math {
 	struct LinearColor {
 		f32 r, g, b, a;
 
@@ -23,7 +23,7 @@ namespace core { namespace math {
 			u32 rgba;
 		};
 	};
-} }
+}
 
 using LinearColor = core::math::LinearColor;
 using Color = core::math::Color;

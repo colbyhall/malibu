@@ -2,7 +2,7 @@
 
 #include "vec2.hpp"
 
-namespace core { namespace math {
+namespace core::math {
 	template <typename T>
 	class AABB2 {
 	public:
@@ -28,7 +28,7 @@ namespace core { namespace math {
 		Point2<T> m_location;
 		Vec2<T> m_half_size;
 	};
-} }
+}
 
 template <typename T>
 using AABB2 = core::math::AABB2<T>;

@@ -2,7 +2,7 @@
 
 #include "../type_traits.hpp"
 
-namespace core { namespace containers {
+namespace core::containers {
 	template <typename T>
 	class BitFlag {
 		static_assert(core::is_enum<T>, "BitFlags can only be specialized for enums");
@@ -12,8 +12,7 @@ namespace core { namespace containers {
 		}
 	public:
 		BitFlag() : bits(0) { };
-		ALWAYS_INLINE
-		BitFlag(T t) : bits(0) {
+		ALWAYS_INLINE BitFlag(T t) : bits(0) {
 			this->set(t);
 		}
 
@@ -34,7 +33,7 @@ namespace core { namespace containers {
 	private:
 		Underlying bits;
 	};
-} }
+}
 
 template <typename T>
 using BitFlag = core::containers::BitFlag<T>;

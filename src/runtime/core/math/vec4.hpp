@@ -2,7 +2,7 @@
 
 #include "vec3.hpp"
 
-namespace core { namespace math {
+namespace core::math {
 	template <typename T>
 	struct Vec4 {
 		union {
@@ -18,7 +18,7 @@ namespace core { namespace math {
 
 		ALWAYS_INLINE constexpr Vec4(T x, T y, T z, T w) : r(x), g(y), b(z), a(w) { }
 	};
-} }
+}
 
 template <typename T>
 using Vec4 = core::math::Vec4<T>;

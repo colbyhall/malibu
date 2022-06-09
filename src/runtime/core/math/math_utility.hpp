@@ -2,7 +2,7 @@
 
 #include "../primitives.hpp"
 
-namespace core { namespace math {
+namespace core::math {
 	constexpr f32 PI = 3.14159265359f;
 	constexpr f32 TAU = PI * 2.0;
 	constexpr f32 DEG_TO_RAD = PI / 180.f;
@@ -31,4 +31,4 @@ namespace core { namespace math {
 	
 	f32 sqrt(f32 x);
 	f64 sqrt(f64 x);
-} }
+}

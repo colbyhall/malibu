@@ -4,7 +4,7 @@
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 
-namespace core { namespace window {
+namespace core::window {
 	static
 		LRESULT CALLBACK window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		auto callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
@@ -112,4 +112,4 @@ namespace core { namespace window {
 		const u32 height = rect.bottom - rect.top;
 		return { width, height };
 	}
-} }
+}

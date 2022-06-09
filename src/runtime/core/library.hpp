@@ -2,7 +2,7 @@
 
 #include "fs.hpp"
 
-namespace core { namespace library {
+namespace core::library {
 	class Library {
 	public:
 		Library() : m_handle(nullptr) { }
@@ -29,4 +29,4 @@ namespace core { namespace library {
 
 		void* m_handle;
 	};
-} }
+}

@@ -5,7 +5,7 @@
 
 #include <new>
 
-namespace core { namespace containers {
+namespace core::containers {
 	template <typename Base>
 	class Unique {
 	public:
@@ -63,7 +63,7 @@ namespace core { namespace containers {
 
 		Base* m_ptr;
 	};
-} }
+}
 
 template <typename T>
 using Unique = core::containers::Unique<T>;
