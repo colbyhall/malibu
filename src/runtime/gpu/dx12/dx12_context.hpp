@@ -4,8 +4,8 @@
 #include "../resources.hpp"
 #include "dx12_utility.hpp"
 
-#include "sync/mutex.hpp"
-#include "library.hpp"
+#include "core/sync/mutex.hpp"
+#include "core/library.hpp"
 
 namespace core::window {
 	class Window;

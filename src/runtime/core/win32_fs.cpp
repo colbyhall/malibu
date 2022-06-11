@@ -49,8 +49,8 @@ namespace core::fs {
 			0
 		);
 
-		if (handle == INVALID_HANDLE_VALUE) {
-			const DWORD err = GetLastError();
+		const DWORD err = GetLastError();
+		if (err != 0) {
 			TODO("File open error handling");
 		}
 

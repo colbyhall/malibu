@@ -1,17 +1,17 @@
-﻿#include "core.hpp"
-#include "window.hpp"
-#include "sync/mutex.hpp"
-#include "fs.hpp"
-#include "time.hpp"
-#include "math.hpp"
-#include "thread.hpp"
+﻿#include "core/core.hpp"
+#include "core/window.hpp"
+#include "core/sync/mutex.hpp"
+#include "core/fs.hpp"
+#include "core/time.hpp"
+#include "core/math.hpp"
+#include "core/thread.hpp"
 
 using namespace core;
 using namespace core::window;
 using namespace core::time;
 using namespace core::sync;
 
-#include "gpu.hpp"
+#include "gpu/gpu.hpp"
 
 #include <cstdio>
 

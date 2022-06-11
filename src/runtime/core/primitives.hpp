@@ -160,12 +160,14 @@ using NullPtr = core::primitives::NullPtr;
 	#define BUILD_RELEASE 0
 #endif
 
-ALWAYS_INLINE constexpr bool core_assert(bool val) {
-	if (!val) DEBUG_TRAP;
-	return true;
+namespace core {
+	ALWAYS_INLINE constexpr bool assert(bool val) {
+		if (!val) DEBUG_TRAP;
+		return true;
+	}
 }
 
-#define VERIFY(n) core_assert(n)
-#define PANIC(msg) core_assert(true)
-#define TODO(msg) core_assert(true)
+#define VERIFY(n) core::assert(n)
+#define PANIC(msg) core::assert(false)
+#define TODO(msg) core::assert(false)
 #define INVALID_CODE_PATH DEBUG_TRAP

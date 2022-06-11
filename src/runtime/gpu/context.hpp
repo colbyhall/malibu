@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core.hpp"
-#include "window.hpp"
-#include "containers/unique.hpp"
+#include "core/core.hpp"
+#include "core/window.hpp"
+#include "core/containers/unique.hpp"
 
 namespace gpu {
 
