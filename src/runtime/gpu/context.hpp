@@ -4,8 +4,11 @@
 #include "core/window.hpp"
 #include "core/containers/unique.hpp"
 
-namespace gpu {
+namespace core::window {
+	class Window;
+}
 
+namespace gpu {
 	class Texture;
 
 	enum class Backend {

@@ -83,12 +83,12 @@ void Dx12GraphicsCommandList::clear_depth(f32 depth) {
 	TODO("");
 }
 
-void Dx12GraphicsCommandList::bind_pipeline(const gpu::GraphicsPipeline& pipeline) {
+void Dx12GraphicsCommandList::set_pipeline(const gpu::GraphicsPipeline& pipeline) {
 	auto& interface = pipeline.interface<Dx12GraphicsPipeline>();
 	m_command_list->SetPipelineState(interface.m_pipeline.Get());
 }
 
-void Dx12GraphicsCommandList::bind_vertices(const gpu::Buffer& buffer) {
+void Dx12GraphicsCommandList::set_vertices(const gpu::Buffer& buffer) {
 	auto& interface = buffer.interface<Dx12Buffer>();
 	m_command_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -99,7 +99,7 @@ void Dx12GraphicsCommandList::bind_vertices(const gpu::Buffer& buffer) {
 	m_command_list->IASetVertexBuffers(0, 1, &view);
 }
 
-void Dx12GraphicsCommandList::bind_indices(const gpu::Buffer& buffer) {
+void Dx12GraphicsCommandList::set_indices(const gpu::Buffer& buffer) {
 	TODO("");
 }
 

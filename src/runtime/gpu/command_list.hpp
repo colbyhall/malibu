@@ -33,9 +33,9 @@ namespace gpu {
 		virtual void set_scissor(Option<Rect2f32> scissor) = 0;
 		virtual void clear_color(LinearColor color) = 0;
 		virtual void clear_depth(f32 depth) = 0;
-		virtual void bind_pipeline(const GraphicsPipeline& pipeline) = 0;
-		virtual void bind_vertices(const Buffer& buffer) = 0;
-		virtual void bind_indices(const Buffer& buffer) = 0;
+		virtual void set_pipeline(const GraphicsPipeline& pipeline) = 0;
+		virtual void set_vertices(const Buffer& buffer) = 0;
+		virtual void set_indices(const Buffer& buffer) = 0;
 		// fn bind_constants(&mut self, name: &str, buffer: &Arc<backend::Buffer>, index: usize);
 		// fn bind_texture(&mut self, name: &str, texture: &Arc<backend::Texture>);
 		virtual void draw(usize vertex_count, usize first_vertex) = 0;
@@ -55,14 +55,14 @@ namespace gpu {
 			return *this;
 		}
 
-		ALWAYS_INLINE RenderPassRecorder& bind_pipeline(const GraphicsPipeline& pipeline) {
-			m_interface.bind_pipeline(pipeline);
+		ALWAYS_INLINE RenderPassRecorder& set_pipeline(const GraphicsPipeline& pipeline) {
+			m_interface.set_pipeline(pipeline);
 			return *this;
 		}
 
-		ALWAYS_INLINE RenderPassRecorder& bind_vertices(const Buffer& buffer) {
+		ALWAYS_INLINE RenderPassRecorder& set_vertices(const Buffer& buffer) {
 			VERIFY(buffer.usage().is_set(BufferUsage::Vertex));
-			m_interface.bind_vertices(buffer);
+			m_interface.set_vertices(buffer);
 			return *this;
 		}
 

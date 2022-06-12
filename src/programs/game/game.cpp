@@ -77,13 +77,16 @@ int WINAPI WinMain(
 	auto triangle = gpu::Buffer::make(
 		gpu::BufferUsage::Vertex,
 		gpu::BufferKind::Upload,
-		3, sizeof(Vertex)
+		6, sizeof(Vertex)
 	);
 	triangle.write([](Slice<u8> slice){
-		Vertex vertices[3] = {
+		Vertex vertices[6] = {
 			{ { 0.f, 0.25f, 0.1f }, LinearColor::RED },
 			{ { 0.25f, -0.25f, 0.1f }, LinearColor::GREEN },
 			{ { -0.25f, -0.25f, 0.1f }, LinearColor::BLUE },
+			{ { 0.f, 0.25f, 0.1f }, LinearColor::RED },
+			{ { 0.50f, 0.25f, 0.1f }, LinearColor::GREEN },
+			{ { 0.25f, -0.25f, 0.1f }, LinearColor::BLUE },
 		};
 		core::mem::copy(slice.ptr(), vertices, slice.len());
 	});
@@ -101,11 +104,11 @@ int WINAPI WinMain(
 		command_list.record([&](gpu::GraphicsCommandRecorder& recorder){
 			auto& backbuffer = context.backbuffer();
 			recorder.texture_barrier(backbuffer, gpu::Layout::Present, gpu::Layout::ColorAttachment);
-			recorder.render_pass(backbuffer, [&](gpu::RenderPassRecorder& render_pass) {
-				// render_pass.clear_color(LinearColor::BLACK);
-				render_pass.bind_pipeline(pipeline);
-				render_pass.bind_vertices(triangle);
-				render_pass.draw(triangle.len());
+			recorder.render_pass(backbuffer, [&](gpu::RenderPassRecorder& rp) {
+				// rp.clear_color(LinearColor::BLACK);
+				rp.set_pipeline(pipeline);
+				rp.set_vertices(triangle);
+				rp.draw(triangle.len());
 			});
 			recorder.texture_barrier(backbuffer, gpu::Layout::ColorAttachment, gpu::Layout::Present);
 		});

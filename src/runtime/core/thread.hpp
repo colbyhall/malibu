@@ -2,6 +2,8 @@
 
 #include "type_traits.hpp"
 
+#include <functional>
+
 namespace core::thread {
     class JoinHandle;
 

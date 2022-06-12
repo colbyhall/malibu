@@ -3,8 +3,7 @@
 #include "../resources.hpp"
 #include "dx12_utility.hpp"
 
-inline 
-DXGI_FORMAT format_to_dxgi(gpu::Format format) {
+inline DXGI_FORMAT format_to_dxgi(gpu::Format format) {
 	DXGI_FORMAT dxgi_format = DXGI_FORMAT_UNKNOWN;
 	switch (format) {
 		// RGB_U8,

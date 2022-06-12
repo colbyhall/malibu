@@ -41,9 +41,9 @@ public:
 	void set_scissor(Option<Rect2f32> scissor) override;
 	void clear_color(LinearColor color) override;
 	void clear_depth(f32 depth) override;
-	void bind_pipeline(const gpu::GraphicsPipeline& pipeline) override;
-	void bind_vertices(const gpu::Buffer& buffer) override;
-	void bind_indices(const gpu::Buffer& buffer) override;
+	void set_pipeline(const gpu::GraphicsPipeline& pipeline) override;
+	void set_vertices(const gpu::Buffer& buffer) override;
+	void set_indices(const gpu::Buffer& buffer) override;
 	// fn bind_constants(&mut self, name: &str, buffer: &Arc<backend::Buffer>, index: usize);
 	// fn bind_texture(&mut self, name: &str, texture: &Arc<backend::Texture>);
 	void draw(usize vertex_count, usize first_vertex) override;
