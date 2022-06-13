@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/core.hpp"
-#include "core/window.hpp"
-#include "core/containers/unique.hpp"
+#include "core.hpp"
+#include "window.hpp"
+#include "containers/unique.hpp"
 
 namespace core::window {
 	class Window;

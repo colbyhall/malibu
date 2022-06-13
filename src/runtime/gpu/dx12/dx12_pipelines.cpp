@@ -2,7 +2,7 @@
 #include "dx12_context.hpp"
 #include "dx12_resources.hpp"
 
-#include "core/library.hpp"
+#include "library.hpp"
 using namespace core::library;
 
 struct Dx12ShaderCompiler {
