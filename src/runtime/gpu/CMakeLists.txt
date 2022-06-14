@@ -1,11 +1,30 @@
 add_library (gpu STATIC
-	resources.cpp 
-	pipelines.cpp 
-	context.cpp 
-	command_list.cpp 
-	dx12/dx12_resources.cpp 
-	dx12/dx12_pipelines.cpp 
-	dx12/dx12_context.cpp 
+	gpu.hpp
+
+	resources.hpp
+	resources.cpp
+
+	pipelines.hpp
+	pipelines.cpp
+
+	context.hpp
+	context.cpp
+
+	command_list.hpp
+	command_list.cpp
+
+	dx12/dx12_utility.hpp
+
+	dx12/dx12_resources.hpp
+	dx12/dx12_resources.cpp
+
+	dx12/dx12_pipelines.hpp
+	dx12/dx12_pipelines.cpp
+
+	dx12/dx12_context.hpp
+	dx12/dx12_context.cpp
+
+	dx12/dx12_command_list.hpp
 	dx12/dx12_command_list.cpp
 )
 

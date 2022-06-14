@@ -1,7 +1,5 @@
 #include "fbx.hpp"
 #include "core.hpp"
-#include "fs.hpp"
-
 
 #include "fbxsdk.h"
 
@@ -36,5 +34,17 @@ namespace fbx {
 		FbxScene* scene = FbxScene::Create(context.manager, "Scene");
 		const bool status = importer->Import(scene);
 		VERIFY(status);
+
+        for (int i = 0; i < scene->GetNodeCount(); ++i) {
+            auto* node = scene->GetNode(i);
+            auto* attribute = node->GetNodeAttribute();
+
+            if (attribute == nullptr) continue;
+            if (attribute->GetAttributeType() != FbxNodeAttribute::eMesh) continue;
+
+            auto* mesh = (FbxMesh*)attribute;
+
+
+        }
 	}
 }

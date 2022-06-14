@@ -30,9 +30,9 @@ namespace gpu {
 	public:
 		static const Context& the();
 
-		ALWAYS_INLINE Backend backend() const { return m_interface->backend(); }
-		ALWAYS_INLINE bool register_window(const Window& window) const { return m_interface->register_window(window); }
-		ALWAYS_INLINE const Texture& backbuffer() const { return m_interface->back_buffer(); }
+        NO_DISCARD ALWAYS_INLINE Backend backend() const { return m_interface->backend(); }
+        NO_DISCARD ALWAYS_INLINE bool register_window(const Window& window) const { return m_interface->register_window(window); }
+		NO_DISCARD ALWAYS_INLINE const Texture& back_buffer() const { return m_interface->back_buffer(); }
 		ALWAYS_INLINE void present() const { return m_interface->present(); }
 
 		template <typename T = ContextInterface>

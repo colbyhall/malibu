@@ -1,6 +1,5 @@
 ﻿#include "core.hpp"
 #include "window.hpp"
-#include "sync/mutex.hpp"
 #include "fs.hpp"
 #include "time.hpp"
 #include "math.hpp"
@@ -9,7 +8,6 @@
 using namespace core;
 using namespace core::window;
 using namespace core::time;
-using namespace core::sync;
 
 #include "gpu.hpp"
 
@@ -86,13 +84,13 @@ int WINAPI WinMain(
 		6, sizeof(Vertex)
 	);
 	triangle.write([](Slice<u8> slice){
-		Vertex vertices[6] = {
+		Vertex vertices[] = {
 			{ { 0.f, 0.25f, 0.1f }, LinearColor::RED },
 			{ { 0.25f, -0.25f, 0.1f }, LinearColor::GREEN },
 			{ { -0.25f, -0.25f, 0.1f }, LinearColor::BLUE },
 			{ { 0.f, 0.25f, 0.1f }, LinearColor::RED },
-			{ { 0.50f, 0.25f, 0.1f }, LinearColor::GREEN },
-			{ { 0.25f, -0.25f, 0.1f }, LinearColor::BLUE },
+			{ { 0.50f, 0.25f, 0.1f }, LinearColor::BLUE },
+			{ { 0.25f, -0.25f, 0.1f }, LinearColor::GREEN },
 		};
 		core::mem::copy(slice.ptr(), vertices, slice.len());
 	});
@@ -108,15 +106,15 @@ int WINAPI WinMain(
 		Window::pump_events();
 
 		command_list.record([&](gpu::GraphicsCommandRecorder& recorder){
-			auto& backbuffer = context.backbuffer();
-			recorder.texture_barrier(backbuffer, gpu::Layout::Present, gpu::Layout::ColorAttachment);
-			recorder.render_pass(backbuffer, [&](gpu::RenderPassRecorder& rp) {
+			auto& back_buffer = context.back_buffer();
+			recorder.texture_barrier(back_buffer, gpu::Layout::Present, gpu::Layout::ColorAttachment);
+			recorder.render_pass(back_buffer, [&](gpu::RenderPassRecorder& rp) {
 				// rp.clear_color(LinearColor::BLACK);
 				rp.set_pipeline(pipeline);
 				rp.set_vertices(triangle);
 				rp.draw(triangle.len());
 			});
-			recorder.texture_barrier(backbuffer, gpu::Layout::ColorAttachment, gpu::Layout::Present);
+			recorder.texture_barrier(back_buffer, gpu::Layout::ColorAttachment, gpu::Layout::Present);
 		});
 
 		command_list.submit();
