@@ -3,6 +3,8 @@
 
 #include "fbxsdk.h"
 
+#include <cstdio>
+
 namespace fbx {
 	class Context {
 	public:
@@ -21,30 +23,72 @@ namespace fbx {
 		FbxIOSettings* ios;
 	};
 
-	void load_mesh(core::fs::PathView path) {
+    Result<Mesh, core::fs::FileOpenError> load_mesh(core::fs::PathView path) {
 		auto& context = Context::the();
 
 		int sdk_maj, sdk_min, sdk_rev;
 		FbxManager::GetFileFormatVersion(sdk_maj, sdk_min, sdk_rev);
 
-		FbxImporter* importer = FbxImporter::Create(context.manager, "");
+		FbxImporter* const importer = FbxImporter::Create(context.manager, "");
 		const bool import_status = importer->Initialize(path.ptr(), -1, context.ios);
-		VERIFY(import_status && importer->IsFBX());
+        if (!import_status || !importer->IsFBX()) return core::fs::FileOpenError::NotFound;
 
-		FbxScene* scene = FbxScene::Create(context.manager, "Scene");
+		FbxScene* const scene = FbxScene::Create(context.manager, "Scene");
 		const bool status = importer->Import(scene);
 		VERIFY(status);
 
+        Array<Vertex> vertices;
+        Array<u32> indices;
         for (int i = 0; i < scene->GetNodeCount(); ++i) {
-            auto* node = scene->GetNode(i);
-            auto* attribute = node->GetNodeAttribute();
+            auto* const node = scene->GetNode(i);
+            auto* const mesh = node->GetMesh();
+            if (!mesh) continue;
 
-            if (attribute == nullptr) continue;
-            if (attribute->GetAttributeType() != FbxNodeAttribute::eMesh) continue;
+            for (int j = 0; j < mesh->GetPolygonCount(); ++j) {
+                const auto size = mesh->GetPolygonSize(j);
+                printf("Index %d: %d\n", j, size);
 
-            auto* mesh = (FbxMesh*)attribute;
+                // FIXME: Proper polygon triangulation
+                if (size == 3) {
+                    for (int k = 0; k < size; ++k) {
+                        const auto vertex_index = mesh->GetPolygonVertex(j, k);
+                        const auto control_point = mesh->GetControlPointAt(vertex_index);
+                        FbxVector4 normal;
+                        mesh->GetPolygonVertexNormal(j, vertex_index, normal);
+                        indices.push((u32)vertices.len());
+                        vertices.push(Vertex {
+                            { (f32)control_point[0], (f32)control_point[1], (f32)control_point[2] },
+                             { (f32)normal[0], (f32)normal[1], (f32)normal[2] },
+                        });
+                        // TODO: UV's
+                    }
+                } else if (size == 4) {
+                    const u32 starting = (u32)vertices.len();
+                    for (int k = 0; k < size; ++k) {
+                        const auto vertex_index = mesh->GetPolygonVertex(j, k);
+                        const auto control_point = mesh->GetControlPointAt(vertex_index);
+                        FbxVector4 normal;
+                        mesh->GetPolygonVertexNormal(j, vertex_index, normal);
+                        vertices.push(Vertex {
+                                { (f32)control_point[0], (f32)control_point[1], (f32)control_point[2] },
+                                { (f32)normal[0], (f32)normal[1], (f32)normal[2] },
+                        });
+                        // TODO: UV's
+                    }
 
+                    // First Triangle
+                    indices.push(starting + 0);
+                    indices.push(starting + 1);
+                    indices.push(starting + 2);
 
+                    // Second Triangle
+                    indices.push(starting + 0);
+                    indices.push(starting + 2);
+                    indices.push(starting + 3);
+                }
+            }
         }
+
+        return Mesh { core::move(vertices), core::move(indices) };
 	}
 }

@@ -34,7 +34,7 @@ struct Vertex {
 };
 
 void thread_proc(void* param) {
-    printf("Hello from other thread");
+    // printf("Hello from other thread");
 }
 
 int WINAPI WinMain(
@@ -50,15 +50,9 @@ int WINAPI WinMain(
 		.visibility = WindowVisibility::Visible,
 	}).unwrap();
 
-	const gpu::Context& context = gpu::Context::the();
+	auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
 
-    thread::spawn(&thread_proc);
-
-	auto cwd = fs::cwd();
-
-	fbx::load_mesh("assets/box.fbx");
-
-	const auto registered = context.register_window(window);
+	const auto registered = gpu::Context::the().register_window(window);
 	VERIFY(registered);
 
 	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();
