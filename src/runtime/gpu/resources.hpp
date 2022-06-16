@@ -70,12 +70,12 @@ namespace gpu {
 			Vec3u32 size
 		);
 
-		NO_DISCARD ALWAYS_INLINE BitFlag<TextureUsage> usage() const { return m_interface->usage(); }
-		NO_DISCARD ALWAYS_INLINE Format format() const { return m_interface->format(); }
-		NO_DISCARD ALWAYS_INLINE Vec3u32 size() const { return m_interface->size(); }
+		NO_DISCARD inline BitFlag<TextureUsage> usage() const { return m_interface->usage(); }
+		NO_DISCARD inline Format format() const { return m_interface->format(); }
+		NO_DISCARD inline Vec3u32 size() const { return m_interface->size(); }
 
 		template <typename T = TextureInterface>
-		NO_DISCARD ALWAYS_INLINE T const& interface() const { 
+		NO_DISCARD inline T const& interface() const {
 			static_assert(core::is_base_of<TextureInterface, T>, "T is not derived of TextureInterface");
 			return static_cast<const T&>(*m_interface);
 		}
@@ -118,10 +118,10 @@ namespace gpu {
 			usize stride
 		);
 
-		NO_DISCARD ALWAYS_INLINE BitFlag<BufferUsage> usage() const { return m_interface->usage(); }
-		NO_DISCARD ALWAYS_INLINE BufferKind kind() const { return m_interface->kind(); }
-		NO_DISCARD ALWAYS_INLINE usize len() const { return m_interface->len(); }
-		NO_DISCARD ALWAYS_INLINE usize stride() const { return m_interface->stride(); }
+		NO_DISCARD inline BitFlag<BufferUsage> usage() const { return m_interface->usage(); }
+		NO_DISCARD inline BufferKind kind() const { return m_interface->kind(); }
+		NO_DISCARD inline usize len() const { return m_interface->len(); }
+		NO_DISCARD inline usize stride() const { return m_interface->stride(); }
 
 		template <typename Callable>
 		void write(Callable&& callable) {

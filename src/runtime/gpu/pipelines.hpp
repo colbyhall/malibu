@@ -19,8 +19,8 @@ namespace gpu {
 	public:
 		static Shader make(Array<u8>&& binary, ShaderType type);
 
-		ALWAYS_INLINE Slice<const u8> binary() const { return m_interface->binary(); }
-		ALWAYS_INLINE ShaderType type() const { return m_interface->type(); }
+		inline Slice<const u8> binary() const { return m_interface->binary(); }
+		inline ShaderType type() const { return m_interface->type(); }
 
 	private:
 		Shader(SharedRef<ShaderInterface>&& interface) : m_interface(core::move(interface)) { }
@@ -128,10 +128,10 @@ namespace gpu {
 	public:
 		static GraphicsPipeline make(GraphicsPipelineConfig&& config);
 
-		NO_DISCARD ALWAYS_INLINE const GraphicsPipelineConfig& config() const { return m_interface->config(); }
+		NO_DISCARD inline const GraphicsPipelineConfig& config() const { return m_interface->config(); }
 
 		template <typename T = GraphicsPipelineInterface>
-		NO_DISCARD ALWAYS_INLINE T const& interface() const { 
+		NO_DISCARD inline T const& interface() const {
 			static_assert(core::is_base_of<GraphicsPipelineInterface, T>, "T is not derived of GraphicsPipelineInterface");
 			return static_cast<const T&>(*m_interface);
 		}

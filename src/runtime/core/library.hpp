@@ -11,10 +11,10 @@ namespace core::library {
 
 		NO_COPY(Library);
 
-		ALWAYS_INLINE Library(Library&& move) noexcept : m_handle(move.m_handle) {
+		inline Library(Library&& move) noexcept : m_handle(move.m_handle) {
 			move.m_handle = nullptr;
 		}
-		ALWAYS_INLINE Library& operator=(Library&& move) noexcept {
+		inline Library& operator=(Library&& move) noexcept {
 			// FIXME: Is this the best way to do this
 			Library to_destroy = core::move(*this);
 			m_handle = move.m_handle;
@@ -25,7 +25,7 @@ namespace core::library {
 		void* find(StringView name);
 
 	private:
-		ALWAYS_INLINE Library(void* handle) : m_handle(handle) { }
+		inline Library(void* handle) : m_handle(handle) { }
 
 		void* m_handle;
 	};

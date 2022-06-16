@@ -40,14 +40,14 @@ namespace core::containers {
 			}
 		}
 
-		NO_DISCARD ALWAYS_INLINE explicit operator NonNull<Base>() { return m_ptr; }
-		NO_DISCARD ALWAYS_INLINE explicit operator NonNull<Base const>() const { return m_ptr; }
-		NO_DISCARD ALWAYS_INLINE explicit operator Base*() { return m_ptr; }
-		NO_DISCARD ALWAYS_INLINE explicit operator Base const *() const { return m_ptr; }
-		NO_DISCARD ALWAYS_INLINE Base* operator ->() { return m_ptr; }
-		NO_DISCARD ALWAYS_INLINE Base const* operator ->() const { return m_ptr; }
-		NO_DISCARD ALWAYS_INLINE Base& operator *() { return *m_ptr; }
-		NO_DISCARD ALWAYS_INLINE Base const& operator *() const { return *m_ptr; }
+		NO_DISCARD inline explicit operator NonNull<Base>() { return m_ptr; }
+		NO_DISCARD inline explicit operator NonNull<Base const>() const { return m_ptr; }
+		NO_DISCARD inline explicit operator Base*() { return m_ptr; }
+		NO_DISCARD inline explicit operator Base const *() const { return m_ptr; }
+		NO_DISCARD inline Base* operator ->() { return m_ptr; }
+		NO_DISCARD inline Base const* operator ->() const { return m_ptr; }
+		NO_DISCARD inline Base& operator *() { return *m_ptr; }
+		NO_DISCARD inline Base const& operator *() const { return *m_ptr; }
 
 	private:
 		Unique() = default;
@@ -64,6 +64,4 @@ namespace core::containers {
 		Base* m_ptr;
 	};
 }
-
-template <typename T>
-using Unique = core::containers::Unique<T>;
+using core::containers::Unique;

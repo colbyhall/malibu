@@ -17,10 +17,10 @@ namespace core::containers {
 			new (p) E(core::forward<E>(e));
 		}
 
-		NO_DISCARD ALWAYS_INLINE bool is_ok() const { return m_ok; }
-		explicit ALWAYS_INLINE operator bool() const { return is_ok(); }
+		NO_DISCARD inline bool is_ok() const { return m_ok; }
+		explicit inline operator bool() const { return is_ok(); }
 
-		NO_DISCARD ALWAYS_INLINE T unwrap() {
+		NO_DISCARD inline T unwrap() {
 			VERIFY(is_ok());
 			m_set = false;
 
@@ -28,7 +28,7 @@ namespace core::containers {
 			return core::move(*p);
 		}
 
-		NO_DISCARD ALWAYS_INLINE E unwrap_err() {
+		NO_DISCARD inline E unwrap_err() {
 			VERIFY(!is_ok());
 			m_set = false;
 			auto* p = reinterpret_cast<E*>(&m_data[0]);
@@ -48,6 +48,4 @@ namespace core::containers {
 		alignas(Internal) u8 m_data[sizeof(Internal)];
 	};
 }
-
-template <typename T, typename E>
-using Result = core::containers::Result<T, E>;
+using core::containers::Result;

@@ -11,7 +11,7 @@ namespace core::time {
 
 	class Duration {
 	public:
-		ALWAYS_INLINE constexpr explicit Duration(u64 secs, u32 nanos) : m_secs(secs), m_nanos(nanos) { }
+		inline constexpr explicit Duration(u64 secs, u32 nanos) : m_secs(secs), m_nanos(nanos) { }
 
 		NO_DISCARD f32 as_secs_f32() const;
         NO_DISCARD f64 as_secs_f64() const;
@@ -29,7 +29,7 @@ namespace core::time {
 		Duration elapsed() const;
 
 	private:
-		ALWAYS_INLINE constexpr Instant(u64 ticks) : m_tick(ticks) { }
+		inline constexpr Instant(u64 ticks) : m_tick(ticks) { }
 
 		u64 m_tick;
 	};

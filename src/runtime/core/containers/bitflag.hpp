@@ -12,7 +12,7 @@ namespace core::containers {
 		}
 	public:
 		BitFlag() : bits(0) { };
-		ALWAYS_INLINE BitFlag(T t) : bits(0) {
+		inline BitFlag(T t) : bits(0) {
 			this->set(t);
 		}
 
@@ -27,13 +27,11 @@ namespace core::containers {
 			return (bits & (1 << b)) != 0;
 		}
 
-		ALWAYS_INLINE explicit
+		inline explicit
 		operator Underlying() const { return bits; }
 		
 	private:
 		Underlying bits;
 	};
 }
-
-template <typename T>
-using BitFlag = core::containers::BitFlag<T>;
+using core::containers::BitFlag;

@@ -11,7 +11,7 @@ namespace core::math {
 			T elements[4 * 4];
 		};
 
-		ALWAYS_INLINE constexpr Mat4() : x(0), y(0), z(0), w(0) { }
+		inline constexpr Mat4() : x(0), y(0), z(0), w(0) { }
 
 		static constexpr Mat4<T> identity() {
 			Mat4<T> result = {};
@@ -78,11 +78,10 @@ namespace core::math {
 		}
 
 	private:
-		ALWAYS_INLINE constexpr Mat4(Vec4<T> _x, Vec4<T> _y, Vec4<T> _z, Vec4<T> _w) : x(_x), y(_y), z(_z), w(_w) { }
+		inline constexpr Mat4(Vec4<T> _x, Vec4<T> _y, Vec4<T> _z, Vec4<T> _w) : x(_x), y(_y), z(_z), w(_w) { }
 	};
 }
 
-template <typename T>
-using Mat4 = core::math::Mat4<T>;
+using core::math::Mat4;
 using Mat4f32 = Mat4<f32>;
 using Mat4f64 = Mat4<f64>;

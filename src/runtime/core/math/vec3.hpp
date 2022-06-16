@@ -13,14 +13,13 @@ namespace core::math {
 			T xyz[3];
 		};
 
-		ALWAYS_INLINE constexpr Vec3() : x(0), y(0), z(0) { }
-		ALWAYS_INLINE constexpr Vec3(T xyz) : x(xyz), y(xyz), z(xyz) { }
-		ALWAYS_INLINE constexpr Vec3(T x, T y, T z) : u(x), v(y), w(z) { }
+		inline constexpr Vec3() : x(0), y(0), z(0) { }
+		inline constexpr Vec3(T xyz) : x(xyz), y(xyz), z(xyz) { }
+		inline constexpr Vec3(T x, T y, T z) : u(x), v(y), w(z) { }
 	};
 }
 
-template <typename T>
-using Vec3 = core::math::Vec3<T>;
+using core::math::Vec3;
 using Vec3f32 = Vec3<f32>;
 using Vec3f64 = Vec3<f64>;
 using Vec3u32 = Vec3<u32>;

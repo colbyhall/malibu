@@ -50,29 +50,29 @@ namespace gpu {
 
 	class RenderPassRecorder {
 	public:
-		ALWAYS_INLINE RenderPassRecorder& clear_color(LinearColor color) {
+		inline RenderPassRecorder& clear_color(LinearColor color) {
 			m_interface.clear_color(color);
 			return *this;
 		}
 
-		ALWAYS_INLINE RenderPassRecorder& set_pipeline(const GraphicsPipeline& pipeline) {
+		inline RenderPassRecorder& set_pipeline(const GraphicsPipeline& pipeline) {
 			m_interface.set_pipeline(pipeline);
 			return *this;
 		}
 
-		ALWAYS_INLINE RenderPassRecorder& set_vertices(const Buffer& buffer) {
+		inline RenderPassRecorder& set_vertices(const Buffer& buffer) {
 			VERIFY(buffer.usage().is_set(BufferUsage::Vertex));
 			m_interface.set_vertices(buffer);
 			return *this;
 		}
 
-		ALWAYS_INLINE RenderPassRecorder& draw(usize vertex_count, usize first_vertex = 0) {
+		inline RenderPassRecorder& draw(usize vertex_count, usize first_vertex = 0) {
 			m_interface.draw(vertex_count, first_vertex);
 			return *this;
 		}
 
 	private:
-		ALWAYS_INLINE RenderPassRecorder(GraphicsCommandListInterface& interface) : m_interface(interface) {}
+		inline RenderPassRecorder(GraphicsCommandListInterface& interface) : m_interface(interface) {}
 		friend class GraphicsCommandRecorder;
 
 		GraphicsCommandListInterface& m_interface;
@@ -81,13 +81,13 @@ namespace gpu {
 	class GraphicsCommandRecorder {
 	public:
 
-		ALWAYS_INLINE GraphicsCommandRecorder& texture_barrier(const Texture& texture, Layout old_layout, Layout new_layout) {
+		inline GraphicsCommandRecorder& texture_barrier(const Texture& texture, Layout old_layout, Layout new_layout) {
 			m_interface.texture_barrier(texture, old_layout, new_layout);
 			return *this;
 		}
 
 		template <typename Callable>
-		ALWAYS_INLINE GraphicsCommandRecorder& render_pass(const Texture& attachment, Callable&& callable) {
+		inline GraphicsCommandRecorder& render_pass(const Texture& attachment, Callable&& callable) {
 			m_interface.begin_render_pass(attachment);
 			RenderPassRecorder recorder(m_interface);
 			callable(recorder);
@@ -96,7 +96,7 @@ namespace gpu {
 		}
 
 	private:
-		ALWAYS_INLINE GraphicsCommandRecorder(GraphicsCommandListInterface& interface) : m_interface(interface) {}
+		inline GraphicsCommandRecorder(GraphicsCommandListInterface& interface) : m_interface(interface) {}
 		friend class GraphicsCommandList;
 
 		GraphicsCommandListInterface& m_interface;
@@ -107,7 +107,7 @@ namespace gpu {
 		static GraphicsCommandList make();
 
 		template <typename Callable>
-		ALWAYS_INLINE void record(Callable&& callable) {
+		inline void record(Callable&& callable) {
 			Unique<GraphicsCommandListInterface>& interface = m_interface.as_ref().unwrap();
 			interface->begin_recording();
 			GraphicsCommandRecorder recorder(*interface);
@@ -115,7 +115,7 @@ namespace gpu {
 			interface->end_recording();
 		}
 
-		ALWAYS_INLINE void submit() {
+		inline void submit() {
 			Unique<GraphicsCommandListInterface>& interface = m_interface.as_ref().unwrap();
 			interface->submit();
 		}

@@ -56,9 +56,9 @@ namespace core::containers {
 			}
 		}
 
-		NO_DISCARD ALWAYS_INLINE explicit operator Base const *() const { return m_ptr; }
-		NO_DISCARD ALWAYS_INLINE Base const* operator ->() const { return m_ptr; }
-		NO_DISCARD ALWAYS_INLINE Base const& operator *() const { return *m_ptr; }
+		NO_DISCARD inline explicit operator Base const *() const { return m_ptr; }
+		NO_DISCARD inline Base const* operator ->() const { return m_ptr; }
+		NO_DISCARD inline Base const& operator *() const { return *m_ptr; }
 
 	private:
 		SharedRef() = default;
@@ -79,6 +79,4 @@ namespace core::containers {
 		Base* m_ptr;
 	};
 }
-
-template <typename T>
-using SharedRef = core::containers::SharedRef<T>;
+using core::containers::SharedRef;

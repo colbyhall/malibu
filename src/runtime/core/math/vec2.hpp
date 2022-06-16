@@ -12,16 +12,15 @@ namespace core::math {
 			T xy[2];
 		};
 
-		ALWAYS_INLINE constexpr Vec2() : x(0), y(0) { }
+		inline constexpr Vec2() : x(0), y(0) { }
 		
-		ALWAYS_INLINE constexpr Vec2(T xy) : x(xy), y(xy) { }
+		inline constexpr Vec2(T xy) : x(xy), y(xy) { }
 
-		ALWAYS_INLINE constexpr Vec2(T x, T y) : u(x), v(y) { }
+		inline constexpr Vec2(T x, T y) : u(x), v(y) { }
 	};
 }
 
-template <typename T>
-using Vec2 = core::math::Vec2<T>;
+using core::math::Vec2;
 using Vec2f32 = Vec2<f32>;
 using Vec2f64 = Vec2<f64>;
 using Vec2u32 = Vec2<u32>;

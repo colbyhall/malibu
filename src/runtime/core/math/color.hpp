@@ -6,8 +6,8 @@ namespace core::math {
 	struct LinearColor {
 		f32 r, g, b, a;
 
-		ALWAYS_INLINE constexpr LinearColor() : r(1), g(1), b(1), a(1) { }
-		ALWAYS_INLINE constexpr LinearColor(f32 _r, f32 _g, f32 _b, f32 _a) : r(_r), g(_g), b(_b), a(_a) { }
+		inline constexpr LinearColor() : r(1), g(1), b(1), a(1) { }
+		inline constexpr LinearColor(f32 _r, f32 _g, f32 _b, f32 _a) : r(_r), g(_g), b(_b), a(_a) { }
 
 		static const LinearColor RED;
 		static const LinearColor GREEN;
@@ -25,5 +25,5 @@ namespace core::math {
 	};
 }
 
-using LinearColor = core::math::LinearColor;
-using Color = core::math::Color;
+using core::math::LinearColor;
+using core::math::Color;

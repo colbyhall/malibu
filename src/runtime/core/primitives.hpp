@@ -62,22 +62,22 @@ namespace core::primitives {
     using NullPtr = decltype(nullptr);
 }
 
-using u8 = core::primitives::u8;
-using u16 = core::primitives::u16;
-using u32 = core::primitives::u32;
-using u64 = core::primitives::u64;
-using usize = core::primitives::usize;
+using core::primitives::u8;
+using core::primitives::u16;
+using core::primitives::u32;
+using core::primitives::u64;
+using core::primitives::usize;
 
-using i8 = core::primitives::i8;
-using i16 = core::primitives::i16;
-using i32 = core::primitives::i32;
-using i64 = core::primitives::i64;
-using isize = core::primitives::isize;
+using core::primitives::i8;
+using core::primitives::i16;
+using core::primitives::i32;
+using core::primitives::i64;
+using core::primitives::isize;
 
-using f32 = core::primitives::f32;
-using f64 = core::primitives::f64;
+using core::primitives::f32;
+using core::primitives::f64;
 
-using NullPtr = core::primitives::NullPtr;
+using core::primitives::NullPtr;
 
 #if defined(_WIN32) || defined(_WIN64)
 	#define PLATFORM_WIN32 1
@@ -132,12 +132,6 @@ using NullPtr = core::primitives::NullPtr;
 	#define COMPILER_CLANG 0
 #endif
 
-#if COMPILER_GCC
-    #define ALWAYS_INLINE __attribute__((always_inline))
-#else
-    #define ALWAYS_INLINE __forceinline
-#endif
-
 #define NO_DISCARD [[nodiscard]]
 #define NO_RETURN [[noreturn]]
 #define ALLOW_UNUSED [[maybe_unused]]
@@ -161,7 +155,7 @@ using NullPtr = core::primitives::NullPtr;
 #endif
 
 namespace core {
-	ALWAYS_INLINE constexpr bool assert(bool val) {
+	inline constexpr bool assert(bool val) {
 		if (!val) DEBUG_TRAP;
 		return true;
 	}

@@ -40,12 +40,12 @@ namespace core::window {
 
 		NO_COPY(Window);
 
-		ALWAYS_INLINE Window(Window && m) noexcept
+		inline Window(Window && m) noexcept
 		: m_handle(m.m_handle) {
 			m.m_handle = nullptr;
 		}
 
-		ALWAYS_INLINE Window& operator=(Window && m) noexcept {
+		inline Window& operator=(Window && m) noexcept {
 			Window w = core::move(*this);
 			m_handle = m.m_handle;
 			m.m_handle = 0;
@@ -54,13 +54,13 @@ namespace core::window {
 
 		static void pump_events();
 
-		ALWAYS_INLINE WindowHandle handle() const { return m_handle; }
+		inline WindowHandle handle() const { return m_handle; }
 
 		Vec2u32 client_size() const;
 
 	private:
 		WindowHandle m_handle;
 
-		ALWAYS_INLINE explicit Window(WindowHandle handle) : m_handle(handle) {}
+		inline explicit Window(WindowHandle handle) : m_handle(handle) {}
 	};
 }
