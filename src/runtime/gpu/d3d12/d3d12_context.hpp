@@ -2,7 +2,7 @@
 
 #include "../context.hpp"
 #include "../resources.hpp"
-#include "dx12_utility.hpp"
+#include "d3d12_utility.hpp"
 
 #include "sync/mutex.hpp"
 #include "library.hpp"
@@ -11,7 +11,7 @@ namespace core::window {
 	class Window;
 }
 
-struct Dx12Swapchain {
+struct D3D12Swapchain {
 	static constexpr usize frame_count = 2;
 
 	ComPtr<IDXGISwapChain3> handle;
@@ -24,10 +24,10 @@ struct Dx12Swapchain {
 	u64 fence_value;
 };
 
-class Dx12DescriptorHeap {
+class D3D12DescriptorHeap {
 public:
-	explicit Dx12DescriptorHeap() = default;
-	explicit Dx12DescriptorHeap(
+	explicit D3D12DescriptorHeap() = default;
+	explicit D3D12DescriptorHeap(
 		ComPtr<ID3D12Device1> device,
 		D3D12_DESCRIPTOR_HEAP_TYPE type, 
 		usize cap, 
@@ -46,7 +46,7 @@ private:
 
 typedef HRESULT (__stdcall *PFN_D3D12_SERIALIZE_ROOT_SIGNATURE)(const D3D12_ROOT_SIGNATURE_DESC *root_signature_desc,D3D_ROOT_SIGNATURE_VERSION version,ID3DBlob **blob,ID3DBlob **error_blob);
 
-class Dx12Context : public gpu::ContextInterface {
+class D3D12Context : public gpu::ContextInterface {
 	using Library = core::library::Library;
 
 	using CreateDevice = PFN_D3D12_CREATE_DEVICE;
@@ -55,7 +55,7 @@ class Dx12Context : public gpu::ContextInterface {
 
 public:
 
-	gpu::Backend backend() const override { return gpu::Backend::Dx12; }
+	gpu::Backend backend() const override { return gpu::Backend::D3D12; }
 	bool register_window(const core::window::Window& window) const override;
 	void present() const override;
 	const gpu::Texture& back_buffer() const override;
@@ -72,13 +72,13 @@ public:
 	ComPtr<ID3D12CommandQueue> queue;
 	ComPtr<ID3D12CommandAllocator> command_allocator;
 	ComPtr<ID3D12RootSignature> root_signature;
-	mutable Dx12DescriptorHeap rtv_heap; // TODO: Bindless under lock
+	mutable D3D12DescriptorHeap rtv_heap; // TODO: Bindless under lock
 
 #if BUILD_DEBUG
 	ComPtr<ID3D12Debug> debug_interface;
 #endif
 
-	mutable Option<Dx12Swapchain> swapchain;
+	mutable Option<D3D12Swapchain> swapchain;
 
-	explicit Dx12Context();
+	explicit D3D12Context();
 };

@@ -1,8 +1,8 @@
-#include "dx12_context.hpp"
-#include "dx12_resources.hpp"
+#include "d3d12_context.hpp"
+#include "d3d12_resources.hpp"
 #include "window.hpp"
 
-Dx12DescriptorHeap::Dx12DescriptorHeap(
+D3D12DescriptorHeap::D3D12DescriptorHeap(
 	ComPtr<ID3D12Device1> device,
 	D3D12_DESCRIPTOR_HEAP_TYPE type, 
 	usize cap,
@@ -26,7 +26,7 @@ Dx12DescriptorHeap::Dx12DescriptorHeap(
 	}
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE Dx12DescriptorHeap::alloc() {
+D3D12_CPU_DESCRIPTOR_HANDLE D3D12DescriptorHeap::alloc() {
 	for (int i = 0; i < m_cap; ++i) {
 		auto& slot = m_free_slots[i];
 		if (!slot) {
@@ -40,14 +40,14 @@ D3D12_CPU_DESCRIPTOR_HANDLE Dx12DescriptorHeap::alloc() {
 	return {};
 }
 
-void Dx12DescriptorHeap::free(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+void D3D12DescriptorHeap::free(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
 	const D3D12_CPU_DESCRIPTOR_HANDLE start = m_heap->GetCPUDescriptorHandleForHeapStart();
 	const usize index = (handle.ptr - start.ptr) / m_size;
 	VERIFY(m_free_slots[index]);
 	m_free_slots[index] = false;
 }
 
-Dx12Context::Dx12Context() {
+D3D12Context::D3D12Context() {
 	d3d12_library = Library::open("d3d12.dll").unwrap();
 	create_device = (CreateDevice)d3d12_library.find("D3D12CreateDevice");
 	serialize_root_signature = (SerializeRootSignature)d3d12_library.find("D3D12SerializeRootSignature");
@@ -177,11 +177,11 @@ Dx12Context::Dx12Context() {
 			IID_PPV_ARGS(&root_signature)
 		));
 
-		rtv_heap = Dx12DescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2048, false);
+		rtv_heap = D3D12DescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2048, false);
 	}
 }
 
-bool Dx12Context::register_window(const core::window::Window& window) const {
+bool D3D12Context::register_window(const core::window::Window& window) const {
 	if (swapchain.is_set()) {
 		return false;
 	}
@@ -189,7 +189,7 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 	const auto size = window.client_size();
 
 	DXGI_SWAP_CHAIN_DESC1 desc = {};
-	desc.BufferCount = Dx12Swapchain::frame_count;
+	desc.BufferCount = D3D12Swapchain::frame_count;
 	desc.Width = size.width;
 	desc.Height = size.height;
 	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -227,7 +227,7 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 	const int fence_value = 1;
 
 	Array<gpu::Texture> backbuffers;
-	for (int i = 0; i < Dx12Swapchain::frame_count; ++i) {
+	for (int i = 0; i < D3D12Swapchain::frame_count; ++i) {
 		ComPtr<ID3D12Resource> resource;
 		throw_if_failed(local_swapchain->GetBuffer(i, IID_PPV_ARGS(&resource)));
 
@@ -236,7 +236,7 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 
 		const Vec3u32 buffer_size = { size.width, size.height, 1 };
 
-		auto interface = SharedRef<gpu::TextureInterface>::make(Dx12Texture(
+		auto interface = SharedRef<gpu::TextureInterface>::make(D3D12Texture(
 			usage, 
 			gpu::Format::RGBA_U8, 
 			buffer_size, 
@@ -245,7 +245,7 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 		backbuffers.push(gpu::Texture(core::move(interface)));
 	}
 
-	swapchain = Dx12Swapchain {
+	swapchain = D3D12Swapchain {
 		local_swapchain,
 		core::move(backbuffers),
 		current,
@@ -260,20 +260,20 @@ bool Dx12Context::register_window(const core::window::Window& window) const {
 	return true;
 }
 
-void Dx12Context::present() const {
+void D3D12Context::present() const {
 	auto& local = swapchain.as_ref().unwrap();
 	throw_if_failed(local.handle->Present(1, 0));
 	wait_for_previous();
 }
 
-const gpu::Texture& Dx12Context::back_buffer() const {
-	Dx12Swapchain& local = swapchain.as_ref().unwrap();
+const gpu::Texture& D3D12Context::back_buffer() const {
+	D3D12Swapchain& local = swapchain.as_ref().unwrap();
 	return local.back_buffers[local.current];
 }
 
-void Dx12Context::wait_for_previous() const {
-	Dx12Context& self = const_cast < Dx12Context& > (*this); // TODO: Thread safety
-	Dx12Swapchain& swapchain = self.swapchain.as_ref().unwrap();
+void D3D12Context::wait_for_previous() const {
+	D3D12Context& self = const_cast < D3D12Context& > (*this); // TODO: Thread safety
+	D3D12Swapchain& swapchain = self.swapchain.as_ref().unwrap();
 
 	const auto fence_value = swapchain.fence_value;
 	throw_if_failed(self.queue->Signal(swapchain.fence.Get(), fence_value));

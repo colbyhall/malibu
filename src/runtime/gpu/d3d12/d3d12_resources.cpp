@@ -1,7 +1,7 @@
-#include "dx12_resources.hpp"
-#include "dx12_context.hpp"
+#include "d3d12_resources.hpp"
+#include "d3d12_context.hpp"
 
-Dx12Texture::Dx12Texture(
+D3D12Texture::D3D12Texture(
 	BitFlag<gpu::TextureUsage> usage,
 	gpu::Format format,
 	Vec3u32 size,
@@ -11,7 +11,7 @@ Dx12Texture::Dx12Texture(
 	VERIFY(size.height > 0);
 	VERIFY(size.depth > 0);
 
-	auto& context = gpu::Context::the().interface<Dx12Context>();
+	auto& context = gpu::Context::the().interface<D3D12Context>();
 
 	D3D12_RESOURCE_DIMENSION dimension = D3D12_RESOURCE_DIMENSION_UNKNOWN;
 	if (size.width > 1) {
@@ -63,13 +63,13 @@ Dx12Texture::Dx12Texture(
 	}
 }
 
-Dx12Buffer::Dx12Buffer(
+D3D12Buffer::D3D12Buffer(
 	BitFlag<gpu::BufferUsage> usage, 
 	gpu::BufferKind kind, 
 	usize len, 
 	usize stride
 ) : m_usage(usage), m_kind(kind), m_len(len), m_stride(stride) {
-	auto& context = gpu::Context::the().interface<Dx12Context>();
+	auto& context = gpu::Context::the().interface<D3D12Context>();
 
 	D3D12_HEAP_PROPERTIES heap = {};
 	switch (kind) {
@@ -108,13 +108,13 @@ Dx12Buffer::Dx12Buffer(
 	));
 }
 
-Slice<u8> Dx12Buffer::write() const {
+Slice<u8> D3D12Buffer::write() const {
 	D3D12_RANGE range = {};
 	void* ptr;
 	throw_if_failed(m_resource->Map(0, &range, &ptr));
 	return Slice { reinterpret_cast<u8*>(ptr), m_len * m_stride };
 }
 
-void Dx12Buffer::unmap() const {
+void D3D12Buffer::unmap() const {
 	m_resource->Unmap(0, nullptr);
 }

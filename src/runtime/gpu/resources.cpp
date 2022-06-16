@@ -1,10 +1,9 @@
 #include "resources.hpp"
 #include "context.hpp"
 
-#include "dx12/dx12_resources.hpp"
+#include "d3d12/d3d12_resources.hpp"
 
 namespace gpu {
-
 	Texture Texture::make(
 		BitFlag<TextureUsage> usage,
 		Format format,
@@ -14,8 +13,8 @@ namespace gpu {
 
 		Option<SharedRef<TextureInterface>> interface;
 		switch (context.backend()) {
-			case Backend::Dx12:
-				interface = SharedRef<TextureInterface>::make(Dx12Texture(usage, format, size));
+			case Backend::D3D12:
+				interface = SharedRef<TextureInterface>::make(D3D12Texture(usage, format, size));
 				break;
 		}
 
@@ -32,12 +31,11 @@ namespace gpu {
 
 		Option<SharedRef<BufferInterface>> interface;
 		switch (context.backend()) {
-		case Backend::Dx12:
-			interface = SharedRef<BufferInterface>::make(Dx12Buffer(usage, kind, len, stride));
+		case Backend::D3D12:
+			interface = SharedRef<BufferInterface>::make(D3D12Buffer(usage, kind, len, stride));
 			break;
 		}
 
 		return Buffer { interface.unwrap() };
 	}
-
 }

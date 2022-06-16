@@ -1,7 +1,7 @@
 #include "command_list.hpp"
 #include "context.hpp"
 
-#include "dx12/dx12_command_list.hpp"
+#include "d3d12/d3d12_command_list.hpp"
 
 namespace gpu {
 	GraphicsCommandList GraphicsCommandList::make() {
@@ -9,8 +9,8 @@ namespace gpu {
 
 		Option<Unique<GraphicsCommandListInterface>> interface;
 		switch (context.backend()) {
-			case Backend::Dx12:
-				interface = Unique<GraphicsCommandListInterface>::make(Dx12GraphicsCommandList());
+			case Backend::D3D12:
+				interface = Unique<GraphicsCommandListInterface>::make(D3D12GraphicsCommandList());
 				break;
 		}
 

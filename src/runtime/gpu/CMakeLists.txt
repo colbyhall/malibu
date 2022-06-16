@@ -13,19 +13,19 @@ add_library (gpu STATIC
 	command_list.hpp
 	command_list.cpp
 
-	dx12/dx12_utility.hpp
+		d3d12/d3d12_utility.hpp
 
-	dx12/dx12_resources.hpp
-	dx12/dx12_resources.cpp
+		d3d12/d3d12_resources.hpp
+		d3d12/d3d12_resources.cpp
 
-	dx12/dx12_pipelines.hpp
-	dx12/dx12_pipelines.cpp
+		d3d12/d3d12_pipelines.hpp
+		d3d12/d3d12_pipelines.cpp
 
-	dx12/dx12_context.hpp
-	dx12/dx12_context.cpp
+		d3d12/d3d12_context.hpp
+		d3d12/d3d12_context.cpp
 
-	dx12/dx12_command_list.hpp
-	dx12/dx12_command_list.cpp
+		d3d12/d3d12_command_list.hpp
+		d3d12/d3d12_command_list.cpp
 )
 
 target_link_libraries (gpu core)

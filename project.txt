@@ -1,3 +1,7 @@
+Elevator Pitch
+
+Dark Souls with fast movement
+
 Exploration traversal puzzle game set on an island in the middle of the ocean
 
 Core Features:

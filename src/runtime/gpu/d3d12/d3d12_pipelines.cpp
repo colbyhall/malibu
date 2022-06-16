@@ -1,6 +1,6 @@
-#include "dx12_pipelines.hpp"
-#include "dx12_context.hpp"
-#include "dx12_resources.hpp"
+#include "d3d12_pipelines.hpp"
+#include "d3d12_context.hpp"
+#include "d3d12_resources.hpp"
 
 #include "library.hpp"
 using namespace core::library;
@@ -79,9 +79,9 @@ Result<Array<u8>, String> gpu::compile_hlsl(StringView source, gpu::ShaderType t
 	return binary_buffer;
 }
 
-Dx12GraphicsPipeline::Dx12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config) 
+D3D12GraphicsPipeline::D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config)
 : m_config(core::forward<gpu::GraphicsPipelineConfig>(config)) {
-	auto& context = gpu::Context::the().interface<Dx12Context>();
+	auto& context = gpu::Context::the().interface<D3D12Context>();
 
 	VERIFY(m_config.vertex_shader.is_set() && m_config.pixel_shader.is_set());
 

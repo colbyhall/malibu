@@ -1,11 +1,11 @@
 #pragma once
 
 #include "../pipelines.hpp"
-#include "dx12_utility.hpp"
+#include "d3d12_utility.hpp"
 
-class Dx12Shader : public gpu::ShaderInterface {
+class D3D12Shader : public gpu::ShaderInterface {
 public:
-	explicit Dx12Shader(Array<u8>&& binary, gpu::ShaderType type)
+	explicit D3D12Shader(Array<u8>&& binary, gpu::ShaderType type)
 	: m_binary(core::forward<Array<u8>>(binary)), m_type(type) {}
 
 	Slice<u8 const> binary() const override { return m_binary; }
@@ -15,9 +15,9 @@ public:
 	gpu::ShaderType m_type;
 };
 
-class Dx12GraphicsPipeline : public gpu::GraphicsPipelineInterface {
+class D3D12GraphicsPipeline : public gpu::GraphicsPipelineInterface {
 public:
-	explicit Dx12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config);
+	explicit D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config);
 
 	const gpu::GraphicsPipelineConfig& config() const override { return m_config; }
 

@@ -1,7 +1,7 @@
 #include "pipelines.hpp"
 #include "context.hpp"
 
-#include "dx12/dx12_pipelines.hpp"
+#include "d3d12/d3d12_pipelines.hpp"
 
 namespace gpu {
 	Shader Shader::make(Array<u8>&& binary, ShaderType type) {
@@ -9,8 +9,8 @@ namespace gpu {
 
 		Option<SharedRef<ShaderInterface>> interface;
 		switch (context.backend()) {
-			case Backend::Dx12:
-				interface = SharedRef<ShaderInterface>::make(Dx12Shader(core::forward<Array<u8>>(binary), type));
+			case Backend::D3D12:
+				interface = SharedRef<ShaderInterface>::make(D3D12Shader(core::forward<Array<u8>>(binary), type));
 				break;
 		}
 
@@ -22,8 +22,8 @@ namespace gpu {
 
 		Option<SharedRef<GraphicsPipelineInterface>> interface;
 		switch (context.backend()) {
-			case Backend::Dx12:
-				interface = SharedRef<GraphicsPipelineInterface>::make(Dx12GraphicsPipeline(core::move(config)));
+			case Backend::D3D12:
+				interface = SharedRef<GraphicsPipelineInterface>::make(D3D12GraphicsPipeline(core::move(config)));
 				break;
 		}
 

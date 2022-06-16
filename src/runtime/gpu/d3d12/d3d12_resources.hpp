@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../resources.hpp"
-#include "dx12_utility.hpp"
+#include "d3d12_utility.hpp"
 
 inline DXGI_FORMAT format_to_dxgi(gpu::Format format) {
 	DXGI_FORMAT dxgi_format = DXGI_FORMAT_UNKNOWN;
@@ -27,9 +27,9 @@ inline DXGI_FORMAT format_to_dxgi(gpu::Format format) {
 	return dxgi_format;
 }
 
-class Dx12Texture : public gpu::TextureInterface {
+class D3D12Texture : public gpu::TextureInterface {
 public:
-	explicit Dx12Texture(
+	explicit D3D12Texture(
 		BitFlag<gpu::TextureUsage> usage,
 		gpu::Format format,
 		Vec3u32 size,
@@ -48,9 +48,9 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE m_rtv_handle;
 };
 
-class Dx12Buffer : public gpu::BufferInterface {
+class D3D12Buffer : public gpu::BufferInterface {
 public:
-	explicit Dx12Buffer(
+	explicit D3D12Buffer(
 		BitFlag<gpu::BufferUsage> usage, 
 		gpu::BufferKind kind, 
 		usize len, 

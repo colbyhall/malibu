@@ -7,15 +7,14 @@
 
 // Windows Runtime Library. Needed for Microsoft::WRL::ComPtr<> template class.
 #include <wrl.h>
-template <typename T>
-using ComPtr = Microsoft::WRL::ComPtr<T>;
+using Microsoft::WRL::ComPtr;
 
 // From DXSampleHelper.h
 // Source: https://github.com/Microsoft/DirectX-Graphics-Samples
 inline void throw_if_failed(HRESULT hr) {
 	if (FAILED(hr))
 	{
-		PANIC("Dx12 Crash");
+		PANIC("D3D12 Crash");
 	}
 }
 

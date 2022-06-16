@@ -12,7 +12,7 @@ namespace gpu {
 	class Texture;
 
 	enum class Backend {
-		Dx12,
+		D3D12,
 	};
 
 	using namespace core::window;

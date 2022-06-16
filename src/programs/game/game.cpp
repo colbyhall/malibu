@@ -52,7 +52,8 @@ int WINAPI WinMain(
 
 	auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
 
-	const auto registered = gpu::Context::the().register_window(window);
+    auto& context = gpu::Context::the();
+	const auto registered = context.register_window(window);
 	VERIFY(registered);
 
 	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();
@@ -79,12 +80,13 @@ int WINAPI WinMain(
 	);
 	triangle.write([](Slice<u8> slice){
 		Vertex vertices[] = {
-			{ { 0.f, 0.25f, 0.1f }, LinearColor::RED },
-			{ { 0.25f, -0.25f, 0.1f }, LinearColor::GREEN },
-			{ { -0.25f, -0.25f, 0.1f }, LinearColor::BLUE },
-			{ { 0.f, 0.25f, 0.1f }, LinearColor::RED },
-			{ { 0.50f, 0.25f, 0.1f }, LinearColor::BLUE },
-			{ { 0.25f, -0.25f, 0.1f }, LinearColor::GREEN },
+            { { -0.5f, -0.5f, 0.f }, LinearColor::WHITE },
+			{ { -0.5f,  0.5f, 0.f }, LinearColor::WHITE },
+			{ {  0.5f,  0.5f, 0.f }, LinearColor::WHITE },
+
+            { { -0.5f, -0.5f, 0.f }, LinearColor::WHITE },
+            { {  0.5f,  0.5f, 0.f }, LinearColor::WHITE },
+            { {  0.5f, -0.5f, 0.f }, LinearColor::WHITE },
 		};
 		core::mem::copy(slice.ptr(), vertices, slice.len());
 	});

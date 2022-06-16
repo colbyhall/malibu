@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../command_list.hpp"
-#include "dx12_resources.hpp"
+#include "d3d12_resources.hpp"
 
 inline
 D3D12_RESOURCE_STATES layout_to_resource_states(gpu::Layout layout) {
@@ -29,9 +29,9 @@ D3D12_RESOURCE_STATES layout_to_resource_states(gpu::Layout layout) {
 	return state;
 }
 
-class Dx12GraphicsCommandList : public gpu::GraphicsCommandListInterface {
+class D3D12GraphicsCommandList : public gpu::GraphicsCommandListInterface {
 public:
-	explicit Dx12GraphicsCommandList();
+	explicit D3D12GraphicsCommandList();
 
 	void begin_recording() override;
 	void copy_buffer_to_texture(const gpu::Texture& dst, const gpu::Buffer& src) override;
