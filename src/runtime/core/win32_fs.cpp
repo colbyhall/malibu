@@ -1,8 +1,5 @@
 #include "fs.hpp"
-
-#define WIN32_LEAN_AND_MEAN
-#define WIN32_MEAN_AND_LEAN
-#include <windows.h>
+#include "win32.hpp"
 
 namespace core::fs {
 	Path cwd() {
@@ -43,10 +40,10 @@ namespace core::fs {
 			wpath.ptr(),
 			access,
 			FILE_SHARE_READ | FILE_SHARE_WRITE,
-			0,
+			nullptr,
 			creation,
 			FILE_ATTRIBUTE_NORMAL,
-			0
+            nullptr
 		);
 
 		const DWORD err = GetLastError();

@@ -4,7 +4,7 @@
 #include "../resources.hpp"
 #include "d3d12_utility.hpp"
 
-#include "sync/mutex.hpp"
+#include "async/mutex.hpp"
 #include "library.hpp"
 
 namespace core::window {

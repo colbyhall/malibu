@@ -1,58 +1,61 @@
 add_library (core STATIC
-	containers/array.hpp
-	containers/bitflag.hpp
-	containers/function.hpp
-	containers/non_null.hpp
-	containers/option.hpp
-	containers/result.hpp
-	containers/shared_ref.hpp
-	containers/slice.hpp
-	containers/string.hpp
-	containers/string.cpp
-	containers/unique.hpp
+		async/atomic.hpp
+        async/mutex.hpp
 
-	math.hpp
-	math/aabb2.hpp
-	math/aabb3.hpp
-	math/color.hpp
-	math/color.cpp
-	math/mat3.hpp
-	math/mat4.hpp
-	math/math_utility.hpp
-	math/math_utility.cpp
-	math/quat.hpp
-	math/vec2.hpp
-	math/vec3.hpp
-	math/vec4.hpp
+		containers/array.hpp
+		containers/bitflag.hpp
+		containers/function.hpp
+		containers/non_null.hpp
+		containers/option.hpp
+		containers/result.hpp
+		containers/shared_ref.hpp
+		containers/slice.hpp
+		containers/string.hpp
+		containers/string.cpp
+		containers/unique.hpp
 
-	sync/atomics.hpp
-	sync/mutex.hpp
+		math.hpp
+		math/aabb2.hpp
+		math/aabb3.hpp
+		math/color.hpp
+		math/color.cpp
+		math/mat3.hpp
+		math/mat4.hpp
+		math/math_utility.hpp
+		math/math_utility.cpp
+		math/quat.hpp
+		math/vec2.hpp
+		math/vec3.hpp
+		math/vec4.hpp
 
-	core.hpp
+		core.hpp
 
-	fs.hpp
-	fs.cpp
-	win32_fs.cpp
+		fiber.hpp
+		win32_fiber.cpp
 
-	library.hpp
-	win32_library.cpp
+		fs.hpp
+		fs.cpp
+		win32_fs.cpp
 
-	memory.hpp
-	memory.cpp
+		library.hpp
+		win32_library.cpp
 
-	primitives.hpp
+		memory.hpp
+		memory.cpp
 
-	thread.hpp
-	win32_thread.cpp
+		primitives.hpp
 
-	time.hpp
-	time.cpp
-	win32_time.cpp
+		thread.hpp
+		win32_thread.cpp
 
-	type_traits.hpp
+		time.hpp
+		time.cpp
+		win32_time.cpp
 
-	window.hpp
-	win32_window.cpp
+		type_traits.hpp
+
+		window.hpp
+		win32_window.cpp
 )
 
 target_include_directories (core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -2,7 +2,7 @@
 
 #include "../type_traits.hpp"
 
-namespace core::sync {
+namespace core::async {
 
 	template <typename T>
 	class Mutex;

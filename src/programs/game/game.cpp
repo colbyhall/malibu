@@ -5,6 +5,8 @@
 #include "math.hpp"
 #include "thread.hpp"
 
+#include "async/atomic.hpp"
+
 using namespace core;
 using namespace core::window;
 using namespace core::time;
@@ -17,8 +19,6 @@ using namespace core::time;
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
-
-#include "fbx.hpp"
 
 static bool g_running = true;
 
@@ -50,7 +50,10 @@ int WINAPI WinMain(
 		.visibility = WindowVisibility::Visible,
 	}).unwrap();
 
-	auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
+	// auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
+
+    core::async::Atomic<int> foo = 420;
+    auto result = foo.fetch_add(20);
 
     auto& context = gpu::Context::the();
 	const auto registered = context.register_window(window);

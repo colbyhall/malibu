@@ -1,9 +1,6 @@
 #include "time.hpp"
 #include "containers/option.hpp"
-
-#define WIN32_LEAN_AND_MEAN
-#define WIN32_MEAN_AND_LEAN
-#include <windows.h>
+#include "win32.hpp"
 
 namespace core::time {
 
