@@ -2,6 +2,7 @@
 
 #include "../type_traits.hpp"
 #include "../memory.hpp"
+#include "../async/atomic.hpp"
 
 #include <new>
 
@@ -9,8 +10,7 @@ namespace core::containers {
 	template <typename Base>
 	class SharedRef {
 		struct Counter {
-			usize strong_count; // TODO: Atomics
-			usize weak_count; // TODO: Atomics
+			async::Atomic<usize> strong_count;
 		};
 	public:
 		template <typename Derived>
@@ -43,9 +43,9 @@ namespace core::containers {
 
 		~SharedRef() {
 			if (m_counter) {
-				m_counter->strong_count -= 1;
+				const auto strong = m_counter->strong_count.fetch_sub(1);
 
-				if (m_counter->strong_count == 0) {
+				if (strong == 1) {
 					mem::free(m_counter);
 					m_counter = nullptr;
 
@@ -69,10 +69,10 @@ namespace core::containers {
 			static_assert(!core::is_abstract<Derived>, "Derived must not be abstract");
 
 			void* counter = mem::alloc(mem::Layout::single<Counter>);
-			m_counter = new (counter) Counter { 1, 0 };
+			m_counter = new (counter) Counter { 1 };
 
 			void* ptr = mem::alloc(mem::Layout::single<Derived>);
-			m_ptr = new (ptr) Derived(core::move(derived));
+			m_ptr = new (ptr) Derived(core::forward<Derived>(derived));
 		}
 
 		Counter* m_counter;
