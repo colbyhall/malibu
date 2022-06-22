@@ -1,5 +1,6 @@
 add_library (core STATIC
 		async/atomic.hpp
+		async/mpmc.hpp
         async/mutex.hpp
 
 		containers/array.hpp

@@ -29,10 +29,10 @@ namespace core::async {
         }
 
         NO_DISCARD inline Option<T> compare_exchange_weak(
+            T expected,
             T desired,
             Order order = Order::SequentiallyConsistent
         ) noexcept {
-            T expected;
             if (!m_atomic.compare_exchange_weak(expected, desired, to_std(order))) {
                 return expected;
             }
@@ -40,10 +40,10 @@ namespace core::async {
         }
 
         NO_DISCARD inline Option<T> compare_exchange_strong(
+            T expected,
             T desired,
             Order order = Order::SequentiallyConsistent
         ) noexcept {
-            T expected;
             if (!m_atomic.compare_exchange_strong(expected, desired, to_std(order))) {
                 return expected;
             }

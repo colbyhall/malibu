@@ -3,7 +3,6 @@
 #include "../type_traits.hpp"
 
 namespace core::async {
-
 	template <typename T>
 	class Mutex;
 
@@ -35,5 +34,4 @@ namespace core::async {
 
 		T m_value;
 	};
-
 }
