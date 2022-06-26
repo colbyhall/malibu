@@ -16,6 +16,15 @@ namespace core::math {
 		inline constexpr Vec3() : x(0), y(0), z(0) { }
 		inline constexpr Vec3(T xyz) : x(xyz), y(xyz), z(xyz) { }
 		inline constexpr Vec3(T x, T y, T z) : u(x), v(y), w(z) { }
+
+		inline Vec3 operator+(const Vec3<T>& b) const { return { x + b.x, y + b.y, z + b.z }; }
+		inline Vec3 operator-(const Vec3<T>& b) const { return { x - b.x, y - b.y, z - b.z }; }
+		inline Vec3 operator*(const Vec3<T>& b) const { return { x * b.x, y * b.y, z * b.z }; }
+		inline Vec3 operator/(const Vec3<T>& b) const { return { x / b.x, y / b.y, z / b.z }; }
+		inline void operator+=(const Vec3<T>& b) { *this = *this + b; }
+		inline void operator-=(const Vec3<T>& b) { *this = *this - b; }
+		inline void operator*=(const Vec3<T>& b) { *this = *this * b; }
+		inline void operator/=(const Vec3<T>& b) { *this = *this / b; }
 	};
 }
 

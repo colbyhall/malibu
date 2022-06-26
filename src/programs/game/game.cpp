@@ -108,8 +108,8 @@ int WINAPI WinMain(
 			auto& back_buffer = context.back_buffer();
 			recorder.texture_barrier(back_buffer, gpu::Layout::Present, gpu::Layout::ColorAttachment);
 			recorder.render_pass(back_buffer, [&](gpu::RenderPassRecorder& rp) {
-				const auto client = window.client_size();
-                const auto identity = Mat4f32::orthographic((f32)client.width / 512.f, (f32)client.height / 512.f, 0.1f, 100.f);
+				const auto client = window.client_size() / 512;
+                const auto identity = Mat4f32::orthographic((f32)client.width, (f32)client.height, 0.1f, 100.f);
 				// rp.clear_color(LinearColor::BLACK);
 				rp.set_pipeline(pipeline);
                 rp.push_constants(&identity);

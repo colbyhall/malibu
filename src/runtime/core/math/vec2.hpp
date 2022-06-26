@@ -13,10 +13,17 @@ namespace core::math {
 		};
 
 		inline constexpr Vec2() : x(0), y(0) { }
-		
 		inline constexpr Vec2(T xy) : x(xy), y(xy) { }
-
 		inline constexpr Vec2(T x, T y) : u(x), v(y) { }
+
+		inline Vec2 operator+(const Vec2<T>& b) const { return { x + b.x, y + b.y }; }
+		inline Vec2 operator-(const Vec2<T>& b) const { return { x - b.x, y - b.y }; }
+		inline Vec2 operator*(const Vec2<T>& b) const { return { x * b.x, y * b.y }; }
+		inline Vec2 operator/(const Vec2<T>& b) const { return { x / b.x, y / b.y }; }
+		inline void operator+=(const Vec2<T>& b) { *this = *this + b; }
+		inline void operator-=(const Vec2<T>& b) { *this = *this - b; }
+		inline void operator*=(const Vec2<T>& b) { *this = *this * b; }
+		inline void operator/=(const Vec2<T>& b) { *this = *this / b; }
 	};
 }
 
