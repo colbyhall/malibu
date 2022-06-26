@@ -33,7 +33,7 @@ void D3D12GraphicsCommandList::copy_buffer_to_buffer(const gpu::Buffer& dst, con
 }
 
 void D3D12GraphicsCommandList::texture_barrier(const gpu::Texture& texture, gpu::Layout old_layout, gpu::Layout new_layout) {
-	const D3D12Texture& interface = texture.interface<D3D12Texture>();
+	const auto& interface = texture.interface<D3D12Texture>();
 
 	D3D12_RESOURCE_BARRIER barrier = {};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -46,7 +46,7 @@ void D3D12GraphicsCommandList::texture_barrier(const gpu::Texture& texture, gpu:
 
 void D3D12GraphicsCommandList::begin_render_pass(const gpu::Texture& attachment) {
 	{
-		const D3D12Texture& interface = attachment.interface<D3D12Texture>();
+		const auto& interface = attachment.interface<D3D12Texture>();
 		m_command_list->OMSetRenderTargets(1, &interface.m_rtv_handle, 0, nullptr);
 	}
 
@@ -67,7 +67,7 @@ void D3D12GraphicsCommandList::begin_render_pass(const gpu::Texture& attachment)
 	m_command_list->RSSetScissorRects(1, &rect);
 
 	const f32 clear_color[] = { 0.05f, 0.05f, 0.05f, 1.0f };
-	const D3D12Texture& interface = attachment.interface<D3D12Texture>();
+	const auto& interface = attachment.interface<D3D12Texture>();
 	m_command_list->ClearRenderTargetView(interface.m_rtv_handle, clear_color, 0, nullptr);
 }
 
@@ -101,6 +101,10 @@ void D3D12GraphicsCommandList::set_vertices(const gpu::Buffer& buffer) {
 
 void D3D12GraphicsCommandList::set_indices(const gpu::Buffer& buffer) {
 	TODO("");
+}
+
+void D3D12GraphicsCommandList::push_constant(const void* ptr) {
+	m_command_list->SetGraphicsRoot32BitConstants(0, 16, ptr, 0);
 }
 
 void D3D12GraphicsCommandList::draw(usize vertex_count, usize first_vertex) {

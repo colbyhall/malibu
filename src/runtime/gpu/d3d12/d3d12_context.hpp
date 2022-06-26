@@ -29,7 +29,7 @@ public:
 	explicit D3D12DescriptorHeap() = default;
 	explicit D3D12DescriptorHeap(
 		ComPtr<ID3D12Device1> device,
-		D3D12_DESCRIPTOR_HEAP_TYPE type, 
+		D3D12_DESCRIPTOR_HEAP_TYPE type,
 		usize cap, 
 		bool shader_visible
 	);
@@ -73,6 +73,7 @@ public:
 	ComPtr<ID3D12CommandAllocator> command_allocator;
 	ComPtr<ID3D12RootSignature> root_signature;
 	mutable D3D12DescriptorHeap rtv_heap; // TODO: Bindless under lock
+    mutable D3D12DescriptorHeap resource_descriptor_heap;
 
 #if BUILD_DEBUG
 	ComPtr<ID3D12Debug> debug_interface;

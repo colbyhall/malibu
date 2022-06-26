@@ -15,10 +15,10 @@ namespace core::math {
 
 		static constexpr Mat4<T> identity() {
 			Mat4<T> result = {};
-			result.elements[0][0] = 1;
-			result.elements[1][1] = 1;
-			result.elements[2][2] = 1;
-			result.elements[3][3] = 1;
+			result.columns[0].x = 1;
+			result.columns[1].y = 1;
+			result.columns[2].z = 1;
+			result.columns[3].w = 1;
 			return result;
 		}
 
@@ -34,7 +34,7 @@ namespace core::math {
 			return { x_col, y_col, z_col, w_col };
 		}
 
-		static constexpr Mat4<T> orthographic(T width, T height, T far, T near) {
+		static constexpr Mat4<T> orthographic(T width, T height, T near, T far) {
 			// 0 - 1 z clipping
 			auto result = Mat4<T>::identity();
 			result.x.x = (T)2 / width;
@@ -46,7 +46,7 @@ namespace core::math {
 			return result;
 		}
 
-		static Mat4<T> perspective(T fov, T aspect_ratio, T far, T near) {
+		static Mat4<T> perspective(T fov, T aspect_ratio, T near, T far) {
 			const auto cotan = (T)1 / tan((fov * DEG_TO_RAD) / (T)2);
 
 			auto result = Mat4<T>::identity();

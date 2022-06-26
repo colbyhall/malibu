@@ -159,7 +159,22 @@ D3D12Context::D3D12Context() {
 
 	// Resource Descriptors
 	{
+        D3D12_DESCRIPTOR_RANGE texture2d_range = {};
+        texture2d_range.BaseShaderRegister = 0;
+        texture2d_range.NumDescriptors = -1;
+        texture2d_range.OffsetInDescriptorsFromTableStart = 0;
+        texture2d_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+        texture2d_range.RegisterSpace = 1;
+
+        D3D12_ROOT_PARAMETER param1 = {};
+        param1.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+        param1.Constants.RegisterSpace;
+        param1.Constants.Num32BitValues = 16;
+        param1.Constants.ShaderRegister;
+
 		D3D12_ROOT_SIGNATURE_DESC desc = {};
+        desc.pParameters = &param1;
+        desc.NumParameters = 1;
 		desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 		ComPtr<ID3DBlob> signature;
@@ -178,6 +193,7 @@ D3D12Context::D3D12Context() {
 		));
 
 		rtv_heap = D3D12DescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2048, false);
+        resource_descriptor_heap = D3D12DescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 4096, true);
 	}
 }
 

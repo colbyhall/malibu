@@ -1,3 +1,7 @@
+cbuffer bufs : register(b0) {
+    float4x4 local_to_view;
+}
+
 struct PSInput
 {
     float4 position : SV_POSITION;
@@ -8,7 +12,7 @@ PSInput vs_main(float4 position : POSITION, float4 color : COLOR)
 {
     PSInput result;
 
-    result.position = position;
+    result.position = mul(local_to_view, position);
     result.color = color;
 
     return result;
