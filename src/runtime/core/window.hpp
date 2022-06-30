@@ -2,7 +2,7 @@
 
 #include "containers/option.hpp"
 #include "containers/string.hpp"
-#include "type_traits.hpp"
+#include "templates/type_traits.hpp"
 #include "math/vec2.hpp"
 
 namespace core::window {

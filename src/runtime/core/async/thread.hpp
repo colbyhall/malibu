@@ -1,10 +1,8 @@
 #pragma once
 
-#include "type_traits.hpp"
+#include "../templates/type_traits.hpp"
 
-#include <functional>
-
-namespace core::thread {
+namespace core::async {
     class JoinHandle;
 
     class Thread {
@@ -20,7 +18,7 @@ namespace core::thread {
         NO_COPY(Thread);
         NO_MOVE(Thread);
 
-        friend Thread current();
+        friend Thread current_thread();
         friend JoinHandle;
 
         Handle m_handle;
@@ -36,22 +34,23 @@ namespace core::thread {
     private:
         inline explicit JoinHandle(void* handle, Thread::Id id) : m_thread(handle, id), m_joined(false) {}
 
-        friend JoinHandle spawn(struct SpawnInfo info);
+        friend JoinHandle spawn_thread(struct ThreadSpawnInfo info);
 
         Thread m_thread;
         bool m_joined;
     };
 
 
-    struct SpawnInfo {
+    struct ThreadSpawnInfo {
         void (*proc)(void* param) = nullptr;
         void* param = nullptr;
 
-        SpawnInfo() = default;
-        inline SpawnInfo(void (*_proc)(void* param)) : proc(_proc) {}
-        inline explicit SpawnInfo(void (*_proc)(void* param), void* _param) : proc(_proc), param(_param) {}
+		ThreadSpawnInfo() = default;
+        inline ThreadSpawnInfo(void (*_proc)(void* param)) : proc(_proc) {}
+        inline explicit ThreadSpawnInfo(void (*_proc)(void* param), void* _param) : proc(_proc), param(_param) {}
     };
-    ALLOW_UNUSED JoinHandle spawn(SpawnInfo info);
+    ALLOW_UNUSED JoinHandle spawn_thread(ThreadSpawnInfo info);
+    ALLOW_UNUSED Thread current_thread();
 
-    ALLOW_UNUSED Thread current();
+	NO_DISCARD u32 logical_core_count();
 }

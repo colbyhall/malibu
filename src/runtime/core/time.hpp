@@ -1,6 +1,6 @@
 #pragma once
 
-#include "primitives.hpp"
+#include "types.hpp"
 
 namespace core::time {
 	constexpr u64 NANOS_PER_SEC = 1000000000;

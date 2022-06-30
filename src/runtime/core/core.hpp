@@ -1,6 +1,6 @@
 #pragma once
 
-#include "primitives.hpp"
+#include "types.hpp"
 #include "memory.hpp"
 
 #include "containers/array.hpp"

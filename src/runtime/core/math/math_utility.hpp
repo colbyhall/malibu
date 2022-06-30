@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../primitives.hpp"
+#include "../types.hpp"
 
 namespace core::math {
 	constexpr f32 PI = 3.14159265359f;

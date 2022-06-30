@@ -1,5 +1,7 @@
 #pragma once
 
+#include "templates/remove_reference.hpp"
+
 namespace core::primitives {
     using u8 = unsigned char;
 	constexpr u8 U8_MIN = 0;
@@ -159,6 +161,24 @@ namespace core {
 		if (!val) DEBUG_TRAP;
 		return true;
 	}
+
+	template <typename T>
+	constexpr T&& forward(typename RemoveReference<T>::Type& t) {
+		return static_cast<T&&>(t);
+	}
+
+	template <typename T>
+	constexpr T&& forward(typename RemoveReference<T>::Type&& t) {
+		return static_cast<T&&>(t);
+	}
+
+	template <typename T>
+	constexpr typename RemoveReference<T>::Type&& move(T&& t) {
+		return static_cast<typename RemoveReference<T>::Type&&>(t);
+	}
+
+#define NO_COPY(type) type(const type& t) = delete; type& operator=(const type& c) = delete
+#define NO_MOVE(type) type(type&& t) noexcept = delete; type& operator=(type&& c) noexcept = delete
 }
 
 #define VERIFY(n) core::assert(n)

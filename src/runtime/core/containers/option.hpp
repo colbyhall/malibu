@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../primitives.hpp"
-#include "../type_traits.hpp"
+#include "../types.hpp"
+#include "../templates/type_traits.hpp"
 #include <new>
 
 namespace core::containers {

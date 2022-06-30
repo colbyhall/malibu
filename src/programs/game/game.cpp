@@ -3,9 +3,9 @@
 #include "fs.hpp"
 #include "time.hpp"
 #include "math.hpp"
-#include "thread.hpp"
 
-#include "async/atomic.hpp"
+#include "async/mpmc.hpp"
+#include "async/thread.hpp"
 
 using namespace core;
 using namespace core::window;
@@ -52,8 +52,10 @@ int WINAPI WinMain(
 
 	// auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
 
-    core::async::Atomic<int> foo = 420;
-    auto result = foo.fetch_add(20);
+    auto foo = async::MPMCQueue<int>::make(512);
+	for (int i = 0; i < 128; ++i) foo.push(i);
+
+	const auto count = async::logical_core_count();
 
     auto& context = gpu::Context::the();
 	const auto registered = context.register_window(window);
@@ -108,9 +110,8 @@ int WINAPI WinMain(
 			auto& back_buffer = context.back_buffer();
 			recorder.texture_barrier(back_buffer, gpu::Layout::Present, gpu::Layout::ColorAttachment);
 			recorder.render_pass(back_buffer, [&](gpu::RenderPassRecorder& rp) {
-				const auto client = window.client_size() / 512;
-                const auto identity = Mat4f32::orthographic((f32)client.width, (f32)client.height, 0.1f, 100.f);
-				// rp.clear_color(LinearColor::BLACK);
+				const auto client = window.client_size().cast<f32>() / 256;
+                const auto identity = Mat4f32::orthographic(client.width, client.height, 0.1f, 100.f);
 				rp.set_pipeline(pipeline);
                 rp.push_constants(&identity);
 				rp.set_vertices(triangle);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../primitives.hpp"
+#include "../types.hpp"
 
 namespace core::math {
 	struct LinearColor {

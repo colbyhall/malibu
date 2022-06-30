@@ -1,8 +1,8 @@
 #include "fiber.hpp"
-#include "memory.hpp"
-#include "win32.hpp"
+#include "../memory.hpp"
+#include "../win32.hpp"
 
-namespace core::fiber {
+namespace core::async {
     Fiber::~Fiber() {
         if (!m_handle) return;
 
@@ -15,20 +15,20 @@ namespace core::fiber {
     }
 
     static void WINAPI FiberProc(_In_ LPVOID lpParameter) {
-        auto* info = reinterpret_cast<SpawnInfo*>(lpParameter);
+        auto* info = reinterpret_cast<FiberSpawnInfo*>(lpParameter);
         info->proc(info->param);
         mem::free(info);
     }
 
-    Fiber spawn(SpawnInfo info) {
-        SpawnInfo* param = mem::alloc<SpawnInfo>();
+    Fiber spawn_thread(FiberSpawnInfo info) {
+		FiberSpawnInfo* param = mem::alloc<FiberSpawnInfo>();
         *param = info;
 
         auto* handle = CreateFiber(0, &FiberProc, param);
         return Fiber{ false, handle };
     }
 
-    Fiber convert() {
+    Fiber convert_thread() {
         auto* handle = ConvertThreadToFiber(nullptr);
         return Fiber{ true, handle };
     }

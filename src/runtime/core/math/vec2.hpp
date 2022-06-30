@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../primitives.hpp"
+#include "../types.hpp"
 
 namespace core::math {
 	template <typename T>
@@ -24,6 +24,9 @@ namespace core::math {
 		inline void operator-=(const Vec2<T>& b) { *this = *this - b; }
 		inline void operator*=(const Vec2<T>& b) { *this = *this * b; }
 		inline void operator/=(const Vec2<T>& b) { *this = *this / b; }
+
+		template <typename D>
+		inline Vec2<D> cast() const { return { (D)x, (D)y }; }
 	};
 }
 

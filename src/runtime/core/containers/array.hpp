@@ -3,7 +3,7 @@
 #include "slice.hpp"
 #include "option.hpp"
 #include "../memory.hpp"
-#include "../type_traits.hpp"
+#include "../templates/type_traits.hpp"
 
 #include <new>
 

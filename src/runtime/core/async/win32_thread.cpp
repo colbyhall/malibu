@@ -1,8 +1,8 @@
 #include "thread.hpp"
-#include "memory.hpp"
-#include "win32.hpp"
+#include "../memory.hpp"
+#include "../win32.hpp"
 
-namespace core::thread {
+namespace core::async {
     bool JoinHandle::join() {
         // TODO: Check the result so we can tell the user if the thread had already ended
         WaitForSingleObject(
@@ -21,14 +21,14 @@ namespace core::thread {
     }
 
     static DWORD WINAPI ThreadProc(_In_ LPVOID lpParameter) {
-        auto* info = reinterpret_cast<SpawnInfo*>(lpParameter);
+        auto* info = reinterpret_cast<ThreadSpawnInfo*>(lpParameter);
         info->proc(info->param);
         mem::free(info);
         return 0;
     }
 
-    JoinHandle spawn(SpawnInfo info) {
-        SpawnInfo* param = mem::alloc<SpawnInfo>();
+    JoinHandle spawn_thread(ThreadSpawnInfo info) {
+		ThreadSpawnInfo* param = mem::alloc<ThreadSpawnInfo>();
         *param = info;
 
         DWORD id;
@@ -44,7 +44,13 @@ namespace core::thread {
         return JoinHandle { handle, id };
     }
 
-    Thread current() {
+    Thread current_thread() {
         return Thread{ GetCurrentThread(), GetCurrentThreadId() };
     }
+
+	u32 logical_core_count() {
+		SYSTEM_INFO info = {};
+		GetSystemInfo(&info);
+		return 0;
+	}
 }

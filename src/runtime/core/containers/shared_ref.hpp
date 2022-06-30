@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../type_traits.hpp"
+#include "../templates/type_traits.hpp"
 #include "../memory.hpp"
 #include "../async/atomic.hpp"
 

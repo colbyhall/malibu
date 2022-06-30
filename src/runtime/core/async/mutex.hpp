@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../type_traits.hpp"
+#include "../templates/type_traits.hpp"
 
 namespace core::async {
 	template <typename T>

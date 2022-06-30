@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../primitives.hpp"
+#include "../types.hpp"
 #include "../containers/option.hpp"
 #include <atomic>
 
@@ -71,7 +71,7 @@ namespace core::async {
         }
 
     private:
-        inline std::memory_order to_std(Order order) {
+        inline std::memory_order to_std(Order order) const {
             static const std::memory_order convert[] = {
                     std::memory_order_relaxed,
                     std::memory_order_seq_cst

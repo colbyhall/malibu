@@ -13,23 +13,48 @@ namespace core::async {
             CacheLinePad() : internal() {}
         };
         struct Cell {
-            Atomic<u32> sequence;
+            Atomic<usize> sequence;
             Option<T> data;
         };
 
     public:
-        static MPMCQueue make(u32 size) {
+        static MPMCQueue make(usize size) {
             // Verify that size is a power of 2
             VERIFY(size >= 2 && (size & size - 1) == 0);
 
-            Cell* buffer = (Cell*)mem::alloc<Cell>(mem::Layout::array<T>(size));
-            for (u32 i = 0; i < size; ++i) {
+            Cell* buffer = mem::alloc<Cell>(mem::Layout::array<Cell>(size));
+            for (usize i = 0; i < size; ++i) {
                 Cell& cell = buffer[i];
                 cell.sequence.store(i, Order::Relaxed);
             }
 
             return MPMCQueue(buffer, size);
         }
+
+		NO_COPY(MPMCQueue);
+
+		inline MPMCQueue(MPMCQueue<T>&& move) noexcept : 
+			m_buffer(move.m_buffer), 
+			m_buffer_mask(move.m_buffer_mask), 
+			m_enqueue_pos(move.m_enqueue_pos.load(Order::Relaxed)),
+			m_dequeue_pos(move.m_dequeue_pos.load(Order::Relaxed)) {
+			move.m_buffer = nullptr;
+			move.m_buffer_mask = 0;
+		}
+		inline MPMCQueue& operator=(MPMCQueue<T>&& move) noexcept {
+			// FIXME: Is this the best way to do this
+			MPMCQueue<T> to_destroy = core::move(*this);
+			m_buffer = move.m_ptr;
+			m_buffer_mask = move.m_len;
+			const auto enqueue_pos = move.m_enqueue_pos.load(Order::Relaxed);
+			m_enqueue_pos.store(enqueue_pos, Order::Relaxed);
+			const auto dequeue_pos = move.m_dequeue_pos.load(Order::Relaxed);
+			m_dequeue_pos.store(dequeue_pos, Order::Relaxed);
+
+			move.m_buffer = nullptr;
+			move.m_buffer_mask = 0;
+			return *this;
+		}
 
         ~MPMCQueue() {
             if (m_buffer) {
@@ -38,7 +63,7 @@ namespace core::async {
             }
         }
 
-        bool enqueue(T&& t) {
+        bool push(T&& t) {
             Cell* cell = nullptr;
             auto pos = m_enqueue_pos.load();
             for(;;) {
@@ -57,7 +82,12 @@ namespace core::async {
             return true;
         }
 
-        Option<T> dequeue() {
+		inline bool push(const T& t) {
+			T copy = t;
+			return push(core::move(copy));
+		}
+
+        Option<T> pop() {
             Cell* cell = nullptr;
             auto pos = m_dequeue_pos.load();
             for (;;) {
@@ -78,7 +108,7 @@ namespace core::async {
         }
 
     private:
-        inline explicit MPMCQueue(Cell* buffer, u32 size) :
+        inline explicit MPMCQueue(Cell* buffer, usize size) :
             m_buffer(buffer),
             m_buffer_mask(size - 1),
             m_enqueue_pos(0),
@@ -86,7 +116,7 @@ namespace core::async {
 
         ALLOW_UNUSED CacheLinePad pad0;
         Cell* m_buffer;
-        u32 m_buffer_mask;
+		usize m_buffer_mask;
         ALLOW_UNUSED CacheLinePad pad1;
         Atomic<u32> m_enqueue_pos;
         ALLOW_UNUSED CacheLinePad pad2;

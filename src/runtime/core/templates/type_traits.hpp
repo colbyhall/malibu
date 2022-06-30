@@ -1,56 +1,9 @@
 #pragma once
 
-#include "primitives.hpp"
+#include "../types.hpp"
+#include "remove_reference.hpp"
 
 namespace core {
-	template<typename T>
-	struct RemoveReference {
-		using Type = T;
-	};
-	
-	template <typename T>
-	struct RemoveReference<T&> {
-		using Type = T;
-	};
-	
-	template <typename T>
-	struct RemoveReference<T&&> {
-		using Type = T;
-	};
-	
-	template<typename T>
-	struct RemovePointer {
-		using Type = T;
-	};
-	
-	template <typename T>
-	struct RemovePointer<T*> {
-		using Type = T;
-	};
-	
-	template <typename T>
-	struct RemovePointer<T**> {
-		using Type = T;
-	};
-	
-	template <typename T>
-	constexpr T&& forward(typename RemoveReference<T>::Type& t) {
-		return static_cast<T&&>(t);
-	}
-	
-	template <typename T>
-	constexpr T&& forward(typename RemoveReference<T>::Type&& t) {
-		return static_cast<T&&>(t);
-	}
-	
-	template <typename T>
-	constexpr typename RemoveReference<T>::Type&& move(T&& t) {
-		return static_cast<typename RemoveReference<T>::Type&&>(t);
-	}
-	
-	#define NO_COPY(type) type(const type& t) = delete; type& operator=(const type& c) = delete
-    #define NO_MOVE(type) type(type&& t) noexcept = delete; type& operator=(type&& c) noexcept = delete
-
 	template <typename T>
 	struct RemoveCV {
 		using Type = T;
