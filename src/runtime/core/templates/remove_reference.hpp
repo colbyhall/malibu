@@ -1,7 +1,9 @@
 #pragma once
 
+// https://en.cppreference.com/w/cpp/types/remove_reference
+// https://en.cppreference.com/w/cpp/types/remove_pointer
+
 namespace core {
-	// https://en.cppreference.com/w/cpp/types/remove_reference
 	template<typename T>
 	struct RemoveReference {
 		using Type = T;
@@ -20,7 +22,6 @@ namespace core {
 	template <typename T>
 	using ReferenceRemoved = typename RemoveReference<T>::Type;
 
-	// https://en.cppreference.com/w/cpp/types/remove_pointer
 	template<typename T>
 	struct RemovePointer {
 		using Type = T;

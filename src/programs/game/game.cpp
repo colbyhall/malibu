@@ -4,6 +4,8 @@
 #include "time.hpp"
 #include "math.hpp"
 
+#include "containers/function.hpp"
+
 #include "async/mpmc.hpp"
 #include "async/thread.hpp"
 
@@ -37,6 +39,10 @@ void thread_proc(void* param) {
     // printf("Hello from other thread");
 }
 
+void whatever(FunctionRef<u32()> f) {
+	const auto result = f();
+}
+
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -51,6 +57,10 @@ int WINAPI WinMain(
 	}).unwrap();
 
 	// auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
+
+	Function<u32()> f = []() {
+		return 0;
+	};
 
     auto foo = async::MPMCQueue<int>::make(512);
 	for (int i = 0; i < 128; ++i) foo.push(i);

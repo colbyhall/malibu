@@ -1,7 +1,8 @@
 #pragma once
 
+// https://en.cppreference.com/w/cpp/types/remove_cv
+
 namespace core {
-	// https://en.cppreference.com/w/cpp/types/remove_cv
 	template <typename T>
 	struct RemoveCV {
 		using Type = T;
@@ -14,11 +15,6 @@ namespace core {
 
 	template <typename T>
 	struct RemoveCV<volatile T> {
-		using Type = T;
-	};
-
-	template <typename T>
-	struct RemoveCV<const volatile T> {
 		using Type = T;
 	};
 

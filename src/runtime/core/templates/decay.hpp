@@ -3,6 +3,11 @@
 #include "../types.hpp"
 #include "remove_cv.hpp"
 #include "remove_reference.hpp"
+#include "type_traits.hpp"
+
+#include <type_traits>
+
+// http://en.cppreference.com/w/cpp/types/decay
 
 namespace core {
 	namespace hidden {
@@ -23,16 +28,15 @@ namespace core {
 
 		template <typename R, typename... P>
 		struct DecayNonReference<R(P...)> {
-			typedef R (*T)(P...);
+			typedef R (*Type)(P...);
+		};
+
+		template <typename T>
+		struct Decay {
+			using Type = typename hidden::DecayNonReference<ReferenceRemoved<T>>::Type;
 		};
 	}
-
-	 // http://en.cppreference.com/w/cpp/types/decay
-	 template <typename T>
-	 struct Decay {
-		 using Type = typename hidden::DecayNonReference<ReferenceRemoved<T>>::Type;
-	 };
-
-	 template <typename T>
-	 using Decayed = typename Decay<T>::Type;
+	 
+	template <typename T>
+	using Decayed = typename hidden::Decay<T>::Type;
 }

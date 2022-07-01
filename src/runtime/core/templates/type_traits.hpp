@@ -2,30 +2,9 @@
 
 #include "../types.hpp"
 #include "remove_reference.hpp"
+#include "remove_cv.hpp"
 
 namespace core {
-	template <typename T>
-	struct RemoveCV {
-		using Type = T;
-	};
-
-	template <typename T>
-	struct RemoveCV<const T> {
-		using Type = T;
-	};
-
-	template <typename T>
-	struct RemoveCV<volatile T> {
-		using Type = T;
-	};
-
-	template <typename T>
-	struct RemoveCV<const volatile T> {
-		using Type = T;
-	};
-
-	template <typename T>
-	using CVRemoved = typename RemoveCV<T>::Type;
 
 	template<typename T, T value>
 	struct IntegralConstant {
