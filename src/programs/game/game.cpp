@@ -35,10 +35,6 @@ struct Vertex {
 	LinearColor color;
 };
 
-void thread_proc(void* param) {
-    // printf("Hello from other thread");
-}
-
 void whatever(FunctionRef<u32()> f) {
 	const auto result = f();
 }
@@ -58,14 +54,14 @@ int WINAPI WinMain(
 
 	// auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
 
-	Function<u32()> f = []() {
-		return 0;
-	};
-
     auto foo = async::MPMCQueue<int>::make(512);
 	for (int i = 0; i < 128; ++i) foo.push(i);
 
 	const auto count = async::logical_core_count();
+
+	auto thread = async::spawn_thread([]() {
+		OutputDebugStringA("Hello from another thread\n");
+	});
 
     auto& context = gpu::Context::the();
 	const auto registered = context.register_window(window);

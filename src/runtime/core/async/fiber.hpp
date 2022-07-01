@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../templates/type_traits.hpp"
+#include "../containers/function.hpp"
 
 namespace core::async {
     class Fiber {
@@ -32,23 +32,14 @@ namespace core::async {
     private:
         Fiber(bool thread, Handle handle) : m_thread(thread), m_handle(handle) {}
 
-        friend Fiber spawn_thread(struct FiberSpawnInfo info);
+        friend Fiber spawn_fiber(Function<void()>&&);
         friend Fiber convert_thread();
 
         bool m_thread;
         Handle m_handle;
     };
 
-    struct FiberSpawnInfo {
-        void (*proc)(void* param) = nullptr;
-        void* param = nullptr;
-
-		FiberSpawnInfo() = default;
-        inline FiberSpawnInfo(void (*_proc)(void* param)) : proc(_proc) {}
-        inline explicit FiberSpawnInfo(void (*_proc)(void* param), void* _param) : proc(_proc), param(_param) {}
-    };
-
-    Fiber spawn_thread(FiberSpawnInfo info);
+    Fiber spawn_fiber(Function<void()>&& spawn);
 
     // Converts current thread into fiber
     Fiber convert_thread();

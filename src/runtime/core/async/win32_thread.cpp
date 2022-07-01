@@ -2,6 +2,8 @@
 #include "../memory.hpp"
 #include "../win32.hpp"
 
+#include <new>
+
 namespace core::async {
     bool JoinHandle::join() {
         // TODO: Check the result so we can tell the user if the thread had already ended
@@ -21,15 +23,16 @@ namespace core::async {
     }
 
     static DWORD WINAPI ThreadProc(_In_ LPVOID lpParameter) {
-        auto* info = reinterpret_cast<ThreadSpawnInfo*>(lpParameter);
-        info->proc(info->param);
-        mem::free(info);
+        auto& info = *reinterpret_cast<Function<void()>*>(lpParameter);
+		info();
+		info.~Function();
+        mem::free(&info);
         return 0;
     }
 
-    JoinHandle spawn_thread(ThreadSpawnInfo info) {
-		ThreadSpawnInfo* param = mem::alloc<ThreadSpawnInfo>();
-        *param = info;
+    JoinHandle spawn_thread(Function<void()>&& spawn) {
+		Function<void()>* param = mem::alloc<Function<void()>>();
+		new(param) Function<void()>(forward<Function<void()>>(spawn));
 
         DWORD id;
         HANDLE handle = CreateThread(

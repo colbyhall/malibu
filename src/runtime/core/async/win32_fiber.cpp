@@ -15,14 +15,15 @@ namespace core::async {
     }
 
     static void WINAPI FiberProc(_In_ LPVOID lpParameter) {
-        auto* info = reinterpret_cast<FiberSpawnInfo*>(lpParameter);
-        info->proc(info->param);
-        mem::free(info);
+		auto& info = *reinterpret_cast<Function<void()>*>(lpParameter);
+		info();
+		info.~Function();
+		mem::free(&info);
     }
 
-    Fiber spawn_thread(FiberSpawnInfo info) {
-		FiberSpawnInfo* param = mem::alloc<FiberSpawnInfo>();
-        *param = info;
+    Fiber spawn_fiber(Function<void()>&& spawn) {
+		Function<void()>* param = mem::alloc<Function<void()>>();
+		new(param) Function<void()>(forward<Function<void()>>(spawn));
 
         auto* handle = CreateFiber(0, &FiberProc, param);
         return Fiber{ false, handle };

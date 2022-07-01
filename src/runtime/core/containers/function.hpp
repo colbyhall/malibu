@@ -56,14 +56,9 @@ namespace core::containers {
 			template <typename OtherS, typename OtherF>
 			friend class FunctionBase;
 		public:
-			FunctionBase() = delete;
+			using Result = R;
 
-			FunctionBase(FunctionBase&& other) 
-				: m_callable(other.m_callable), m_storage(move(other.storage)) {
-				if (m_callable) {
-					other.m_callable = nullptr;
-				}
-			}
+			FunctionBase() = delete;
 
 			template <
 				typename F,
@@ -72,7 +67,14 @@ namespace core::containers {
 			FunctionBase(F&& f) {
 				if (auto* binding = m_storage.bind(forward<F>(f))) {
 					using DecayedFunctorType = PointerRemoved<decltype(binding)>;
-					m_callable = &FunctionRefCaller<DecayedFunctorType, R (Param...)>::call;
+					m_callable = &FunctionRefCaller<DecayedFunctorType, R(Param...)>::call;
+				}
+			}
+
+			FunctionBase(FunctionBase&& other) noexcept
+				: m_callable(other.m_callable), m_storage(move(other.m_storage)) {
+				if (m_callable) {
+					other.m_callable = nullptr;
 				}
 			}
 
@@ -92,6 +94,13 @@ namespace core::containers {
 
 		struct RefStorage {
 			RefStorage() = default;
+
+			RefStorage(RefStorage&& s) : m_ptr(s.m_ptr) { 
+				s.m_ptr = nullptr; 
+			}
+
+			NO_COPY(RefStorage);
+
 			template <typename F>
 			ReferenceRemoved<F>* bind(F&& f) {
 				m_ptr = (void*)&f;
@@ -104,6 +113,7 @@ namespace core::containers {
 		};
 
 		struct FunctionWrapperInterface {
+			virtual void* ptr() = 0;
 			virtual ~FunctionWrapperInterface() = default;
 		};
 
@@ -112,6 +122,9 @@ namespace core::containers {
 			template <typename... A>
 			explicit FunctionWrapper(A&&... args) : t(forward<A>(args)...) {}
 
+			virtual void* ptr() override { return &t; }
+			virtual ~FunctionWrapper() override = default;
+
 			T t;
 		};
 
@@ -119,21 +132,30 @@ namespace core::containers {
 			UniqueStorage() = default;
 			template <typename F>
 			ReferenceRemoved<F>* bind(F&& f) {
-				void* memory = mem::alloc(mem::Layout::single<F>);
-				auto* result = new(memory) F(forward<F>(f));
+				void* memory = mem::alloc(mem::Layout::single<FunctionWrapper<F>>);
+				auto* result = new(memory) FunctionWrapper<F>(forward<F>(f));
 				m_ptr = memory;
 
-				return result;
+				return (ReferenceRemoved<F>*)result->ptr();
+			}
+
+			UniqueStorage(UniqueStorage&& s) : m_ptr(s.m_ptr) {
+				s.m_ptr = nullptr;
 			}
 
 			~UniqueStorage() {
-				auto* f = (FunctionWrapperInterface*)m_ptr;
-				f->~FunctionWrapperInterface();
-				mem::free(m_ptr);
-				m_ptr = nullptr;
+				if (m_ptr) {
+					auto* f = (FunctionWrapperInterface*)m_ptr;
+					f->~FunctionWrapperInterface();
+					mem::free(m_ptr);
+					m_ptr = nullptr;
+				}
 			}
 
-			void* ptr() const { return m_ptr; }
+			void* ptr() const { 
+				auto* f = (FunctionWrapperInterface*)m_ptr;
+				return f->ptr();
+			}
 		private:
 			void* m_ptr = nullptr;
 		};
@@ -167,6 +189,8 @@ namespace core::containers {
 		using Super = hidden::FunctionBase<hidden::RefStorage, Func>;
 	
 	public:
+		using Result = Super::Result;
+
 		template <
 			typename Functor,
 			typename = EnabledIf<
@@ -187,6 +211,8 @@ namespace core::containers {
 		using Super = hidden::FunctionBase<hidden::UniqueStorage, Func>;
 
 	public:
+		using Result = Super::Result;
+
 		template <
 			typename Functor,
 			typename = EnabledIf<
@@ -195,10 +221,8 @@ namespace core::containers {
 			>
 		>
 		Function(Functor&& f) : Super(forward<Functor>(f)) { }
-		Function(const Function&) = default;
-
-		Function& operator=(const Function&) const = delete;
-
+		Function(Function&& move) = default;
+		NO_COPY(Function);
 		~Function() = default;
 	};
 }

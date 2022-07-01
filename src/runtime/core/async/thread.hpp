@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../templates/type_traits.hpp"
+#include "../containers/function.hpp"
 
 namespace core::async {
     class JoinHandle;
@@ -34,22 +34,14 @@ namespace core::async {
     private:
         inline explicit JoinHandle(void* handle, Thread::Id id) : m_thread(handle, id), m_joined(false) {}
 
-        friend JoinHandle spawn_thread(struct ThreadSpawnInfo info);
+        friend JoinHandle spawn_thread(Function<void()>&&);
 
         Thread m_thread;
         bool m_joined;
     };
 
 
-    struct ThreadSpawnInfo {
-        void (*proc)(void* param) = nullptr;
-        void* param = nullptr;
-
-		ThreadSpawnInfo() = default;
-        inline ThreadSpawnInfo(void (*_proc)(void* param)) : proc(_proc) {}
-        inline explicit ThreadSpawnInfo(void (*_proc)(void* param), void* _param) : proc(_proc), param(_param) {}
-    };
-    ALLOW_UNUSED JoinHandle spawn_thread(ThreadSpawnInfo info);
+    ALLOW_UNUSED JoinHandle spawn_thread(Function<void()>&& spawn);
     ALLOW_UNUSED Thread current_thread();
 
 	NO_DISCARD u32 logical_core_count();
