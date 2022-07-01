@@ -26,10 +26,10 @@ namespace core::async {
 		static JobSystem init() {
 			auto count = logical_core_count();
 
-			#if PLATFORM_WIN32
+#if PLATFORM_WIN32
 			// Core 0 is used for interupts 
 			count -= 1;
-			#endif
+#endif
 
 			Array<Thread> threads;
 			threads.reserve(count);

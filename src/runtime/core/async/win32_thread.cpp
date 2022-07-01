@@ -54,6 +54,6 @@ namespace core::async {
 	u32 logical_core_count() {
 		SYSTEM_INFO info = {};
 		GetSystemInfo(&info);
-		return 0;
+		return (u32)info.dwNumberOfProcessors;
 	}
 }

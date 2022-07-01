@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 namespace core::async {
 	struct Job {
 		void (*task)(void* param) = nullptr;
