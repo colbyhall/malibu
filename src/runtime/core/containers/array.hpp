@@ -118,7 +118,7 @@ namespace core::containers {
 				mem::set(src, 0, sizeof(T));
 			}
 
-			new (src) T(core::move(item));
+			new (src) T(core::forward<T>(item));
 			m_len += 1;
 		}
 

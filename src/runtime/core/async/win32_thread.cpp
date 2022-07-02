@@ -23,16 +23,16 @@ namespace core::async {
     }
 
     static DWORD WINAPI ThreadProc(_In_ LPVOID lpParameter) {
-        auto& info = *reinterpret_cast<Function<void()>*>(lpParameter);
+        auto& info = *reinterpret_cast<Thread::Function*>(lpParameter);
 		info();
 		info.~Function();
         mem::free(&info);
         return 0;
     }
 
-    JoinHandle spawn_thread(Function<void()>&& spawn) {
-		Function<void()>* param = mem::alloc<Function<void()>>();
-		new(param) Function<void()>(forward<Function<void()>>(spawn));
+    JoinHandle Thread::spawn(bool start, Thread::Function&& spawn) {
+		Thread::Function* param = mem::alloc<Thread::Function>();
+		new(param) Thread::Function(forward<Thread::Function>(spawn));
 
         DWORD id;
         HANDLE handle = CreateThread(
@@ -47,9 +47,13 @@ namespace core::async {
         return JoinHandle { handle, id };
     }
 
-    Thread current_thread() {
+    Thread Thread::current() {
         return Thread{ GetCurrentThread(), GetCurrentThreadId() };
     }
+
+	void Thread::resume() const {
+		ResumeThread(m_handle);
+	}
 
 	u32 logical_core_count() {
 		SYSTEM_INFO info = {};

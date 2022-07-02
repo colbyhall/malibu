@@ -13,7 +13,7 @@ namespace core::async {
             CacheLinePad() : internal() {}
         };
         struct Cell {
-            Atomic<usize> sequence;
+            Atomic<int> sequence;
             Option<T> data;
         };
 
@@ -25,10 +25,10 @@ namespace core::async {
             Cell* buffer = mem::alloc<Cell>(mem::Layout::array<Cell>(size));
             for (usize i = 0; i < size; ++i) {
                 Cell& cell = buffer[i];
-                cell.sequence.store(i, Order::Relaxed);
+                cell.sequence.store((int)i, Order::Relaxed);
             }
 
-            return MPMCQueue(buffer, size);
+            return MPMCQueue(buffer, (int)size);
         }
 
 		NO_COPY(MPMCQueue);
@@ -63,7 +63,7 @@ namespace core::async {
             }
         }
 
-        bool push(T&& t) {
+        bool push(T&& t) const {
             Cell* cell = nullptr;
             auto pos = m_enqueue_pos.load();
             for(;;) {
@@ -82,12 +82,12 @@ namespace core::async {
             return true;
         }
 
-		inline bool push(const T& t) {
+		inline bool push(const T& t) const {
 			T copy = t;
 			return push(core::move(copy));
 		}
 
-        Option<T> pop() {
+        Option<T> pop() const {
             Cell* cell = nullptr;
             auto pos = m_dequeue_pos.load();
             for (;;) {
@@ -98,17 +98,16 @@ namespace core::async {
                 if (dif == 0) {
                     if (!m_dequeue_pos.compare_exchange_weak(pos, pos + 1).is_set())
                         break;
-                } else if (dif < 0) return Option<T> {};
+                } else if (dif < 0) return Option<T>{};
                 else pos = m_dequeue_pos.load();
-
-                T t = cell->data.unwrap();
-                cell->sequence.store(pos + m_buffer_mask + 1);
-                return t;
             }
+			T t = cell->data.unwrap();
+			cell->sequence.store(pos + m_buffer_mask + 1);
+			return t;
         }
 
     private:
-        inline explicit MPMCQueue(Cell* buffer, usize size) :
+        inline explicit MPMCQueue(Cell* buffer, int size) :
             m_buffer(buffer),
             m_buffer_mask(size - 1),
             m_enqueue_pos(0),
@@ -116,11 +115,11 @@ namespace core::async {
 
         ALLOW_UNUSED CacheLinePad pad0;
         Cell* m_buffer;
-		usize m_buffer_mask;
+		int m_buffer_mask;
         ALLOW_UNUSED CacheLinePad pad1;
-        Atomic<u32> m_enqueue_pos;
+        Atomic<int> m_enqueue_pos;
         ALLOW_UNUSED CacheLinePad pad2;
-        Atomic<u32> m_dequeue_pos;
+        Atomic<int> m_dequeue_pos;
         ALLOW_UNUSED CacheLinePad pad3;
     };
 }

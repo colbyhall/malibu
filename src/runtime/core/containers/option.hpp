@@ -9,6 +9,7 @@ namespace core::containers {
 	class Option {
 	public:
 		inline constexpr explicit Option() : m_set(false), m_data() {}
+
 		inline Option(T&& t) : m_set(true), m_data() {
 			auto* p = &m_data[0];
 			new (p) T(core::forward<T>(t));

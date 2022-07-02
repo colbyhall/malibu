@@ -16,12 +16,14 @@ namespace core::async {
 	constexpr usize LOW_PRIORITY_SIZE = 1024;
 
 	struct JobSystem {
-		Array<Thread> threads;
+		Array<JoinHandle> threads;
 		Array<Fiber> fibers;
 
 		JobQueue high_queue;
 		JobQueue normal_queue;
 		JobQueue low_queue;
+
+		Atomic<bool> running;
 	
 		static JobSystem init() {
 			auto count = logical_core_count();
@@ -31,8 +33,15 @@ namespace core::async {
 			count -= 1;
 #endif
 
-			Array<Thread> threads;
+			Array<JoinHandle> threads;
 			threads.reserve(count);
+
+			for (u32 i = 0; i < count; ++i) {
+				auto thread = Thread::spawn(false, []() {
+					JobSystem::the().work_cycle();
+				});
+				threads.push(core::move(thread));
+			}
 
 			Array<Fiber> fibers;
 			fibers.reserve(NUM_FIBERS);
@@ -46,14 +55,65 @@ namespace core::async {
 				core::move(fibers),
 				core::move(high_queue),
 				core::move(normal_queue),
-				core::move(low_queue)
+				core::move(low_queue),
+				true
 			};
 		}
 
-		static const JobSystem& the() {
+		static JobSystem const& the() {
 			static JobSystem it = init();
+			static bool post_init = false;
+			if (!post_init) {
+				post_init = true;
+
+
+			}
 			return it;
+		}
+
+		Option<Job> find_work() const {
+			// High priority task override waiting fibers
+			if (auto high = high_queue.pop()) return high.unwrap();
+
+			// TODO: Waiting list
+
+			if (auto normal = normal_queue.pop()) return normal.unwrap();
+			if (auto low = low_queue.pop()) return low.unwrap();
+
+			return Option<Job> {};
+		}
+
+		void work_cycle() const {
+			while (running.load()) {
+				// Look for work
+				Option<Job> job;
+				{
+					// High priority task override waiting fibers
+					if (auto high = high_queue.pop()) job = high.unwrap();
+
+					// TODO: Waiting list
+
+					if (auto normal = normal_queue.pop()) job = normal.unwrap();
+					if (auto low = low_queue.pop()) job = low.unwrap();
+				}
+
+				if (job) {
+					auto work = job.unwrap();
+					work();
+				} else {
+					// TODO: Put thread to sleep for some time. We can't have a total event based system as we want to supporter many different types of waiting fibers other than counters
+				}
+			}
 		}
 	};
 
+	void schedule(Job&& job) {
+		auto& system = JobSystem::the();
+		system.normal_queue.push(core::forward<Job>(job));
+	}
+
+	void shutdown() {
+		auto& system = JobSystem::the();
+		system.running.store(false);
+	}
 }

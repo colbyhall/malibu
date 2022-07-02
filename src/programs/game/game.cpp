@@ -6,8 +6,7 @@
 
 #include "containers/function.hpp"
 
-#include "async/mpmc.hpp"
-#include "async/thread.hpp"
+#include "async/job.hpp"
 
 using namespace core;
 using namespace core::window;
@@ -27,6 +26,7 @@ static bool g_running = true;
 void window_callback(WindowHandle window, const WindowEvent& event) {
 	if (event.type == WindowEventType::ExitRequested || event.type == WindowEventType::Closed) {
 		g_running = false;
+		async::shutdown();
 	}
 }
 
@@ -52,15 +52,17 @@ int WINAPI WinMain(
 		.visibility = WindowVisibility::Visible,
 	}).unwrap();
 
-	// auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
-
-    auto foo = async::MPMCQueue<int>::make(512);
-	for (int i = 0; i < 128; ++i) foo.push(i);
-
-	const auto count = async::logical_core_count();
-
-	auto thread = async::spawn_thread([]() {
-		OutputDebugStringA("Hello from another thread\n");
+	async::schedule([]() {
+		OutputDebugStringA("hello world1\n");
+		async::schedule([]() {
+			OutputDebugStringA("hello world2\n");
+		});
+	});
+	async::schedule([]() {
+		OutputDebugStringA("hello world3\n");
+	});
+	async::schedule([]() {
+		OutputDebugStringA("hello world4\n");
 	});
 
     auto& context = gpu::Context::the();

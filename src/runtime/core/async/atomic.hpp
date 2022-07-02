@@ -16,7 +16,7 @@ namespace core::async {
         Atomic() noexcept = default;
         constexpr Atomic(T desired) noexcept : m_atomic(desired) {}
 
-        inline void store(T desired, Order order = Order::SequentiallyConsistent) noexcept {
+        inline void store(T desired, Order order = Order::SequentiallyConsistent) const noexcept {
             m_atomic.store(desired, to_std(order));
         }
 
@@ -24,7 +24,7 @@ namespace core::async {
             return m_atomic.load(to_std(order));
         }
 
-        NO_DISCARD inline T exchange(T desired, Order order = Order::SequentiallyConsistent) noexcept {
+        NO_DISCARD inline T exchange(T desired, Order order = Order::SequentiallyConsistent) const noexcept {
             return m_atomic.exchange(desired, to_std(order));
         }
 
@@ -32,7 +32,7 @@ namespace core::async {
             T expected,
             T desired,
             Order order = Order::SequentiallyConsistent
-        ) noexcept {
+        ) const noexcept {
             if (!m_atomic.compare_exchange_weak(expected, desired, to_std(order))) {
                 return expected;
             }
@@ -43,30 +43,30 @@ namespace core::async {
             T expected,
             T desired,
             Order order = Order::SequentiallyConsistent
-        ) noexcept {
+        ) const noexcept {
             if (!m_atomic.compare_exchange_strong(expected, desired, to_std(order))) {
                 return expected;
             }
             return Option<T> {};
         }
 
-        inline T fetch_add(T arg, Order order = Order::SequentiallyConsistent) noexcept {
+        inline T fetch_add(T arg, Order order = Order::SequentiallyConsistent) const noexcept {
             return m_atomic.fetch_add(arg, to_std(order));
         }
 
-        inline T fetch_sub(T arg, Order order = Order::SequentiallyConsistent) noexcept {
+        inline T fetch_sub(T arg, Order order = Order::SequentiallyConsistent) const noexcept {
             return m_atomic.fetch_sub(arg, to_std(order));
         }
 
-        inline T fetch_and(T arg, Order order = Order::SequentiallyConsistent) noexcept {
+        inline T fetch_and(T arg, Order order = Order::SequentiallyConsistent) const noexcept {
             return m_atomic.fetch_and(arg, to_std(order));
         }
 
-        inline T fetch_or(T arg, Order order = Order::SequentiallyConsistent) noexcept {
+        inline T fetch_or(T arg, Order order = Order::SequentiallyConsistent) const noexcept {
             return m_atomic.fetch_or(arg, to_std(order));
         }
 
-        inline T fetch_xor(T arg, Order order = Order::SequentiallyConsistent) noexcept {
+        inline T fetch_xor(T arg, Order order = Order::SequentiallyConsistent) const noexcept {
             return m_atomic.fetch_xor(arg, to_std(order));
         }
 
@@ -79,6 +79,6 @@ namespace core::async {
             return convert[(u8)order];
         }
 
-        std::atomic<T> m_atomic;
+        mutable std::atomic<T> m_atomic;
     };
 }
