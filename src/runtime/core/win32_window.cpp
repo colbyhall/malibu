@@ -109,4 +109,24 @@ namespace core::window {
 		const u32 height = rect.bottom - rect.top;
 		return { width, height };
 	}
+
+	bool Window::set_visibility(WindowVisibility visibility) {
+		int show = SW_HIDE;
+		switch (visibility) {
+		case WindowVisibility::Default:
+			show = SW_SHOWDEFAULT;
+			break;
+		case WindowVisibility::Visible:
+			show = SW_SHOWNORMAL;
+			break;
+		case WindowVisibility::Maximized:
+			show = SW_SHOWMAXIMIZED;
+			break;
+		case WindowVisibility::Minimized:
+			show = SW_SHOWMINIMIZED;
+			break;
+		}
+
+		return ShowWindow((HWND)m_handle, show) > 0;
+	}
 }

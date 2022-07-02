@@ -37,6 +37,7 @@ namespace core::window {
 	class Window {
 	public:
 		static Option<Window> make(const WindowConfig& config);
+		static void pump_events(); 
 
 		NO_COPY(Window);
 
@@ -52,11 +53,10 @@ namespace core::window {
 			return *this;
 		}
 
-		static void pump_events();
+		bool set_visibility(WindowVisibility visibility);
 
 		inline WindowHandle handle() const { return m_handle; }
-
-		Vec2u32 client_size() const;
+		NO_DISCARD Vec2u32 client_size() const;
 
 	private:
 		WindowHandle m_handle;

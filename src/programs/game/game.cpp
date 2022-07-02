@@ -49,21 +49,8 @@ int WINAPI WinMain(
 		.size = { 1280, 720 },
 		.title = "Hello World",
 		.callback = window_callback,
-		.visibility = WindowVisibility::Visible,
+		.visibility = WindowVisibility::Hidden,
 	}).unwrap();
-
-	async::schedule([]() {
-		OutputDebugStringA("hello world1\n");
-		async::schedule([]() {
-			OutputDebugStringA("hello world2\n");
-		});
-	});
-	async::schedule([]() {
-		OutputDebugStringA("hello world3\n");
-	});
-	async::schedule([]() {
-		OutputDebugStringA("hello world4\n");
-	});
 
     auto& context = gpu::Context::the();
 	const auto registered = context.register_window(window);
@@ -106,6 +93,7 @@ int WINAPI WinMain(
 
 	auto command_list = gpu::GraphicsCommandList::make();
 
+	bool first_show = true;
 	auto last_frame = Instant::now();
 	while (g_running) {
 		const auto now = Instant::now();
@@ -130,6 +118,10 @@ int WINAPI WinMain(
 
 		command_list.submit();
 		context.present();
+		if (first_show) {
+			first_show = false;
+			window.set_visibility(WindowVisibility::Visible);
+		}
 	}
 
 	return 0;
