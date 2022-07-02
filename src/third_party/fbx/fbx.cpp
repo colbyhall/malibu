@@ -1,6 +1,7 @@
 #include "fbx.hpp"
 #include "core.hpp"
 
+#define FBXSDK_SHARED
 #include "fbxsdk.h"
 
 #include <cstdio>

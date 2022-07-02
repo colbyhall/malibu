@@ -20,5 +20,6 @@ workspace "malibu"
 
 	include "src/runtime"
 	include "src/programs"
+	include "src/third_party"
 
 	flags { "FatalWarnings" }

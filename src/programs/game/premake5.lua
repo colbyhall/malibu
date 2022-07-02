@@ -5,12 +5,12 @@ project "game"
     files { "**.hpp", "**.cpp" }
 
     vpaths { ["*"] = { "**.hpp", "**.cpp" } }
-    includedirs { "../../runtime/*" }
+    includedirs { "../../runtime/*", "../../third_party/*" }
 
-    links { "core", "gpu" }
+    links { "core", "gpu", "fbx" }
 
     cppdialect "C++20"
 
 	flags { "FatalWarnings" }
 
-    debugdir "../../"
+    debugdir "../../../"

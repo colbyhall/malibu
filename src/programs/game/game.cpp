@@ -8,6 +8,8 @@
 
 #include "async/job.hpp"
 
+#include "fbx.hpp"
+
 using namespace core;
 using namespace core::window;
 using namespace core::time;
@@ -55,6 +57,8 @@ int WINAPI WinMain(
     auto& context = gpu::Context::the();
 	const auto registered = context.register_window(window);
 	VERIFY(registered);
+
+	auto mesh = fbx::load_mesh("assets/humanoid.fbx").unwrap();
 
 	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();
 	auto vertex_binary = gpu::compile_hlsl(shader, gpu::ShaderType::Vertex).unwrap();
