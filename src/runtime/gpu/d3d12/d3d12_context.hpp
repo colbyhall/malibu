@@ -73,6 +73,7 @@ public:
 	ComPtr<ID3D12CommandAllocator> command_allocator;
 	ComPtr<ID3D12RootSignature> root_signature;
 	mutable D3D12DescriptorHeap rtv_heap; // TODO: Bindless under lock
+	mutable D3D12DescriptorHeap dsv_heap; // TODO: Bindless under lock
     mutable D3D12DescriptorHeap resource_descriptor_heap;
 
 #if BUILD_DEBUG

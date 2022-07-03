@@ -3,9 +3,7 @@
 #include "containers/unique.hpp"
 #include "resources.hpp"
 
-
 namespace gpu {
-
 	class GraphicsPipeline;
 
 	enum class Layout : u8 {
@@ -28,7 +26,7 @@ namespace gpu {
 
 		virtual void texture_barrier(const Texture& texture, Layout old_layout, Layout new_layout) = 0;
 
-		virtual void begin_render_pass(const Texture& attachment) = 0;
+		virtual void begin_render_pass(const Texture& color, Option<Texture const&> depth) = 0;
 
 		virtual void set_scissor(Option<Rect2f32> scissor) = 0;
 		virtual void clear_color(LinearColor color) = 0;
@@ -73,7 +71,6 @@ namespace gpu {
 			return *this;
 		}
 
-
         inline RenderPassRecorder& push_constants(const void* ptr) {
             m_interface.push_constant(ptr);
             return *this;
@@ -105,8 +102,12 @@ namespace gpu {
 		}
 
 		template <typename Callable>
-		inline GraphicsCommandRecorder& render_pass(const Texture& attachment, Callable&& callable) {
-			m_interface.begin_render_pass(attachment);
+		inline GraphicsCommandRecorder& render_pass(
+			const Texture& color, 
+			Option<const Texture&> depth,
+			Callable&& callable
+		) {
+			m_interface.begin_render_pass(color, depth);
 			RenderPassRecorder recorder(m_interface);
 			callable(recorder);
 			m_interface.end_render_pass();

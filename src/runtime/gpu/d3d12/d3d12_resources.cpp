@@ -27,7 +27,6 @@ D3D12Texture::D3D12Texture(
 
 
 	const DXGI_FORMAT dxgi_format = format_to_dxgi(format);
-	VERIFY(dxgi_format != DXGI_FORMAT_UNKNOWN);
 
 	if (resource == nullptr) {
 		D3D12_RESOURCE_DESC desc = {};
@@ -40,17 +39,39 @@ D3D12Texture::D3D12Texture(
 		desc.SampleDesc.Count = 1;
 		desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-		const D3D12_RESOURCE_STATES initial_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+		if (usage.is_set(gpu::TextureUsage::ColorAttachment)) {
+			desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+		}
+		if (usage.is_set(gpu::TextureUsage::DepthAttachment)) {
+			desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+		}
+
+		D3D12_RESOURCE_STATES initial_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+		if (usage.is_set(gpu::TextureUsage::DepthAttachment)) {
+			initial_state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		}
 
 		D3D12_HEAP_PROPERTIES heap = {};
 		heap.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+		bool optimized_clear = usage.is_set(gpu::TextureUsage::ColorAttachment);
+		optimized_clear |= usage.is_set(gpu::TextureUsage::DepthAttachment);
+
+		D3D12_CLEAR_VALUE clear = {};
+		D3D12_CLEAR_VALUE* pclear = nullptr;
+		if (optimized_clear) {
+			clear.Color[3] = 1.f;
+			clear.Format = dxgi_format;
+			clear.DepthStencil.Depth = 1.f;
+			pclear = &clear;
+		}
 
 		throw_if_failed(context.device->CreateCommittedResource(
 			&heap,
 			D3D12_HEAP_FLAG_NONE,
 			&desc,
 			initial_state,
-			nullptr,
+			pclear,
 			IID_PPV_ARGS(&m_resource)
 		));		
 	} else {
@@ -60,6 +81,10 @@ D3D12Texture::D3D12Texture(
 	if (usage.is_set(gpu::TextureUsage::ColorAttachment)) {
 		m_rtv_handle = context.rtv_heap.alloc();
 		context.device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtv_handle);
+	}
+	if (usage.is_set(gpu::TextureUsage::DepthAttachment)) {
+		m_dsv_handle = context.dsv_heap.alloc();
+		context.device->CreateDepthStencilView(m_resource.Get(), nullptr, m_dsv_handle);
 	}
 }
 

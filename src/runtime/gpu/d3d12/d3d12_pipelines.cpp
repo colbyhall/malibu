@@ -154,7 +154,9 @@ D3D12GraphicsPipeline::D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& confi
 
 	// DepthStencilState
 	{
-		desc.DepthStencilState.DepthEnable = FALSE;
+		desc.DepthStencilState.DepthEnable = TRUE;
+		desc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+		desc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
 		desc.DepthStencilState.StencilEnable = FALSE;
 	}
 
@@ -215,6 +217,10 @@ D3D12GraphicsPipeline::D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& confi
 	desc.NumRenderTargets = (UINT)m_config.color_attachments.len();
 	for (int i = 0; i < m_config.color_attachments.len(); ++i) {
 		desc.RTVFormats[i] = format_to_dxgi(m_config.color_attachments[i]);
+	}
+
+	if (m_config.depth_attachment) {
+		desc.DSVFormat = format_to_dxgi(m_config.depth_attachment.as_ref().unwrap());
 	}
 
 	desc.SampleMask = UINT_MAX;

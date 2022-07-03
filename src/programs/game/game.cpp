@@ -39,7 +39,7 @@ int WINAPI WinMain(
 	_In_ int nShowCmd
 ) {
 	auto window = Window::make({
-		.size = { 1280, 720 },
+		.size = { 1920, 1080 },
 		.title = "Hello World",
 		.callback = window_callback,
 		.visibility = WindowVisibility::Hidden,
@@ -56,7 +56,7 @@ int WINAPI WinMain(
 	const auto registered = context.register_window(window);
 	VERIFY(registered);
 
-	auto mesh = fbx::load_mesh("assets/humanoid.fbx").unwrap();
+	auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
 
 	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();
 	auto vertex_binary = gpu::compile_hlsl(shader, gpu::ShaderType::Vertex).unwrap();
@@ -67,6 +67,7 @@ int WINAPI WinMain(
 
 	gpu::GraphicsPipelineConfig config = {};
 	config.color_attachments.push(gpu::Format::RGBA_U8);
+	config.depth_attachment = gpu::Format::Depth24_Stencil8;
 	config.vertex_shader = core::move(vertex_shader);
 	config.pixel_shader = core::move(pixel_shader);
 
@@ -95,39 +96,64 @@ int WINAPI WinMain(
 
 	auto command_list = gpu::GraphicsCommandList::make();
 
+	auto depth_buffer = gpu::Texture::make(
+		gpu::TextureUsage::DepthAttachment, 
+		gpu::Format::Depth24_Stencil8,
+		{ 1920, 1080, 1 }
+	);
+
 	bool first_show = true;
 	auto last_frame = Instant::now();
+	f32 time = 0.f;
 	while (g_running) {
 		const auto now = Instant::now();
 		const auto delta = now.duration_since(last_frame);
+		time += delta.as_secs_f32();
 		last_frame = now;
 
 		Window::pump_events();
 
 		command_list.record([&](gpu::GraphicsCommandRecorder& recorder){
 			auto& back_buffer = context.back_buffer();
-			recorder.texture_barrier(back_buffer, gpu::Layout::Present, gpu::Layout::ColorAttachment);
-			recorder.render_pass(back_buffer, [&](gpu::RenderPassRecorder& rp) {
-				const auto client = window.client_size().cast<f32>();
-                const auto projection = Mat4f32::perspective(
-					90.f,
-					client.width / client.height, 
-					0.1f, 
-					1000.f
-				); 
-				const auto view = Mat4f32::transform(
-					{ 0, -100, -100 }, 
-					Quatf32::identity(),
-					1.f
-				);
-				const auto local_to_projection = projection * view;
-				rp.set_pipeline(pipeline);
-                rp.push_constants(&local_to_projection);
-				rp.set_vertices(vertices);
-				rp.set_indices(indices);
-				rp.draw_index(indices.len());
-			});
-			recorder.texture_barrier(back_buffer, gpu::Layout::ColorAttachment, gpu::Layout::Present);
+			recorder.texture_barrier(
+				back_buffer, 
+				gpu::Layout::Present, 
+				gpu::Layout::ColorAttachment
+			);
+
+			recorder.render_pass(
+				back_buffer, 
+				depth_buffer, 
+				[&](gpu::RenderPassRecorder& rp) {
+					const auto client = window.client_size().cast<f32>();
+					const auto projection = Mat4f32::perspective(
+						90.f,
+						client.width / client.height, 
+						0.1f, 
+						1000.f
+					); 
+
+					const auto x = math::cos(time) * 2.f;
+					const auto y = math::sin(time) * 2.f;
+					const auto view = Mat4f32::transform(
+						{ x, y, -4 }, 
+						Quatf32::identity(),
+						1.f
+					);
+					const auto local_to_projection = projection * view;
+					rp.set_pipeline(pipeline);
+					rp.push_constants(&local_to_projection);
+					rp.set_vertices(vertices);
+					rp.set_indices(indices);
+					rp.draw_index(indices.len());
+				}
+			);
+
+			recorder.texture_barrier(
+				back_buffer, 
+				gpu::Layout::ColorAttachment, 
+				gpu::Layout::Present
+			);
 		});
 
 		command_list.submit();

@@ -192,8 +192,24 @@ D3D12Context::D3D12Context() {
 			IID_PPV_ARGS(&root_signature)
 		));
 
-		rtv_heap = D3D12DescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2048, false);
-        resource_descriptor_heap = D3D12DescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 4096, true);
+		rtv_heap = D3D12DescriptorHeap(
+			device, 
+			D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 
+			2048, 
+			false
+		);
+		dsv_heap = D3D12DescriptorHeap(
+			device, 
+			D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 
+			2048, 
+			false
+		);
+        resource_descriptor_heap = D3D12DescriptorHeap(
+			device, 
+			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 
+			4096, 
+			true
+		);
 	}
 }
 

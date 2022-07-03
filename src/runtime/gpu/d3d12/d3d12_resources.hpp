@@ -22,8 +22,14 @@ inline DXGI_FORMAT format_to_dxgi(gpu::Format format) {
 			break;
 		// BGR_U8_SRGB,
 		// Depth16,
-		// Depth24_Stencil8,
+		case gpu::Format::Depth24_Stencil8:
+			dxgi_format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			break;
+		default:
+			TODO("Unsupported format type");
+			break;
 	}
+
 	return dxgi_format;
 }
 
@@ -36,6 +42,18 @@ public:
 		ComPtr<ID3D12Resource> resource = nullptr
 	);
 
+	NO_COPY(D3D12Texture);
+	inline D3D12Texture(D3D12Texture&& move) noexcept : 
+		m_resource(core::move(move.m_resource)),
+		m_usage(move.m_usage),
+		m_format(move.m_format),
+		m_size(move.m_size),
+		m_rtv_handle(move.m_rtv_handle),
+		m_dsv_handle(move.m_dsv_handle)
+	{
+		move.m_resource = nullptr;
+	}
+
 	BitFlag<gpu::TextureUsage> usage() const override { return m_usage; }
 	gpu::Format format() const override { return m_format; }
 	Vec3u32 size() const override { return m_size; }
@@ -46,6 +64,7 @@ public:
 	Vec3u32 m_size;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE m_rtv_handle;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_dsv_handle;
 };
 
 class D3D12Buffer : public gpu::BufferInterface {
@@ -56,6 +75,17 @@ public:
 		usize len, 
 		usize stride
 	);
+
+	NO_COPY(D3D12Buffer);
+	inline D3D12Buffer(D3D12Buffer&& move) noexcept :
+		m_resource(core::move(move.m_resource)),
+		m_usage(move.m_usage),
+		m_kind(move.m_kind),
+		m_len(move.m_len),
+		m_stride(move.m_stride)
+	{
+		move.m_resource = nullptr;
+	}
 
 	BitFlag<gpu::BufferUsage> usage() const override { return m_usage; }
 	gpu::BufferKind kind() const override { return m_kind; }

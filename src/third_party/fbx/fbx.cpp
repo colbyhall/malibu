@@ -58,8 +58,16 @@ namespace fbx {
                         mesh->GetPolygonVertexNormal(j, vertex_index, normal);
                         indices.push((u32)vertices.len());
                         vertices.push(Vertex {
-                            { (f32)control_point[0], (f32)control_point[1], (f32)control_point[2] },
-                             { (f32)normal[0], (f32)normal[1], (f32)normal[2] },
+                            { 
+								(f32)control_point[0], 
+								(f32)control_point[1], 
+								(f32)control_point[2] 
+							},
+                            { 
+								(f32)normal[0], 
+								(f32)normal[1], 
+								(f32)normal[2] 
+							},
                         });
                         // TODO: UV's
                     }
@@ -71,8 +79,16 @@ namespace fbx {
                         FbxVector4 normal;
                         mesh->GetPolygonVertexNormal(j, vertex_index, normal);
                         vertices.push(Vertex {
-                                { (f32)control_point[0], (f32)control_point[1], (f32)control_point[2] },
-                                { (f32)normal[0], (f32)normal[1], (f32)normal[2] },
+                                { 
+									(f32)control_point[0], 
+									(f32)control_point[1], 
+									(f32)control_point[2] 
+								},
+                                { 
+									(f32)normal[0], 
+									(f32)normal[1], 
+									(f32)normal[2] 
+								},
                         });
                         // TODO: UV's
                     }

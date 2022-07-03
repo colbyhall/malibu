@@ -44,17 +44,27 @@ void D3D12GraphicsCommandList::texture_barrier(const gpu::Texture& texture, gpu:
 	m_command_list->ResourceBarrier(1, &barrier);
 }
 
-void D3D12GraphicsCommandList::begin_render_pass(const gpu::Texture& attachment) {
-	{
-		const auto& interface = attachment.interface<D3D12Texture>();
-		m_command_list->OMSetRenderTargets(1, &interface.m_rtv_handle, 0, nullptr);
+void D3D12GraphicsCommandList::begin_render_pass(const gpu::Texture& color, Option<const gpu::Texture&> depth) {
+	const D3D12_CPU_DESCRIPTOR_HANDLE* depth_handle = nullptr;
+	if (depth) {
+		auto& depth_texture = depth.unwrap();
+		auto& interface = depth_texture.interface<D3D12Texture>();
+		depth_handle = &interface.m_dsv_handle;
 	}
+
+	const auto& interface = color.interface<D3D12Texture>();
+	m_command_list->OMSetRenderTargets(
+		1, 
+		&interface.m_rtv_handle, 
+		0, 
+		depth_handle
+	);
 
 	D3D12_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = (f32)attachment.size().width;
-	viewport.Height = (f32)attachment.size().height;
+	viewport.Width = (f32)color.size().width;
+	viewport.Height = (f32)color.size().height;
 	viewport.MinDepth = 0.f;
 	viewport.MaxDepth = 1.f;
 	m_command_list->RSSetViewports(1, &viewport);
@@ -62,13 +72,23 @@ void D3D12GraphicsCommandList::begin_render_pass(const gpu::Texture& attachment)
 	D3D12_RECT rect = {};
 	rect.left = 0;
 	rect.top = 0;
-	rect.bottom = (LONG)attachment.size().height;
-	rect.right = (LONG)attachment.size().width;
+	rect.bottom = (LONG)color.size().height;
+	rect.right = (LONG)color.size().width;
 	m_command_list->RSSetScissorRects(1, &rect);
 
 	const f32 clear_color[] = { 0.05f, 0.05f, 0.05f, 1.0f };
-	const auto& interface = attachment.interface<D3D12Texture>();
 	m_command_list->ClearRenderTargetView(interface.m_rtv_handle, clear_color, 0, nullptr);
+	
+	if (depth_handle) {
+		m_command_list->ClearDepthStencilView(
+			*depth_handle, 
+			D3D12_CLEAR_FLAG_DEPTH,
+			1.f,
+			0,
+			0,
+			nullptr
+		);
+	}
 }
 
 void D3D12GraphicsCommandList::set_scissor(Option<Rect2f32> scissor) {
@@ -76,11 +96,11 @@ void D3D12GraphicsCommandList::set_scissor(Option<Rect2f32> scissor) {
 }
 
 void D3D12GraphicsCommandList::clear_color(LinearColor color) {
-	TODO("");
+	TODO("Need to store the current bound attachements to clear");
 }
 
 void D3D12GraphicsCommandList::clear_depth(f32 depth) {
-	TODO("");
+	TODO("Need to store the current bound attachements to clear");
 }
 
 void D3D12GraphicsCommandList::set_pipeline(const gpu::GraphicsPipeline& pipeline) {

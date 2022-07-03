@@ -37,7 +37,7 @@ public:
 	void copy_buffer_to_texture(const gpu::Texture& dst, const gpu::Buffer& src) override;
 	void copy_buffer_to_buffer(const gpu::Buffer& dst, const gpu::Buffer& src) override;
 	void texture_barrier(const gpu::Texture& texture, gpu::Layout old_layout, gpu::Layout new_layout) override;
-	void begin_render_pass(const gpu::Texture& attachment) override;
+	void begin_render_pass(const gpu::Texture& color, Option<const gpu::Texture&> depth) override;
 	void set_scissor(Option<Rect2f32> scissor) override;
 	void clear_color(LinearColor color) override;
 	void clear_depth(f32 depth) override;
