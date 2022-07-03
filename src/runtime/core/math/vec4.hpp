@@ -15,16 +15,24 @@ namespace core::math {
 		inline constexpr Vec4() : x(0), y(0), z(0), w(0) { }
 		inline constexpr Vec4(T xyzw) : x(xyzw), y(xyzw), z(xyzw), w(xyzw) { }
 		inline constexpr Vec4(T x, T y, T z, T w) : r(x), g(y), b(z), a(w) { }
+		inline constexpr Vec4(Vec3<T> xyz, T w) : r(xyz.x), g(xyz.y), b(xyz.z), a(w) { }
 
-		inline Vec4 operator+(const Vec4<T>& b) const { return { x + b.x, y + b.y, z + b.z, w + b.w }; }
-		inline Vec4 operator-(const Vec4<T>& b) const { return { x - b.x, y - b.y, z - b.z, w - b.w }; }
-		inline Vec4 operator*(const Vec4<T>& b) const { return { x * b.x, y * b.y, z * b.z, w * b.w }; }
-		inline Vec4 operator/(const Vec4<T>& b) const { return { x / b.x, y / b.y, z / b.z, w / b.w }; }
-		inline void operator+=(const Vec4<T>& b) { *this = *this + b; }
-		inline void operator-=(const Vec4<T>& b) { *this = *this - b; }
-		inline void operator*=(const Vec4<T>& b) { *this = *this * b; }
-		inline void operator/=(const Vec4<T>& b) { *this = *this / b; }
+		NO_DISCARD inline T dot(const Vec4& rhs) const;
+
+		inline Vec4 operator+(const Vec4& b) const { return { x + b.x, y + b.y, z + b.z, w + b.w }; }
+		inline Vec4 operator-(const Vec4& b) const { return { x - b.x, y - b.y, z - b.z, w - b.w }; }
+		inline Vec4 operator*(const Vec4& b) const { return { x * b.x, y * b.y, z * b.z, w * b.w }; }
+		inline Vec4 operator/(const Vec4& b) const { return { x / b.x, y / b.y, z / b.z, w / b.w }; }
+		inline void operator+=(const Vec4& b) { *this = *this + b; }
+		inline void operator-=(const Vec4& b) { *this = *this - b; }
+		inline void operator*=(const Vec4& b) { *this = *this * b; }
+		inline void operator/=(const Vec4& b) { *this = *this / b; }
 	};
+
+	template <typename T>
+	inline T Vec4<T>::dot(const Vec4<T>& rhs) const {
+		return x * rhs.x + y * rhs.y + z * rhs.z + w * rhs.w;
+	}
 }
 
 using core::math::Vec4;

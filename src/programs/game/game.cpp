@@ -32,15 +32,6 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 	}
 }
 
-struct Vertex {
-	Vec3f32 position;
-	LinearColor color;
-};
-
-void whatever(FunctionRef<u32()> f) {
-	const auto result = f();
-}
-
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -53,6 +44,13 @@ int WINAPI WinMain(
 		.callback = window_callback,
 		.visibility = WindowVisibility::Hidden,
 	}).unwrap();
+
+	async::schedule([]() {
+		OutputDebugStringA("Hello World\n");
+	});
+
+	Vec3f32 xyz = 0.f;
+	const auto f = xyz.dot(xyz);
 
     auto& context = gpu::Context::the();
 	const auto registered = context.register_window(window);
@@ -73,26 +71,26 @@ int WINAPI WinMain(
 	config.pixel_shader = core::move(pixel_shader);
 
 	config.vertex_primitives.push(gpu::Primitive::Vec3f32);
-	config.vertex_primitives.push(gpu::Primitive::Vec4f32);
+	config.vertex_primitives.push(gpu::Primitive::Vec3f32);
 
 	auto pipeline = gpu::GraphicsPipeline::make(core::move(config));
 
-	auto triangle = gpu::Buffer::make(
+	auto vertices = gpu::Buffer::make(
 		gpu::BufferUsage::Vertex,
 		gpu::BufferKind::Upload,
-		6, sizeof(Vertex)
+		mesh.vertices.len(), sizeof(fbx::Vertex)
 	);
-	triangle.write([](Slice<u8> slice){
-		Vertex vertices[] = {
-            { { -0.5f, -0.5f, 0.f }, LinearColor::WHITE },
-			{ { -0.5f,  0.5f, 0.f }, LinearColor::WHITE },
-			{ {  0.5f,  0.5f, 0.f }, LinearColor::WHITE },
+	vertices.write([&mesh](Slice<u8> slice){
+		mem::copy(slice.ptr(), mesh.vertices.ptr(), slice.len());
+	});
 
-            { { -0.5f, -0.5f, 0.f }, LinearColor::WHITE },
-            { {  0.5f,  0.5f, 0.f }, LinearColor::WHITE },
-            { {  0.5f, -0.5f, 0.f }, LinearColor::WHITE },
-		};
-		core::mem::copy(slice.ptr(), vertices, slice.len());
+	auto indices = gpu::Buffer::make(
+		gpu::BufferUsage::Index,
+		gpu::BufferKind::Upload,
+		mesh.indices.len(), sizeof(u32)
+	);
+	indices.write([&mesh](Slice<u8> slice) {
+		mem::copy(slice.ptr(), mesh.indices.ptr(), slice.len());
 	});
 
 	auto command_list = gpu::GraphicsCommandList::make();
@@ -110,12 +108,24 @@ int WINAPI WinMain(
 			auto& back_buffer = context.back_buffer();
 			recorder.texture_barrier(back_buffer, gpu::Layout::Present, gpu::Layout::ColorAttachment);
 			recorder.render_pass(back_buffer, [&](gpu::RenderPassRecorder& rp) {
-				const auto client = window.client_size().cast<f32>() / 256;
-                const auto identity = Mat4f32::orthographic(client.width, client.height, 0.1f, 100.f);
+				const auto client = window.client_size().cast<f32>();
+                const auto projection = Mat4f32::perspective(
+					90.f,
+					client.width / client.height, 
+					0.1f, 
+					1000.f
+				); 
+				const auto view = Mat4f32::transform(
+					{ 0, -100, -100 }, 
+					Quatf32::identity(),
+					1.f
+				);
+				const auto local_to_projection = projection * view;
 				rp.set_pipeline(pipeline);
-                rp.push_constants(&identity);
-				rp.set_vertices(triangle);
-				rp.draw(triangle.len());
+                rp.push_constants(&local_to_projection);
+				rp.set_vertices(vertices);
+				rp.set_indices(indices);
+				rp.draw_index(indices.len());
 			});
 			recorder.texture_barrier(back_buffer, gpu::Layout::ColorAttachment, gpu::Layout::Present);
 		});

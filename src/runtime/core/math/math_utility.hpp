@@ -7,6 +7,7 @@ namespace core::math {
 	constexpr f32 TAU = PI * 2.0;
 	constexpr f32 DEG_TO_RAD = PI / 180.f;
 	constexpr f32 RAD_TO_DEG = 180.f / PI;
+	constexpr f32 NEAR_ZERO = 1.0e-8f;
 
 	f32 cos(f32 x);
 	f64 cos(f64 x);
@@ -31,4 +32,7 @@ namespace core::math {
 	
 	f32 sqrt(f32 x);
 	f64 sqrt(f64 x);
+
+	f32 fmod(f32 numerator, f32 denominator);
+	f64 fmod(f64 numerator, f64 denominator);
 }

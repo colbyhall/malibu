@@ -86,11 +86,11 @@ void D3D12GraphicsCommandList::clear_depth(f32 depth) {
 void D3D12GraphicsCommandList::set_pipeline(const gpu::GraphicsPipeline& pipeline) {
 	auto& interface = pipeline.interface<D3D12GraphicsPipeline>();
 	m_command_list->SetPipelineState(interface.m_pipeline.Get());
+	m_command_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void D3D12GraphicsCommandList::set_vertices(const gpu::Buffer& buffer) {
 	auto& interface = buffer.interface<D3D12Buffer>();
-	m_command_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	D3D12_VERTEX_BUFFER_VIEW view = {};
 	view.BufferLocation = (UINT)interface.m_resource->GetGPUVirtualAddress();
@@ -100,7 +100,14 @@ void D3D12GraphicsCommandList::set_vertices(const gpu::Buffer& buffer) {
 }
 
 void D3D12GraphicsCommandList::set_indices(const gpu::Buffer& buffer) {
-	TODO("");
+	auto& interface = buffer.interface<D3D12Buffer>();
+
+	D3D12_INDEX_BUFFER_VIEW view = {};
+	view.BufferLocation = (UINT)interface.m_resource->GetGPUVirtualAddress();
+	view.SizeInBytes = (UINT)(interface.m_len * interface.m_stride);
+	view.Format = DXGI_FORMAT_R32_UINT; // All index buffers must be of u32
+
+	m_command_list->IASetIndexBuffer(&view);
 }
 
 void D3D12GraphicsCommandList::push_constant(const void* ptr) {
@@ -108,11 +115,22 @@ void D3D12GraphicsCommandList::push_constant(const void* ptr) {
 }
 
 void D3D12GraphicsCommandList::draw(usize vertex_count, usize first_vertex) {
-	m_command_list->DrawInstanced((UINT)vertex_count, 1, (UINT)first_vertex, 0);
+	m_command_list->DrawInstanced(
+		(UINT)vertex_count, 
+		1, 
+		(UINT)first_vertex, 
+		0
+	);
 }
 
 void D3D12GraphicsCommandList::draw_indexed(usize index_count, usize first_index) {
-	TODO("");
+	m_command_list->DrawIndexedInstanced(
+		(UINT)index_count, 
+		1, 
+		(UINT)first_index, 
+		0, 
+		0
+	);
 }
 
 void D3D12GraphicsCommandList::end_render_pass() {

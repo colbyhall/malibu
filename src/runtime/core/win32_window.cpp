@@ -1,9 +1,27 @@
 #include "window.hpp"
 #include "win32.hpp"
+#include "library.hpp"
+using core::library::Library;
+
+typedef enum PROCESS_DPI_AWARENESS {
+	PROCESS_DPI_UNAWARE,
+	PROCESS_SYSTEM_DPI_AWARE,
+	PROCESS_PER_MONITOR_DPI_AWARE
+} PROCESS_DPI_AWARENESS;
+
+enum MONITOR_DPI_TYPE {
+	MDT_EFFECTIVE_DPI,
+	MDT_ANGULAR_DPI,
+	MDT_RAW_DPI,
+	MDT_DEFAULT
+};
+
+typedef HRESULT(*SetProcessDPIAwareness)(PROCESS_DPI_AWARENESS value);
+typedef HRESULT(*GetDPIForMonitor)(HMONITOR hmonitor, MONITOR_DPI_TYPE dpiType, UINT* dpiX, UINT* dpiY);
 
 namespace core::window {
 	static
-		LRESULT CALLBACK window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+	LRESULT CALLBACK window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		auto callback = (WindowCallback)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
 		const WindowHandle window = hWnd;
 
@@ -20,6 +38,15 @@ namespace core::window {
 	}
 
 	Option<Window> Window::make(const WindowConfig& config) {
+		static bool first = true;
+		static auto shcore = Library::open("shcore.dll");
+		if (first && shcore) {
+			first = false;
+			auto& actual = shcore.as_ref().unwrap();
+			auto SetProcessDpiAwareness = (SetProcessDPIAwareness)actual.find("SetProcessDpiAwareness");
+			if (SetProcessDpiAwareness) SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
+		}
+
 		HINSTANCE hInstance = GetModuleHandleA(nullptr);
 
 		DWORD dwStyle = WS_OVERLAPPEDWINDOW;

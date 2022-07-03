@@ -67,6 +67,13 @@ namespace gpu {
 			return *this;
 		}
 
+		inline RenderPassRecorder& set_indices(const Buffer& buffer) {
+			VERIFY(buffer.usage().is_set(BufferUsage::Index));
+			m_interface.set_indices(buffer);
+			return *this;
+		}
+
+
         inline RenderPassRecorder& push_constants(const void* ptr) {
             m_interface.push_constant(ptr);
             return *this;
@@ -74,6 +81,11 @@ namespace gpu {
 
 		inline RenderPassRecorder& draw(usize vertex_count, usize first_vertex = 0) {
 			m_interface.draw(vertex_count, first_vertex);
+			return *this;
+		}
+
+		inline RenderPassRecorder& draw_index(usize index_count, usize first_index = 0) {
+			m_interface.draw_indexed(index_count, first_index);
 			return *this;
 		}
 

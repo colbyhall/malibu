@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../types.hpp"
+#include "math_utility.hpp"
 
 namespace core::math {
 	template <typename T>
@@ -16,17 +16,17 @@ namespace core::math {
 		inline constexpr Vec2(T xy) : x(xy), y(xy) { }
 		inline constexpr Vec2(T x, T y) : u(x), v(y) { }
 
-		inline Vec2 operator+(const Vec2<T>& b) const { return { x + b.x, y + b.y }; }
-		inline Vec2 operator-(const Vec2<T>& b) const { return { x - b.x, y - b.y }; }
-		inline Vec2 operator*(const Vec2<T>& b) const { return { x * b.x, y * b.y }; }
-		inline Vec2 operator/(const Vec2<T>& b) const { return { x / b.x, y / b.y }; }
-		inline void operator+=(const Vec2<T>& b) { *this = *this + b; }
-		inline void operator-=(const Vec2<T>& b) { *this = *this - b; }
-		inline void operator*=(const Vec2<T>& b) { *this = *this * b; }
-		inline void operator/=(const Vec2<T>& b) { *this = *this / b; }
-
 		template <typename D>
 		inline Vec2<D> cast() const { return { (D)x, (D)y }; }
+
+		inline Vec2 operator+(const Vec2& b) const { return { x + b.x, y + b.y }; }
+		inline Vec2 operator-(const Vec2& b) const { return { x - b.x, y - b.y }; }
+		inline Vec2 operator*(const Vec2& b) const { return { x * b.x, y * b.y }; }
+		inline Vec2 operator/(const Vec2& b) const { return { x / b.x, y / b.y }; }
+		inline void operator+=(const Vec2& b) { *this = *this + b; }
+		inline void operator-=(const Vec2& b) { *this = *this - b; }
+		inline void operator*=(const Vec2& b) { *this = *this * b; }
+		inline void operator/=(const Vec2& b) { *this = *this / b; }
 	};
 }
 
