@@ -1,5 +1,6 @@
 /.vs
 /.idea
+/.vscode
 
 build/vs2005
 build/vs2008

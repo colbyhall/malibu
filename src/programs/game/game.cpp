@@ -25,11 +25,46 @@ using namespace core::time;
 
 static bool g_running = true;
 
+struct Camera {
+	bool capture_mouse = false;
+
+	f32 pitch;
+	f32 yaw;
+
+	Vec3f32 position;
+};
+
+static Camera g_camera = {};
+
+struct Input {
+	bool keys_pressed[256];
+	bool last_keys_pressed[256];
+
+	inline bool was_key_pressed(int key) const {
+		return keys_pressed[key] && !last_keys_pressed[key];
+	}
+};
+
+static Input g_input = {};
+
 void window_callback(WindowHandle window, const WindowEvent& event) {
-	if (event.type == WindowEventType::ExitRequested || event.type == WindowEventType::Closed) {
+	switch (event.type) {
+	case WindowEventType::Closed:
+	case WindowEventType::ExitRequested:
 		g_running = false;
 		async::shutdown();
-	}
+		break;
+	case WindowEventType::MouseMoved:
+		if (g_camera.capture_mouse) {
+			const auto sensitivity = 0.3f;
+			g_camera.pitch -= (f32)event.mouse_moved.delta.y * sensitivity;
+			g_camera.yaw += (f32)event.mouse_moved.delta.x * sensitivity;
+		}
+		break;
+	case WindowEventType::Key:
+		g_input.keys_pressed[event.key.vk] = event.key.pressed;
+		break;
+	};
 }
 
 int WINAPI WinMain(
@@ -111,7 +146,34 @@ int WINAPI WinMain(
 		time += delta.as_secs_f32();
 		last_frame = now;
 
+		const auto dt = delta.as_secs_f32();
+
+		mem::copy(g_input.last_keys_pressed, g_input.keys_pressed, 256);
 		Window::pump_events();
+
+		const auto view_rotation = Quatf32::from_euler(
+			g_camera.pitch,
+			g_camera.yaw,
+			0.f
+		);
+
+		const auto forward = view_rotation.rotate_vector(Vec3f32::forward());
+		const auto right = view_rotation.rotate_vector(Vec3f32::right());
+		const Vec3f32 up = Vec3f32::up();
+
+		const auto speed = 5.f;
+		g_camera.position += forward * speed * (f32)g_input.keys_pressed['W'] * dt;
+		g_camera.position -= forward * speed * (f32)g_input.keys_pressed['S'] * dt;
+
+		g_camera.position += right * speed * (f32)g_input.keys_pressed['D'] * dt;
+		g_camera.position -= right * speed * (f32)g_input.keys_pressed['A'] * dt;
+
+		g_camera.position += up * speed * (f32)g_input.keys_pressed[' '] * dt;
+		g_camera.position -= up * speed * (f32)g_input.keys_pressed['C'] * dt;
+
+		if (g_input.was_key_pressed('P')) {
+			g_camera.capture_mouse = !g_camera.capture_mouse;
+		}
 
 		command_list.record([&](gpu::GraphicsCommandRecorder& recorder){
 			auto& back_buffer = context.back_buffer();
@@ -133,14 +195,23 @@ int WINAPI WinMain(
 						1000.f
 					); 
 
+					const auto axis_adjustment = Mat4f32::from_columns(
+						{ 0.0, 0.0, -1.0, 0.0 },
+						{ 1.0, 0.0, 0.0, 0.0 },
+						{ 0.0, 1.0, 0.0, 0.0 },
+						{ 0.0, 0.0, 0.0, 1.0 }
+					);
+
 					const auto x = math::cos(time) * 2.f;
 					const auto y = math::sin(time) * 2.f;
+
 					const auto view = Mat4f32::transform(
-						{ x, y, -4 }, 
-						Quatf32::identity(),
+						g_camera.position, 
+						view_rotation,
 						1.f
-					);
-					const auto local_to_projection = projection * view;
+					).inverse().unwrap();
+					const auto local_to_projection = projection * axis_adjustment * view;
+
 					rp.set_pipeline(pipeline);
 					rp.push_constants(&local_to_projection);
 					rp.set_vertices(vertices);

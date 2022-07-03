@@ -1,6 +1,9 @@
 #include "window.hpp"
 #include "win32.hpp"
 #include "library.hpp"
+
+#include <cstdio>
+
 using core::library::Library;
 
 typedef enum PROCESS_DPI_AWARENESS {
@@ -19,6 +22,14 @@ enum MONITOR_DPI_TYPE {
 typedef HRESULT(*SetProcessDPIAwareness)(PROCESS_DPI_AWARENESS value);
 typedef HRESULT(*GetDPIForMonitor)(HMONITOR hmonitor, MONITOR_DPI_TYPE dpiType, UINT* dpiX, UINT* dpiY);
 
+// NOTE: Could #include <hidusage.h> for these defines
+#ifndef HID_USAGE_PAGE_GENERIC
+#define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
+#endif
+#ifndef HID_USAGE_GENERIC_MOUSE
+#define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
+#endif
+
 namespace core::window {
 	static
 	LRESULT CALLBACK window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
@@ -32,19 +43,60 @@ namespace core::window {
 			case WM_CLOSE: {
 				callback(window, WindowEvent { WindowEventType::Closed });
 			} break;
+			case WM_INPUT: {
+				UINT dwSize = sizeof(RAWINPUT);
+    			static BYTE lpb[sizeof(RAWINPUT)];
+
+				GetRawInputData(
+					(HRAWINPUT)lParam, 
+					RID_INPUT, 
+					lpb, 
+					&dwSize, 
+					sizeof(RAWINPUTHEADER)
+				);
+
+				RAWINPUT* raw = (RAWINPUT*)lpb;
+				if (raw->header.dwType == RIM_TYPEMOUSE && (raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) == 0 )
+				{
+					const auto x = raw->data.mouse.lLastX;
+					const auto y = raw->data.mouse.lLastY;
+
+					WindowEvent event = {};
+					event.type = WindowEventType::MouseMoved;
+					event.mouse_moved.delta = { x, y };
+					callback(window, event);
+				}
+			} break;
+			case WM_KEYDOWN: {
+				WindowEvent event = {};
+				event.type = WindowEventType::Key;
+				event.key.vk = (int)wParam;
+				event.key.pressed = true;
+				callback(window, event);
+			} break;
+			case WM_KEYUP: {
+				WindowEvent event = {};
+				event.type = WindowEventType::Key;
+				event.key.vk = (int)wParam;
+				callback(window, event);
+			} break;
 		}
 
 		return DefWindowProcA(hWnd, Msg, wParam, lParam);
 	}
 
 	Option<Window> Window::make(const WindowConfig& config) {
+		// TODO: This should be explicit
 		static bool first = true;
 		static auto shcore = Library::open("shcore.dll");
-		if (first && shcore) {
+		if (first) {
 			first = false;
-			auto& actual = shcore.as_ref().unwrap();
-			auto SetProcessDpiAwareness = (SetProcessDPIAwareness)actual.find("SetProcessDpiAwareness");
-			if (SetProcessDpiAwareness) SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
+
+			if (shcore) {
+				auto& actual = shcore.as_ref().unwrap();
+				auto SetProcessDpiAwareness = (SetProcessDPIAwareness)actual.find("SetProcessDpiAwareness");
+				if (SetProcessDpiAwareness) SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
+			}
 		}
 
 		HINSTANCE hInstance = GetModuleHandleA(nullptr);
@@ -58,7 +110,7 @@ namespace core::window {
 		window_class.cbClsExtra = 0;
 		window_class.cbWndExtra = 0;
 		window_class.hInstance = hInstance;
-		window_class.hIcon = ::LoadIcon(hInstance, nullptr);
+		window_class.hIcon = ::LoadIcon(hInstance, 0);
 		window_class.hCursor = ::LoadCursor(nullptr, IDC_ARROW);
 		window_class.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
 		window_class.lpszMenuName = nullptr;
@@ -95,6 +147,14 @@ namespace core::window {
 		);
 		// FIXME: Error
 		VERIFY(handle != INVALID_HANDLE_VALUE);
+
+		RAWINPUTDEVICE rid;
+		rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
+		rid.usUsage = HID_USAGE_GENERIC_MOUSE;
+		rid.dwFlags = RIDEV_INPUTSINK;
+		rid.hwndTarget = handle;
+		const auto rid_success = RegisterRawInputDevices(&rid, 1, sizeof(rid));
+		VERIFY(rid_success); // FIXME: Do error handling
 
 		int show = 0;
 		switch (config.visibility) {

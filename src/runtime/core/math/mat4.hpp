@@ -13,12 +13,14 @@ namespace core::math {
 		};
 
 		inline constexpr Mat4() : x(0), y(0), z(0), w(0) {}
-		static constexpr Mat4 from_columns(Vec4<T> x, Vec4<T> y, Vec4<T> z, Vec4<T> w);
-		static constexpr Mat4 from_rows(Vec4<T> x, Vec4<T> y, Vec4<T> z, Vec4<T> w);
-		static constexpr Mat4 orthographic(T width, T height, T near, T far);
-		static Mat4 perspective(T fov, T aspect_ratio, T near, T far);
-		static Mat4 transform(Vec3<T> position, Quat<T> rotation, Vec3<T> scale);
-		static constexpr Mat4 identity();
+		static NO_DISCARD constexpr Mat4 from_columns(Vec4<T> x, Vec4<T> y, Vec4<T> z, Vec4<T> w);			    
+		static NO_DISCARD constexpr Mat4 from_rows(Vec4<T> x, Vec4<T> y, Vec4<T> z, Vec4<T> w);
+		static NO_DISCARD constexpr Mat4 orthographic(T width, T height, T near, T far);
+		static NO_DISCARD Mat4 perspective(T fov, T aspect_ratio, T near, T far);
+		static NO_DISCARD Mat4 transform(Vec3<T> position, Quat<T> rotation, Vec3<T> scale);
+		static NO_DISCARD constexpr Mat4 identity();
+
+		NO_DISCARD Option<Mat4> inverse() const;
 
 		NO_DISCARD Vec4<T> row(usize index) const;
 
@@ -87,10 +89,138 @@ namespace core::math {
 	template <typename T>
 	Mat4<T> Mat4<T>::transform(Vec3<T> position, Quat<T> rotation, Vec3<T> scale) {
 		Mat4 result;
-		result.x = { rotation.rotate_vector(Vec3<T>::forward()) * scale.x, 0 };
-		result.y = { rotation.rotate_vector(Vec3<T>::right()) * scale.y, 0 };
-		result.z = { rotation.rotate_vector(Vec3<T>::up()) * scale.z, 0 };
+		result.x = { rotation.rotate_vector(Vec3f32::forward()) * scale.x, 0 };
+		result.y = { rotation.rotate_vector(Vec3f32::right()) * scale.y, 0 };
+		result.z = { rotation.rotate_vector(Vec3f32::up()) * scale.z, 0 };
 		result.w = { position, 1 };
+		return result;
+	}
+
+	template <typename T>
+	Option<Mat4<T>> Mat4<T>::inverse() const {
+		Mat4 result = {};
+		result.elements[0] = elements[5] * elements[10] * elements[15]
+			- elements[5] * elements[11] * elements[14]
+			- elements[9] * elements[6] * elements[15]
+			+ elements[9] * elements[7] * elements[14]
+			+ elements[13] * elements[6] * elements[11]
+			- elements[13] * elements[7] * elements[10];
+
+		result.elements[4] = -elements[4] * elements[10] * elements[15]
+			+ elements[4] * elements[11] * elements[14]
+			+ elements[8] * elements[6] * elements[15]
+			- elements[8] * elements[7] * elements[14]
+			- elements[12] * elements[6] * elements[11]
+			+ elements[12] * elements[7] * elements[10];
+
+		result.elements[8] = elements[4] * elements[9] * elements[15]
+			- elements[4] * elements[11] * elements[13]
+			- elements[8] * elements[5] * elements[15]
+			+ elements[8] * elements[7] * elements[13]
+			+ elements[12] * elements[5] * elements[11]
+			- elements[12] * elements[7] * elements[9];
+
+		result.elements[12] = -elements[4] * elements[9] * elements[14]
+			+ elements[4] * elements[10] * elements[13]
+			+ elements[8] * elements[5] * elements[14]
+			- elements[8] * elements[6] * elements[13]
+			- elements[12] * elements[5] * elements[10]
+			+ elements[12] * elements[6] * elements[9];
+
+		result.elements[1] = -elements[1] * elements[10] * elements[15]
+			+ elements[1] * elements[11] * elements[14]
+			+ elements[9] * elements[2] * elements[15]
+			- elements[9] * elements[3] * elements[14]
+			- elements[13] * elements[2] * elements[11]
+			+ elements[13] * elements[3] * elements[10];
+
+		result.elements[5] = elements[0] * elements[10] * elements[15]
+			- elements[0] * elements[11] * elements[14]
+			- elements[8] * elements[2] * elements[15]
+			+ elements[8] * elements[3] * elements[14]
+			+ elements[12] * elements[2] * elements[11]
+			- elements[12] * elements[3] * elements[10];
+
+		result.elements[9] = -elements[0] * elements[9] * elements[15]
+			+ elements[0] * elements[11] * elements[13]
+			+ elements[8] * elements[1] * elements[15]
+			- elements[8] * elements[3] * elements[13]
+			- elements[12] * elements[1] * elements[11]
+			+ elements[12] * elements[3] * elements[9];
+
+		result.elements[13] = elements[0] * elements[9] * elements[14]
+			- elements[0] * elements[10] * elements[13]
+			- elements[8] * elements[1] * elements[14]
+			+ elements[8] * elements[2] * elements[13]
+			+ elements[12] * elements[1] * elements[10]
+			- elements[12] * elements[2] * elements[9];
+
+		result.elements[2] = elements[1] * elements[6] * elements[15]
+			- elements[1] * elements[7] * elements[14]
+			- elements[5] * elements[2] * elements[15]
+			+ elements[5] * elements[3] * elements[14]
+			+ elements[13] * elements[2] * elements[7]
+			- elements[13] * elements[3] * elements[6];
+
+		result.elements[6] = -elements[0] * elements[6] * elements[15]
+			+ elements[0] * elements[7] * elements[14]
+			+ elements[4] * elements[2] * elements[15]
+			- elements[4] * elements[3] * elements[14]
+			- elements[12] * elements[2] * elements[7]
+			+ elements[12] * elements[3] * elements[6];
+
+		result.elements[10] = elements[0] * elements[5] * elements[15]
+			- elements[0] * elements[7] * elements[13]
+			- elements[4] * elements[1] * elements[15]
+			+ elements[4] * elements[3] * elements[13]
+			+ elements[12] * elements[1] * elements[7]
+			- elements[12] * elements[3] * elements[5];
+
+		result.elements[14] = -elements[0] * elements[5] * elements[14]
+			+ elements[0] * elements[6] * elements[13]
+			+ elements[4] * elements[1] * elements[14]
+			- elements[4] * elements[2] * elements[13]
+			- elements[12] * elements[1] * elements[6]
+			+ elements[12] * elements[2] * elements[5];
+
+		result.elements[3] = -elements[1] * elements[6] * elements[11]
+			+ elements[1] * elements[7] * elements[10]
+			+ elements[5] * elements[2] * elements[11]
+			- elements[5] * elements[3] * elements[10]
+			- elements[9] * elements[2] * elements[7]
+			+ elements[9] * elements[3] * elements[6];
+
+		result.elements[7] = elements[0] * elements[6] * elements[11]
+			- elements[0] * elements[7] * elements[10]
+			- elements[4] * elements[2] * elements[11]
+			+ elements[4] * elements[3] * elements[10]
+			+ elements[8] * elements[2] * elements[7]
+			- elements[8] * elements[3] * elements[6];
+
+		result.elements[11] = -elements[0] * elements[5] * elements[11]
+			+ elements[0] * elements[7] * elements[9]
+			+ elements[4] * elements[1] * elements[11]
+			- elements[4] * elements[3] * elements[9]
+			- elements[8] * elements[1] * elements[7]
+			+ elements[8] * elements[3] * elements[5];
+
+		result.elements[15] = elements[0] * elements[5] * elements[10]
+			- elements[0] * elements[6] * elements[9]
+			- elements[4] * elements[1] * elements[10]
+			+ elements[4] * elements[2] * elements[9]
+			+ elements[8] * elements[1] * elements[6]
+			- elements[8] * elements[2] * elements[5];
+
+		const auto det = elements[0] * result.elements[0] + elements[1] * result.elements[4] + elements[2] * result.elements[8] + elements[3] * result.elements[12];
+		if (det == 0.f ) {
+			return Option<Mat4>{};
+		}
+		const auto det_reciprocal = (T)1 / det;
+
+		for (int i = 0; i < 16; ++i) {
+			result.elements[i] *= det_reciprocal;
+		}
+
 		return result;
 	}
 

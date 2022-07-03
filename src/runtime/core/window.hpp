@@ -11,10 +11,25 @@ namespace core::window {
 	enum class WindowEventType {
 		Closed,
 		ExitRequested,
+		MouseMoved,
+		Key,
+	};
+
+	struct MouseMovedEvent {
+		Vec2i32 delta;
+	};
+
+	struct KeyEvent {
+		bool pressed;
+		int vk; // TODO: Make a platform independent key 
 	};
 
 	struct WindowEvent {
 		WindowEventType type;
+		union {
+			MouseMovedEvent mouse_moved;
+			KeyEvent key;
+		};
 	};
 
 	using WindowCallback = void(*)(WindowHandle window, const WindowEvent& event);

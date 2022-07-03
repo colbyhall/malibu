@@ -95,7 +95,6 @@ namespace gpu {
 
 	class GraphicsCommandRecorder {
 	public:
-
 		inline GraphicsCommandRecorder& texture_barrier(const Texture& texture, Layout old_layout, Layout new_layout) {
 			m_interface.texture_barrier(texture, old_layout, new_layout);
 			return *this;

@@ -37,6 +37,8 @@ namespace core::math {
 		inline void operator-=(const Vec3& b) { *this = *this - b; }
 		inline void operator*=(const Vec3& b) { *this = *this * b; }
 		inline void operator/=(const Vec3& b) { *this = *this / b; }
+
+		inline Vec3 operator-() const { return { -x, -y, -z }; }
 	};
 
 	template <typename T> 
