@@ -1,4 +1,4 @@
 [x] Render humanoid mesh
 [x] Depth Buffering
 [ ] Normals
-[ ] Debug Camera Controls
+[x] Debug Camera Controls
