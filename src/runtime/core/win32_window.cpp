@@ -80,6 +80,51 @@ namespace core::window {
 				event.key.vk = (int)wParam;
 				callback(window, event);
 			} break;
+			case WM_LBUTTONDOWN: {
+				SetCapture(hWnd);
+				WindowEvent event = {};
+				event.type = WindowEventType::MouseButton;
+				event.mouse_button.button = MouseButton::Left;
+				event.mouse_button.pressed = true;
+				callback(window, event);
+			} break;
+			case WM_MBUTTONDOWN: {
+				SetCapture(hWnd);
+				WindowEvent event = {};
+				event.type = WindowEventType::MouseButton;
+				event.mouse_button.button = MouseButton::Middle;
+				event.mouse_button.pressed = true;
+				callback(window, event);
+			} break;
+			case WM_RBUTTONDOWN: {
+				SetCapture(hWnd);
+				WindowEvent event = {};
+				event.type = WindowEventType::MouseButton;
+				event.mouse_button.button = MouseButton::Right;
+				event.mouse_button.pressed = true;
+				callback(window, event);
+			} break;
+			case WM_LBUTTONUP: {
+				ReleaseCapture();
+				WindowEvent event = {};
+				event.type = WindowEventType::MouseButton;
+				event.mouse_button.button = MouseButton::Left;
+				callback(window, event);
+			} break;
+			case WM_MBUTTONUP: {
+				ReleaseCapture();
+				WindowEvent event = {};
+				event.type = WindowEventType::MouseButton;
+				event.mouse_button.button = MouseButton::Middle;
+				callback(window, event);
+			} break;
+			case WM_RBUTTONUP: {
+				ReleaseCapture();
+				WindowEvent event = {};
+				event.type = WindowEventType::MouseButton;
+				event.mouse_button.button = MouseButton::Right;
+				callback(window, event);
+			} break;
 		}
 
 		return DefWindowProcA(hWnd, Msg, wParam, lParam);
@@ -215,5 +260,23 @@ namespace core::window {
 		}
 
 		return ShowWindow((HWND)m_handle, show) > 0;
+	}
+
+	bool Window::set_cursor_lock(bool locked) {
+		if (locked) {
+			POINT cursor_pos;
+			GetCursorPos(&cursor_pos);
+			RECT cursor_rect;
+			cursor_rect.left = cursor_pos.x;
+			cursor_rect.right = cursor_pos.x;
+			cursor_rect.bottom = cursor_pos.y;
+			cursor_rect.top = cursor_pos.y;
+			return ClipCursor(&cursor_rect) > 0;
+		}
+		return ClipCursor(nullptr) > 0;
+	}
+
+	void Window::set_cursor_visbility(bool visible) {
+		ShowCursor(visible);
 	}
 }

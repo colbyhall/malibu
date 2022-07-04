@@ -47,6 +47,8 @@ struct Input {
 
 static Input g_input = {};
 
+static Option<Window> g_window;
+
 void window_callback(WindowHandle window, const WindowEvent& event) {
 	switch (event.type) {
 	case WindowEventType::Closed:
@@ -64,6 +66,14 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 	case WindowEventType::Key:
 		g_input.keys_pressed[event.key.vk] = event.key.pressed;
 		break;
+	case WindowEventType::MouseButton:
+		if (event.mouse_button.button == window::MouseButton::Right)  {
+			g_camera.capture_mouse = event.mouse_button.pressed;
+			auto& win = g_window.as_ref().unwrap();
+			win.set_cursor_lock(g_camera.capture_mouse);
+			win.set_cursor_visbility(!g_camera.capture_mouse);
+		}
+		break;
 	};
 }
 
@@ -73,22 +83,15 @@ int WINAPI WinMain(
 	_In_ LPSTR lpCmdLine,
 	_In_ int nShowCmd
 ) {
-	auto window = Window::make({
+	g_window = Window::make({
 		.size = { 1920, 1080 },
-		.title = "Hello World",
+		.title = "Malibu",
 		.callback = window_callback,
 		.visibility = WindowVisibility::Hidden,
 	}).unwrap();
 
-	async::schedule([]() {
-		OutputDebugStringA("Hello World\n");
-	});
-
-	Vec3f32 xyz = 0.f;
-	const auto f = xyz.dot(xyz);
-
     auto& context = gpu::Context::the();
-	const auto registered = context.register_window(window);
+	const auto registered = context.register_window(g_window.as_ref().unwrap());
 	VERIFY(registered);
 
 	auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
@@ -114,7 +117,8 @@ int WINAPI WinMain(
 	auto vertices = gpu::Buffer::make(
 		gpu::BufferUsage::Vertex,
 		gpu::BufferKind::Upload,
-		mesh.vertices.len(), sizeof(fbx::Vertex)
+		mesh.vertices.len(), 
+		sizeof(fbx::Vertex)
 	);
 	vertices.write([&mesh](Slice<u8> slice){
 		mem::copy(slice.ptr(), mesh.vertices.ptr(), slice.len());
@@ -123,7 +127,8 @@ int WINAPI WinMain(
 	auto indices = gpu::Buffer::make(
 		gpu::BufferUsage::Index,
 		gpu::BufferKind::Upload,
-		mesh.indices.len(), sizeof(u32)
+		mesh.indices.len(), 
+		sizeof(u32)
 	);
 	indices.write([&mesh](Slice<u8> slice) {
 		mem::copy(slice.ptr(), mesh.indices.ptr(), slice.len());
@@ -159,7 +164,7 @@ int WINAPI WinMain(
 
 		const auto forward = view_rotation.rotate_vector(Vec3f32::forward());
 		const auto right = view_rotation.rotate_vector(Vec3f32::right());
-		const Vec3f32 up = Vec3f32::up();
+		const auto up = Vec3f32::up();
 
 		const auto speed = 5.f;
 		g_camera.position += forward * speed * (f32)g_input.keys_pressed['W'] * dt;
@@ -170,10 +175,6 @@ int WINAPI WinMain(
 
 		g_camera.position += up * speed * (f32)g_input.keys_pressed[' '] * dt;
 		g_camera.position -= up * speed * (f32)g_input.keys_pressed['C'] * dt;
-
-		if (g_input.was_key_pressed('P')) {
-			g_camera.capture_mouse = !g_camera.capture_mouse;
-		}
 
 		command_list.record([&](gpu::GraphicsCommandRecorder& recorder){
 			auto& back_buffer = context.back_buffer();
@@ -187,11 +188,11 @@ int WINAPI WinMain(
 				back_buffer, 
 				depth_buffer, 
 				[&](gpu::RenderPassRecorder& rp) {
-					const auto client = window.client_size().cast<f32>();
+					const auto client = g_window.as_ref().unwrap().client_size().cast<f32>();
 					const auto projection = Mat4f32::perspective(
-						90.f,
+						60.f,
 						client.width / client.height, 
-						0.1f, 
+						0.01f, 
 						1000.f
 					); 
 
@@ -201,9 +202,6 @@ int WINAPI WinMain(
 						{ 0.0, 1.0, 0.0, 0.0 },
 						{ 0.0, 0.0, 0.0, 1.0 }
 					);
-
-					const auto x = math::cos(time) * 2.f;
-					const auto y = math::sin(time) * 2.f;
 
 					const auto view = Mat4f32::transform(
 						g_camera.position, 
@@ -231,7 +229,7 @@ int WINAPI WinMain(
 		context.present();
 		if (first_show) {
 			first_show = false;
-			window.set_visibility(WindowVisibility::Visible);
+			g_window.as_ref().unwrap().set_visibility(WindowVisibility::Visible);
 		}
 	}
 

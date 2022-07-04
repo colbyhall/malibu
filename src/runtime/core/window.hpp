@@ -12,11 +12,24 @@ namespace core::window {
 		Closed,
 		ExitRequested,
 		MouseMoved,
+		MouseButton,
 		Key,
 	};
 
 	struct MouseMovedEvent {
 		Vec2i32 delta;
+	};
+
+	enum class MouseButton : u8 {
+		Left,
+		Middle,
+		Right,
+		Count,
+	};
+
+	struct MouseButtonEvent {
+		bool pressed;
+		MouseButton button;
 	};
 
 	struct KeyEvent {
@@ -28,6 +41,7 @@ namespace core::window {
 		WindowEventType type;
 		union {
 			MouseMovedEvent mouse_moved;
+			MouseButtonEvent mouse_button;
 			KeyEvent key;
 		};
 	};
@@ -69,6 +83,9 @@ namespace core::window {
 		}
 
 		bool set_visibility(WindowVisibility visibility);
+
+		bool set_cursor_lock(bool locked);
+		void set_cursor_visbility(bool visible);
 
 		inline WindowHandle handle() const { return m_handle; }
 		NO_DISCARD Vec2u32 client_size() const;
