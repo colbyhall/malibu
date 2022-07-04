@@ -57,7 +57,6 @@ namespace core::fs {
 
 	class File {
 	public:
-		// TODO: Error handling with core::containers::Result
 		static Result<File, FileOpenError> open(PathView path, BitFlag<FileFlags> flags);
 
 		NO_COPY(File);

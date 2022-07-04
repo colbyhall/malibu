@@ -47,15 +47,16 @@ namespace fbx {
 
             for (int j = 0; j < mesh->GetPolygonCount(); ++j) {
                 const auto size = mesh->GetPolygonSize(j);
-                printf("Index %d: %d\n", j, size);
 
                 // FIXME: Proper polygon triangulation
                 if (size == 3) {
+					const auto start = vertices.len();
                     for (int k = 0; k < size; ++k) {
                         const auto vertex_index = mesh->GetPolygonVertex(j, k);
                         const auto control_point = mesh->GetControlPointAt(vertex_index);
                         FbxVector4 normal;
-                        mesh->GetPolygonVertexNormal(j, vertex_index, normal);
+						
+                        // const bool found = mesh->GetPolygonVertexNormal(j, vertex_index, normal);
                         indices.push((u32)vertices.len());
                         vertices.push(Vertex {
                             { 
@@ -71,8 +72,21 @@ namespace fbx {
                         });
                         // TODO: UV's
                     }
+
+					// HACK: Fix to get normals in temoporarily
+					const auto a = vertices[start + 0].position;
+					const auto b = vertices[start + 1].position;
+					const auto c = vertices[start + 2].position;
+
+					const auto a_to_b = b - a;
+					const auto a_to_c = c - a;
+
+					const auto normal = a_to_c.cross(a_to_b);
+					for (int k = 0; k < size; ++k) {
+						vertices[start + k].normal = normal;
+					}
                 } else if (size == 4) {
-                    const u32 starting = (u32)vertices.len();
+                    const u32 start = (u32)vertices.len();
                     for (int k = 0; k < size; ++k) {
                         const auto vertex_index = mesh->GetPolygonVertex(j, k);
                         const auto control_point = mesh->GetControlPointAt(vertex_index);
@@ -94,14 +108,26 @@ namespace fbx {
                     }
 
                     // First Triangle
-                    indices.push(starting + 0);
-                    indices.push(starting + 1);
-                    indices.push(starting + 2);
+                    indices.push(start + 0);
+                    indices.push(start + 1);
+                    indices.push(start + 2);
 
                     // Second Triangle
-                    indices.push(starting + 0);
-                    indices.push(starting + 2);
-                    indices.push(starting + 3);
+                    indices.push(start + 0);
+                    indices.push(start + 2);
+                    indices.push(start + 3);
+
+					const auto a = vertices[start + 0].position;
+					const auto b = vertices[start + 1].position;
+					const auto c = vertices[start + 2].position;
+
+					const auto a_to_b = b - a;
+					const auto a_to_c = c - a;
+
+					const auto normal = a_to_c.cross(a_to_b);
+					for (int k = 0; k < size; ++k) {
+						vertices[start + k].normal = normal;
+					}
                 }
             }
         }

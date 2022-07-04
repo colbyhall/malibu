@@ -2,7 +2,7 @@
 
 #include "templates/remove_reference.hpp"
 
-namespace core::primitives {
+namespace core::types {
     using u8 = unsigned char;
 	constexpr u8 U8_MIN = 0;
 	constexpr u8 U8_MAX = 0xff;
@@ -64,22 +64,22 @@ namespace core::primitives {
     using NullPtr = decltype(nullptr);
 }
 
-using core::primitives::u8;
-using core::primitives::u16;
-using core::primitives::u32;
-using core::primitives::u64;
-using core::primitives::usize;
+using core::types::u8;
+using core::types::u16;
+using core::types::u32;
+using core::types::u64;
+using core::types::usize;
 
-using core::primitives::i8;
-using core::primitives::i16;
-using core::primitives::i32;
-using core::primitives::i64;
-using core::primitives::isize;
+using core::types::i8;
+using core::types::i16;
+using core::types::i32;
+using core::types::i64;
+using core::types::isize;
 
-using core::primitives::f32;
-using core::primitives::f64;
+using core::types::f32;
+using core::types::f64;
 
-using core::primitives::NullPtr;
+using core::types::NullPtr;
 
 #if defined(_WIN32) || defined(_WIN64)
 	#define PLATFORM_WIN32 1

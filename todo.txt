@@ -2,3 +2,6 @@
 [x] Depth Buffering
 [ ] Normals
 [x] Debug Camera Controls
+[ ] Hookup physx
+[ ] Entity System
+[ ] Serialization
