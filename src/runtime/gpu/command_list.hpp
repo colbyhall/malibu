@@ -100,11 +100,11 @@ namespace gpu {
 			return *this;
 		}
 
-		template <typename Callable>
+		template <typename F>
 		inline GraphicsCommandRecorder& render_pass(
 			const Texture& color, 
 			Option<const Texture&> depth,
-			Callable&& callable
+			F&& callable
 		) {
 			m_interface.begin_render_pass(color, depth);
 			RenderPassRecorder recorder(m_interface);
@@ -124,8 +124,8 @@ namespace gpu {
 	public:
 		static GraphicsCommandList make();
 
-		template <typename Callable>
-		inline void record(Callable&& callable) {
+		template <typename F>
+		inline void record(F&& callable) {
 			Unique<GraphicsCommandListInterface>& interface = m_interface.as_ref().unwrap();
 			interface->begin_recording();
 			GraphicsCommandRecorder recorder(*interface);

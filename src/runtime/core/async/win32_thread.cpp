@@ -34,13 +34,18 @@ namespace core::async {
 		Thread::Function* param = mem::alloc<Thread::Function>();
 		new(param) Thread::Function(forward<Thread::Function>(spawn));
 
+		auto flags = 0;
+		if (!start) {
+			flags = CREATE_SUSPENDED;
+		}
+
         DWORD id;
         HANDLE handle = CreateThread(
             nullptr,
             0,
             &ThreadProc,
             (LPVOID)param,
-            0,
+            flags,
             &id
         );
         VERIFY(handle != nullptr);

@@ -16,6 +16,15 @@ namespace core::async {
         Atomic() noexcept = default;
         constexpr Atomic(T desired) noexcept : m_atomic(desired) {}
 
+		NO_COPY(Atomic);
+
+		inline Atomic(Atomic&& rhs) noexcept 
+			: m_atomic(rhs.m_atomic.load(std::memory_order_relaxed)) {}
+		inline Atomic& operator=(Atomic&& rhs) noexcept {
+			const auto order = std::memory_order_relaxed;
+			m_atomic.store(rhs.m_atomic.load(order), order);
+		}
+
         inline void store(T desired, Order order = Order::SequentiallyConsistent) const noexcept {
             m_atomic.store(desired, to_std(order));
         }

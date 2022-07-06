@@ -139,7 +139,7 @@ namespace core::containers {
 				return (ReferenceRemoved<F>*)result->ptr();
 			}
 
-			UniqueStorage(UniqueStorage&& s) : m_ptr(s.m_ptr) {
+			UniqueStorage(UniqueStorage&& s) noexcept : m_ptr(s.m_ptr) {
 				s.m_ptr = nullptr;
 			}
 
@@ -184,9 +184,9 @@ namespace core::containers {
 		inline constexpr bool func_can_bind_to_functor<void(P...), F> = is_invocable<F, P...>;
 	}
 
-	template <typename Func>
-	class FunctionRef final : public hidden::FunctionBase<hidden::RefStorage, Func> {
-		using Super = hidden::FunctionBase<hidden::RefStorage, Func>;
+	template <typename F>
+	class FunctionRef final : public hidden::FunctionBase<hidden::RefStorage, F> {
+		using Super = hidden::FunctionBase<hidden::RefStorage, F>;
 	
 	public:
 		using Result = Super::Result;
@@ -195,7 +195,7 @@ namespace core::containers {
 			typename Functor,
 			typename = EnabledIf<
 				!is_function_ref<Decayed<Functor>> &&
-				hidden::func_can_bind_to_functor<Func, Decayed<Functor>>
+				hidden::func_can_bind_to_functor<F, Decayed<Functor>>
 			>
 		>
 		FunctionRef(Functor&& f) : Super(forward<Functor>(f)) { }
@@ -206,9 +206,9 @@ namespace core::containers {
 		~FunctionRef() = default;
 	};
 
-	template <typename Func>
-	class Function final : public hidden::FunctionBase<hidden::UniqueStorage, Func> {
-		using Super = hidden::FunctionBase<hidden::UniqueStorage, Func>;
+	template <typename F>
+	class Function final : public hidden::FunctionBase<hidden::UniqueStorage, F> {
+		using Super = hidden::FunctionBase<hidden::UniqueStorage, F>;
 
 	public:
 		using Result = Super::Result;
@@ -217,7 +217,7 @@ namespace core::containers {
 			typename Functor,
 			typename = EnabledIf<
 				!is_function<Decayed<Functor>> &&
-				hidden::func_can_bind_to_functor<Func, Decayed<Functor>>
+				hidden::func_can_bind_to_functor<F, Decayed<Functor>>
 			>
 		>
 		Function(Functor&& f) : Super(forward<Functor>(f)) { }

@@ -1,7 +1,24 @@
-[x] Render humanoid mesh
-[x] Depth Buffering
-[ ] Normals
-[x] Debug Camera Controls
-[ ] Hookup physx
-[ ] Entity System
-[ ] Serialization
+---------- Month of July 2022 Goals ----------
+
+- Job System
+	- Futures
+	- Paused Polling
+
+- Asset System
+	- Serialization
+	- Data Conversion
+	- GUID based
+	- Handle based
+	- Asset Pipeline
+
+- Game Runtime System
+	- ECS based
+	- Performance Oriented
+
+- Skeletal Animation Prototype
+	- Load Animation
+	- Skin Mesh
+	- Play Animation
+
+- Physics Abstraction
+	- PhysX 4 Implementation

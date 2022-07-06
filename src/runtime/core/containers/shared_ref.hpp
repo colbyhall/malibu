@@ -41,6 +41,12 @@ namespace core::containers {
 			return *this;
 		}
 
+		SharedRef clone() const {
+			VERIFY(m_counter && m_ptr);
+			m_counter->strong_count.fetch_add(1);
+			return SharedRef{ m_counter, m_ptr };
+		}
+
 		~SharedRef() {
 			if (m_counter) {
 				const auto strong = m_counter->strong_count.fetch_sub(1);
@@ -62,6 +68,7 @@ namespace core::containers {
 
 	private:
 		SharedRef() = default;
+		SharedRef(Counter* counter, Base* ptr) : m_counter(counter), m_ptr(ptr) {}
 
 		template <typename Derived>
 		explicit SharedRef(Derived&& derived) { 

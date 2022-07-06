@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../types.hpp"
-#include "../templates/type_traits.hpp"
 #include <new>
 
 namespace core::containers {
@@ -11,13 +10,12 @@ namespace core::containers {
 		inline constexpr explicit Option() : m_set(false), m_data() {}
 
 		inline Option(T&& t) : m_set(true), m_data() {
-			auto* p = &m_data[0];
+			auto* p = m_data;
 			new (p) T(core::forward<T>(t));
 		}
 		inline Option(const T& t) : m_set(true), m_data() {
-			T copy = t;
-			auto* p = &m_data[0];
-			new (p) T(core::move(copy));
+			auto* p = m_data;
+			new (p) T(t);
 		}
 
 		NO_DISCARD inline bool is_set() const { return m_set; }

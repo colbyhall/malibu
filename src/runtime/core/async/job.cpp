@@ -5,6 +5,8 @@
 #include "fiber.hpp"
 #include "mpmc.hpp"
 
+#include <type_traits>
+
 namespace core::async {
 	using JobQueue = MPMCQueue<Job>;
 
@@ -24,52 +26,6 @@ namespace core::async {
 		JobQueue low_queue;
 
 		Atomic<bool> running;
-	
-		static JobSystem init() {
-			auto count = logical_core_count();
-
-#if PLATFORM_WIN32
-			// Core 0 is used for interupts 
-			count -= 1;
-#endif
-
-			Array<JoinHandle> threads;
-			threads.reserve(count);
-
-			for (u32 i = 0; i < count; ++i) {
-				auto thread = Thread::spawn(false, []() {
-					JobSystem::the().work_cycle();
-				});
-				threads.push(core::move(thread));
-			}
-
-			Array<Fiber> fibers;
-			fibers.reserve(NUM_FIBERS);
-
-			auto high_queue = JobQueue::make(HIGH_PRIORITY_SIZE);
-			auto normal_queue = JobQueue::make(NORMAL_PRIORITY_SIZE);
-			auto low_queue = JobQueue::make(LOW_PRIORITY_SIZE);
-
-			return JobSystem{
-				core::move(threads),
-				core::move(fibers),
-				core::move(high_queue),
-				core::move(normal_queue),
-				core::move(low_queue),
-				true
-			};
-		}
-
-		static JobSystem const& the() {
-			static JobSystem it = init();
-			static bool post_init = false;
-			if (!post_init) {
-				post_init = true;
-
-
-			}
-			return it;
-		}
 
 		Option<Job> find_work() const {
 			// High priority task override waiting fibers
@@ -107,13 +63,59 @@ namespace core::async {
 		}
 	};
 
+	static Option<JobSystem> g_job_system;
+
 	void schedule(Job&& job) {
-		auto& system = JobSystem::the();
-		system.normal_queue.push(core::forward<Job>(job));
+		if (g_job_system) {
+			auto& job_system = g_job_system.as_ref().unwrap();
+			job_system.normal_queue.push(core::forward<Job>(job));
+		}
 	}
 
-	void shutdown() {
-		auto& system = JobSystem::the();
-		system.running.store(false);
+	void init_job_system() {
+		auto count = logical_core_count();
+
+#if PLATFORM_WIN32
+		// Core 0 is used for interupts 
+		count -= 1;
+#endif
+
+		Array<JoinHandle> threads;
+		threads.reserve(count);
+
+		for (u32 i = 0; i < count; ++i) {
+			threads.push(Thread::spawn(false, []() {
+				auto& job_system = g_job_system.as_ref().unwrap();
+				job_system.work_cycle();
+			}));
+		}
+
+		Array<Fiber> fibers;
+		fibers.reserve(NUM_FIBERS);
+
+		auto high_queue = JobQueue::make(HIGH_PRIORITY_SIZE);
+		auto normal_queue = JobQueue::make(NORMAL_PRIORITY_SIZE);
+		auto low_queue = JobQueue::make(LOW_PRIORITY_SIZE);
+
+		g_job_system = JobSystem{
+			core::move(threads),
+			core::move(fibers),
+			core::move(high_queue),
+			core::move(normal_queue),
+			core::move(low_queue),
+			true
+		};
+
+		auto& job_system = g_job_system.as_ref().unwrap();
+		for (u32 i = 0; i < count; ++i) {
+			job_system.threads[i].thread().resume();
+		}
+	}
+
+	void shutdown_job_system() {
+		if (g_job_system) {
+			auto& job_system = g_job_system.as_ref().unwrap();
+			job_system.running.store(false);	
+		}
 	}
 }

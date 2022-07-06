@@ -54,7 +54,7 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 	case WindowEventType::Closed:
 	case WindowEventType::ExitRequested:
 		g_running = false;
-		async::shutdown();
+		async::shutdown_job_system();
 		break;
 	case WindowEventType::MouseMoved:
 		if (g_camera.capture_mouse) {
@@ -83,11 +83,21 @@ int WINAPI WinMain(
 	_In_ LPSTR lpCmdLine,
 	_In_ int nShowCmd
 ) {
+	async::init_job_system();
+
+	auto result = async::schedule2([]() -> u32 {
+		return 420;
+	});
+
+	while (!result.is_ready()) {
+		OutputDebugStringA("Waiting\n");
+	}
+
 	g_window = Window::make({
-		.size = { 1920, 1080 },
-		.title = "Malibu",
-		.callback = window_callback,
-		.visibility = WindowVisibility::Hidden,
+		{ 1920, 1080 },
+		"Malibu",
+		window_callback,
+		WindowVisibility::Hidden,
 	}).unwrap();
 
     auto& context = gpu::Context::the();
@@ -174,9 +184,9 @@ int WINAPI WinMain(
 		g_camera.position -= right * speed * (f32)g_input.keys_pressed['A'] * dt;
 
 		g_camera.position += up * speed * (f32)g_input.keys_pressed[' '] * dt;
-		g_camera.position -= up * speed * (f32)g_input.keys_pressed['C'] * dt;
+		g_camera.position -= up * speed * (f32)g_input.keys_pressed[VK_CONTROL] * dt;
 
-		command_list.record([&](gpu::GraphicsCommandRecorder& recorder){
+		command_list.record([&](gpu::GraphicsCommandRecorder& recorder) {
 			auto& back_buffer = context.back_buffer();
 			recorder.texture_barrier(
 				back_buffer, 

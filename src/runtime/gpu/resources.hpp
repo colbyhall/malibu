@@ -123,8 +123,8 @@ namespace gpu {
 		NO_DISCARD inline usize len() const { return m_interface->len(); }
 		NO_DISCARD inline usize stride() const { return m_interface->stride(); }
 
-		template <typename Callable>
-		void write(Callable&& callable) {
+		template <typename F>
+		void write(F&& callable) {
 			Slice<u8> slice = m_interface->write();
 			callable(slice);
 			m_interface->unmap();
