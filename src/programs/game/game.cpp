@@ -31,6 +31,9 @@ struct Camera {
 	f32 pitch;
 	f32 yaw;
 
+	f32 speed = 5.f;
+	f32 fov = 90.f;
+
 	Vec3f32 position;
 };
 
@@ -74,6 +77,11 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 			win.set_cursor_visbility(!g_camera.capture_mouse);
 		}
 		break;
+	case WindowEventType::MouseWheel:
+		g_camera.speed += event.mouse_wheel.delta;
+		const auto min = 0.1f;
+		if (g_camera.speed < min) g_camera.speed = min;
+		break;
 	};
 }
 
@@ -85,6 +93,7 @@ int WINAPI WinMain(
 ) {
 	async::init_job_system();
 
+#if 0
 	auto result = async::schedule2([]() -> u32 {
 		return 420;
 	});
@@ -92,6 +101,7 @@ int WINAPI WinMain(
 	while (!result.is_ready()) {
 		OutputDebugStringA("Waiting\n");
 	}
+#endif
 
 	g_window = Window::make({
 		{ 1920, 1080 },
@@ -104,7 +114,8 @@ int WINAPI WinMain(
 	const auto registered = context.register_window(g_window.as_ref().unwrap());
 	VERIFY(registered);
 
-	auto mesh = fbx::load_mesh("assets/box.fbx").unwrap();
+	auto scene = fbx::load_fbx_scene("assets/human_head.fbx").unwrap();
+	auto& mesh = scene.meshes[0];
 
 	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();
 	auto vertex_binary = gpu::compile_hlsl(shader, gpu::ShaderType::Vertex).unwrap();
@@ -176,7 +187,7 @@ int WINAPI WinMain(
 		const auto right = view_rotation.rotate_vector(Vec3f32::right());
 		const auto up = Vec3f32::up();
 
-		const auto speed = 5.f;
+		const auto speed = g_camera.speed;
 		g_camera.position += forward * speed * (f32)g_input.keys_pressed['W'] * dt;
 		g_camera.position -= forward * speed * (f32)g_input.keys_pressed['S'] * dt;
 
@@ -185,6 +196,12 @@ int WINAPI WinMain(
 
 		g_camera.position += up * speed * (f32)g_input.keys_pressed[' '] * dt;
 		g_camera.position -= up * speed * (f32)g_input.keys_pressed[VK_CONTROL] * dt;
+
+		const auto fov_speed = 5.f;
+		g_camera.fov += (f32)g_input.keys_pressed['E'] * dt * fov_speed;
+		g_camera.fov -= (f32)g_input.keys_pressed['Q'] * dt * fov_speed;
+
+		const auto fov = g_camera.fov;
 
 		command_list.record([&](gpu::GraphicsCommandRecorder& recorder) {
 			auto& back_buffer = context.back_buffer();
@@ -200,7 +217,7 @@ int WINAPI WinMain(
 				[&](gpu::RenderPassRecorder& rp) {
 					const auto client = g_window.as_ref().unwrap().client_size().cast<f32>();
 					const auto projection = Mat4f32::perspective(
-						60.f,
+						fov,
 						client.width / client.height, 
 						0.01f, 
 						1000.f

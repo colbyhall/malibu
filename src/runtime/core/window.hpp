@@ -13,6 +13,7 @@ namespace core::window {
 		ExitRequested,
 		MouseMoved,
 		MouseButton,
+		MouseWheel,
 		Key,
 	};
 
@@ -32,6 +33,10 @@ namespace core::window {
 		MouseButton button;
 	};
 
+	struct MouseWheelEvent {
+		f32 delta;
+	};
+
 	struct KeyEvent {
 		bool pressed;
 		int vk; // TODO: Make a platform independent key 
@@ -42,6 +47,7 @@ namespace core::window {
 		union {
 			MouseMovedEvent mouse_moved;
 			MouseButtonEvent mouse_button;
+			MouseWheelEvent mouse_wheel;
 			KeyEvent key;
 		};
 	};

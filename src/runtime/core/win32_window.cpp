@@ -2,8 +2,6 @@
 #include "win32.hpp"
 #include "library.hpp"
 
-#include <cstdio>
-
 using core::library::Library;
 
 typedef enum PROCESS_DPI_AWARENESS {
@@ -56,8 +54,7 @@ namespace core::window {
 				);
 
 				RAWINPUT* raw = (RAWINPUT*)lpb;
-				if (raw->header.dwType == RIM_TYPEMOUSE && (raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) == 0 )
-				{
+				if (raw->header.dwType == RIM_TYPEMOUSE && (raw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) == 0 ) {
 					const auto x = raw->data.mouse.lLastX;
 					const auto y = raw->data.mouse.lLastY;
 
@@ -65,6 +62,13 @@ namespace core::window {
 					event.type = WindowEventType::MouseMoved;
 					event.mouse_moved.delta = { x, y };
 					callback(window, event);
+
+					if ((raw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL) == RI_MOUSE_WHEEL) {
+						WindowEvent event = {};
+						event.type = WindowEventType::MouseWheel;
+						event.mouse_wheel.delta = (f32)(short)(raw->data.mouse.usButtonData) / (f32)WHEEL_DELTA;
+						callback(window, event);
+					}
 				}
 			} break;
 			case WM_KEYDOWN: {

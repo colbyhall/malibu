@@ -12,7 +12,7 @@ namespace core::containers {
 	class Array {
 	public:
 		inline constexpr Array() : m_ptr(nullptr), m_len(0), m_cap(0) {}
-		inline explicit Array(Slice<const T> slice) : m_len(slice.len()), m_cap(0) {
+		inline explicit Array(Slice<const T> slice) : m_ptr(nullptr), m_len(slice.len()), m_cap(0) {
 			reserve(slice.len());
 			for (int i = 0; i < slice.len(); ++i) {
 				T copy = slice[i];

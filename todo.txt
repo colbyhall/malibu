@@ -1,9 +1,5 @@
 ---------- Month of July 2022 Goals ----------
 
-- Job System
-	- Futures
-	- Paused Polling
-
 - Asset System
 	- Serialization
 	- Data Conversion
@@ -11,14 +7,18 @@
 	- Handle based
 	- Asset Pipeline
 
-- Game Runtime System
-	- ECS based
-	- Performance Oriented
-
 - Skeletal Animation Prototype
 	- Load Animation
 	- Skin Mesh
 	- Play Animation
+
+- Job System
+	- Futures
+	- Paused Polling
+
+- Game Runtime System
+	- ECS based
+	- Performance Oriented
 
 - Physics Abstraction
 	- PhysX 4 Implementation
