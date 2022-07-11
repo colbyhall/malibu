@@ -8,7 +8,7 @@ project "fbx"
 
 	includedirs { "../../runtime/*", "2020.2.1/include/" }
 
-	cppdialect "C++20"
+	cppdialect "C++17"
 
 	links { "core", "2020.2.1/lib/libfbxsdk.lib" }
 

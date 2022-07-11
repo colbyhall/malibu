@@ -1,16 +1,16 @@
-project "gpu"
+project "resources"
     kind "StaticLib"
     language "C++"
 
-    files { "**.hpp", "**.cpp", "**.h" }
+    files { "**.hpp", "**.cpp" }
 
-    vpaths { ["*"] = { "**.hpp", "**.cpp", "**.h" } }
+    vpaths { ["*"] = { "**.hpp", "**.cpp" } }
 
     includedirs { "../*" }
 
 	systemversion "latest"
 
-    links { "core", "dxgi" }
+    links { "core" }
 
 	cppdialect "C++17"
 

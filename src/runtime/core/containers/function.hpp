@@ -189,7 +189,7 @@ namespace core::containers {
 		using Super = hidden::FunctionBase<hidden::RefStorage, F>;
 	
 	public:
-		using Result = Super::Result;
+		using Result = typename Super::Result;
 
 		template <
 			typename Functor,
@@ -211,7 +211,7 @@ namespace core::containers {
 		using Super = hidden::FunctionBase<hidden::UniqueStorage, F>;
 
 	public:
-		using Result = Super::Result;
+		using Result = typename Super::Result;
 
 		template <
 			typename Functor,

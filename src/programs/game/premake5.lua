@@ -9,7 +9,7 @@ project "game"
 
     links { "core", "gpu", "fbx" }
 
-    cppdialect "C++20"
+    cppdialect "C++17"
 
 	flags { "FatalWarnings" }
 
