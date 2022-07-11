@@ -34,4 +34,6 @@ float4 ps_main(PSInput input) : SV_TARGET
 	float3 final_color = color * (diffuse + ambient);
 
     return float4(final_color.x, final_color.y, final_color.z, 1.f);
+	// return float4(color.x, color.y, color.z, 1.f);
+	// return float4(input.normal.x, input.normal.y, input.normal.z, 1.f);
 }

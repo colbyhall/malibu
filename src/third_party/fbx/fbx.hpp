@@ -10,9 +10,28 @@ namespace fbx {
     };
 
     struct Mesh {
+		String name;
         Array<Vertex> vertices;
         Array<u32> indices;
+
+		int skeleton = -1;
     };
 
-	Result<Mesh, core::fs::FileOpenError> load_mesh(core::fs::PathView path);
+	struct SkeletonNode {
+		String name;
+		int parent;
+		Array<usize> children;
+	};
+
+	struct Skeleton {
+		Array<SkeletonNode> nodes;
+		usize root;
+	};
+
+	struct Scene {
+		Array<Mesh> meshes;
+		Array<Skeleton> skeletons;
+	};
+
+	Result<Scene, core::fs::FileOpenError> load_fbx_scene(core::fs::PathView path);
 }

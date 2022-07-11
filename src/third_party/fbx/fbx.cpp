@@ -4,8 +4,6 @@
 #define FBXSDK_SHARED
 #include "fbxsdk.h"
 
-#include <cstdio>
-
 namespace fbx {
 	class Context {
 	public:
@@ -24,7 +22,7 @@ namespace fbx {
 		FbxIOSettings* ios;
 	};
 
-    Result<Mesh, core::fs::FileOpenError> load_mesh(core::fs::PathView path) {
+    Result<Scene, core::fs::FileOpenError> load_fbx_scene(core::fs::PathView path) {
 		auto& context = Context::the();
 
 		int sdk_maj, sdk_min, sdk_rev;
@@ -38,100 +36,137 @@ namespace fbx {
 		const bool status = importer->Import(scene);
 		VERIFY(status);
 
-        Array<Vertex> vertices;
-        Array<u32> indices;
-        for (int i = 0; i < scene->GetNodeCount(); ++i) {
-            auto* const node = scene->GetNode(i);
-            auto* const mesh = node->GetMesh();
-            if (!mesh) continue;
+		Scene result = {};
 
-            for (int j = 0; j < mesh->GetPolygonCount(); ++j) {
-                const auto size = mesh->GetPolygonSize(j);
+		for (
+			int geometry_index = 0;
+			geometry_index < scene->GetGeometryCount();
+			++geometry_index
+		) {
+			auto* geometry = scene->GetGeometry(geometry_index);
+			if (geometry->GetAttributeType() == FbxNodeAttribute::eMesh) {
+				auto* geometry_node = geometry->GetNode();
+				auto* mesh = (FbxMesh*)geometry;
 
-                // FIXME: Proper polygon triangulation
-                if (size == 3) {
-					const auto start = vertices.len();
-                    for (int k = 0; k < size; ++k) {
-                        const auto vertex_index = mesh->GetPolygonVertex(j, k);
-                        const auto control_point = mesh->GetControlPointAt(vertex_index);
-                        FbxVector4 normal;
+				if (!mesh->IsTriangleMesh()) {
+					// TODO: Error message
+					continue;
+				}
+
+				Array<Vertex> vertices;
+				vertices.reserve(mesh->GetControlPointsCount());
+				Array<u32> indices;
+				indices.reserve(mesh->GetPolygonCount() * 3);
+
+#if 0
+				const auto num_stacks = scene->GetSrcObjectCount<FbxAnimStack>();
+				if (num_stacks > 0) {
+					auto* stack = scene->GetCurrentAnimationStack();
+
+					const auto num_layers = stack->GetMemberCount<FbxAnimLayer>();
+					if (num_layers > 0) {
+						auto* layer = stack->GetMember<FbxAnimLayer>(0);
+						auto curve = node->LclTranslation.GetCurve(layer, FBXSDK_CURVENODE_COMPONENT_X);
+					}
+				}
+#endif
+
+				auto* layer = mesh->GetLayer(0);
+				
+				auto* normal_element = layer->GetNormals();
+				FbxLayerElement::EReferenceMode normal_reference_mode = FbxLayerElement::eDirect;
+				FbxLayerElement::EMappingMode normal_mapping_mode = FbxLayerElement::eByControlPoint;
+				if (normal_element) {
+					normal_reference_mode = normal_element->GetReferenceMode();
+					normal_mapping_mode = normal_element->GetMappingMode();
+				}
+
+				for (
+					int polygon_index = 0; 
+					polygon_index < mesh->GetPolygonCount(); 
+					++polygon_index
+				) {
+					const auto polygon_size = mesh->GetPolygonSize(polygon_index);
+					VERIFY(polygon_size == 3);
+
+					for (int vertex_index = 0; vertex_index < polygon_size; ++vertex_index) {
+						const auto control_point_index = mesh->GetPolygonVertex(polygon_index, vertex_index);
+						const auto control_point = mesh->GetControlPointAt(control_point_index);
+
+						// Lookup the normals
+						Vec3f32 normal = {};
+						if (normal_element) {
+							const int normal_map_index = (normal_mapping_mode == FbxLayerElement::eByControlPoint) ?
+								control_point_index : (int)vertices.len();
+							const int normal_value_index = (normal_reference_mode == FbxLayerElement::eDirect) ?
+								normal_map_index : normal_element->GetIndexArray().GetAt(normal_map_index);
+
+							const auto value = normal_element->GetDirectArray().GetAt(normal_value_index);
+							normal.x = (f32)value[0];
+							normal.y = (f32)value[1];
+							normal.z = (f32)value[2];
+						}
+
+						indices.push((u32)vertices.len());
+						vertices.push(Vertex{
+							{
+								(f32)control_point[0],
+								(f32)control_point[1],
+								(f32)control_point[2]
+							},
+							normal
+						});
+						// TODO: UV's
+					}
+				}
+
+				// TODO: Import the skeletal mesh
+				if (mesh->GetDeformerCount(FbxDeformer::eSkin) > 0) {
+					auto* skin = (FbxSkin*)mesh->GetDeformer(0, FbxDeformer::eSkin);
+
+					FbxNode* root = nullptr;
+					for (
+						int cluster_index = 0;
+						cluster_index < skin->GetClusterCount();
+						++cluster_index
+					) {
+						auto* cluster = skin->GetCluster(cluster_index);
+						root = cluster->GetLink();
+						while (
+							root && 
+							root->GetParent() && 
+							root->GetParent()->GetSkeleton()
+						) root = root->GetParent();
+
+						if (root) break;
+					}
+
+					auto position0 = root->GetGeometricTranslation(FbxNode::eSourcePivot);
+					auto rotation0 = root->GetGeometricRotation(FbxNode::eSourcePivot);
+
+					for (
+						int child_index = 0;
+						child_index < root->GetChildCount();
+						++child_index
+					) {
+						auto* child = root->GetChild(child_index);
 						
-                        // const bool found = mesh->GetPolygonVertexNormal(j, vertex_index, normal);
-                        indices.push((u32)vertices.len());
-                        vertices.push(Vertex {
-                            { 
-								(f32)control_point[0], 
-								(f32)control_point[1], 
-								(f32)control_point[2] 
-							},
-                            { 
-								(f32)normal[0], 
-								(f32)normal[1], 
-								(f32)normal[2] 
-							},
-                        });
-                        // TODO: UV's
-                    }
-
-					// HACK: Fix to get normals in temoporarily
-					const auto a = vertices[start + 0].position;
-					const auto b = vertices[start + 1].position;
-					const auto c = vertices[start + 2].position;
-
-					const auto a_to_b = b - a;
-					const auto a_to_c = c - a;
-
-					const auto normal = a_to_c.cross(a_to_b);
-					for (int k = 0; k < size; ++k) {
-						vertices[start + k].normal = normal;
+						auto position1 = child->GetGeometricTranslation(FbxNode::eSourcePivot);
+						auto rotation1 = child->GetGeometricRotation(FbxNode::eSourcePivot);
 					}
-                } else if (size == 4) {
-                    const u32 start = (u32)vertices.len();
-                    for (int k = 0; k < size; ++k) {
-                        const auto vertex_index = mesh->GetPolygonVertex(j, k);
-                        const auto control_point = mesh->GetControlPointAt(vertex_index);
-                        FbxVector4 normal;
-                        mesh->GetPolygonVertexNormal(j, vertex_index, normal);
-                        vertices.push(Vertex {
-                                { 
-									(f32)control_point[0], 
-									(f32)control_point[1], 
-									(f32)control_point[2] 
-								},
-                                { 
-									(f32)normal[0], 
-									(f32)normal[1], 
-									(f32)normal[2] 
-								},
-                        });
-                        // TODO: UV's
-                    }
 
-                    // First Triangle
-                    indices.push(start + 0);
-                    indices.push(start + 1);
-                    indices.push(start + 2);
+				}
 
-                    // Second Triangle
-                    indices.push(start + 0);
-                    indices.push(start + 2);
-                    indices.push(start + 3);
+				result.meshes.push(Mesh{
+					String("None"),
+					core::move(vertices),
+					core::move(indices),
 
-					const auto a = vertices[start + 0].position;
-					const auto b = vertices[start + 1].position;
-					const auto c = vertices[start + 2].position;
+					-1,
+				});
+			}
+		}
 
-					const auto a_to_b = b - a;
-					const auto a_to_c = c - a;
-
-					const auto normal = a_to_c.cross(a_to_b);
-					for (int k = 0; k < size; ++k) {
-						vertices[start + k].normal = normal;
-					}
-                }
-            }
-        }
-
-        return Mesh { core::move(vertices), core::move(indices) };
+        return result;
 	}
 }
