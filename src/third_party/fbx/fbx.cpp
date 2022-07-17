@@ -158,7 +158,7 @@ namespace fbx {
 				}
 
 				result.meshes.push(Mesh{
-					String("None"),
+					String::from("None"),
 					core::move(vertices),
 					core::move(indices),
 

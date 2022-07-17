@@ -114,7 +114,9 @@ int WINAPI WinMain(
 	const auto registered = context.register_window(g_window.as_ref().unwrap());
 	VERIFY(registered);
 
-	auto scene = fbx::load_fbx_scene("assets/human_head.fbx").unwrap();
+	auto things = fs::read_directory("res");
+
+	auto scene = fbx::load_fbx_scene("res/humanoid.fbx").unwrap();
 	auto& mesh = scene.meshes[0];
 
 	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();

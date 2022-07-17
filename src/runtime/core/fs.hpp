@@ -15,7 +15,7 @@ namespace core::fs {
 		inline operator StringView() const { return m_string; }
 		NO_DISCARD inline char const* ptr() const { return m_string.ptr(); }
 		NO_DISCARD inline usize len() const { return m_string.len(); }
-		NO_DISCARD inline Chars chars() const { return Chars(m_string); }
+		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_string); }
 
 	private:
 		StringView m_string;
@@ -24,13 +24,17 @@ namespace core::fs {
 	class Path {
 	public:
 		inline constexpr Path() : m_string() {}
-		explicit inline Path(PathView view) : m_string(view) {}
+		explicit inline Path(PathView view) : m_string(String::from(view)) {}
 		inline Path(String&& string) noexcept : m_string(core::forward<String>(string)) {}
 
+		inline static Path from(StringView string) { return Path(String::from(string)); }
+		inline static Path from(WStringView wstring) { return Path(String::from(wstring)); }
+
 		inline operator StringView() const { return m_string; }
+		inline operator PathView() const { return PathView(m_string); }
 		NO_DISCARD inline char const* ptr() const { return m_string.ptr(); }
 		NO_DISCARD inline usize len() const { return m_string.len(); }
-		NO_DISCARD inline Chars chars() const { return Chars(m_string); }
+		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_string); }
 
 	private:
 		String m_string;
@@ -91,5 +95,28 @@ namespace core::fs {
 		usize m_cursor;
 	};
 
+	struct MetaData {
+		u64 creation_time;
+		u64 last_access_time;
+		u64 last_write_time;
+
+		usize size;
+		bool read_only;
+	};
+
 	Result<String, FileOpenError> read_to_string(PathView path);
+
+	enum class DirectoryItemType : u8 {
+		File,
+		Directory,
+		Unknown,
+	};
+
+	struct DirectoryItem {
+		Path path;
+		DirectoryItemType type;
+		MetaData meta_data;
+	};
+
+	Array<DirectoryItem> read_directory(PathView path, bool recursive = true);
 }

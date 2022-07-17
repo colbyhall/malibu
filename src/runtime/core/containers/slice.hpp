@@ -14,6 +14,7 @@ namespace core::containers {
 
 		NO_DISCARD inline T* ptr() const { return m_ptr; }
 		NO_DISCARD inline usize len() const { return m_len; }
+		inline void set_len(usize len) { m_len = len; }
 		NO_DISCARD inline bool is_empty() const { return len() == 0; }
 		NO_DISCARD inline bool is_valid_index(usize index) const { return index < len(); }
 		explicit operator bool() const { return !is_empty(); }
@@ -55,6 +56,7 @@ namespace core::containers {
 
 		NO_DISCARD inline T const* ptr() const { return m_ptr; }
 		NO_DISCARD inline usize len() const { return m_len; }
+		inline void set_len(usize len) { m_len = len; }
 		NO_DISCARD inline bool is_empty() const { return len() == 0; }
 		NO_DISCARD inline bool is_valid_index(usize index) const { return index < len(); }
 		explicit operator bool() const { return !is_empty(); }
@@ -84,6 +86,7 @@ namespace core::containers {
 
 		NO_DISCARD inline T const** ptr() const { return m_ptr; }
 		NO_DISCARD inline usize len() const { return m_len; }
+		inline void set_len(usize len) { m_len = len; }
 		NO_DISCARD inline bool is_empty() const { return len() == 0; }
 		NO_DISCARD inline bool is_valid_index(usize index) const { return index < len(); }
 		explicit operator bool() const { return !is_empty(); }

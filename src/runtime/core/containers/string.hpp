@@ -15,14 +15,14 @@ namespace core::containers {
 	constexpr Char EOL = '\n';
 	constexpr Char UTF8_BOM = 0xfeff;
 
-	class Chars;
+	class CharsIterator;
 
-	class Chars {
+	class CharsIterator {
 	public:
-		inline explicit Chars(Slice<char const> string) : m_string(string), m_index(0), m_decoder_state(0), m_codepoint(0) {}
+		inline explicit CharsIterator(Slice<char const> string) : m_string(string), m_index(0), m_decoder_state(0), m_codepoint(0) {}
 
 		inline explicit operator bool() const { return should_continue(); }
-		inline Chars& operator++() { next(); return *this; }
+		inline CharsIterator& operator++() { next(); return *this; }
 		inline Char operator*() const { return get(); }
 
 	private:
@@ -45,7 +45,7 @@ namespace core::containers {
 		inline operator Slice<char const>() const { return m_bytes; }
 		NO_DISCARD inline char const* ptr() const { return m_bytes.ptr(); }
 		NO_DISCARD inline usize len() const { return m_bytes.len(); }
-		NO_DISCARD inline Chars chars() const { return Chars(m_bytes); }
+		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_bytes); }
 		inline const char* operator*() const { return m_bytes.ptr(); }
 
 	private:
@@ -78,13 +78,21 @@ namespace core::containers {
 	class String {
 	public:
 		inline constexpr String() : m_bytes() {}
-		explicit inline String(StringView view) : m_bytes(Array<char>(view)) { m_bytes.push(0); }
-		explicit inline String(Array<char>&& bytes) : m_bytes(core::forward<Array<char>>(bytes)) {
-			if (m_bytes.len() > 0 && m_bytes[m_bytes.len() - 1] != 0) {
-				m_bytes.push(0);
+		inline static String from(Array<char>&& bytes) {
+			String string;
+			string.m_bytes = core::forward<Array<char>>(bytes);
+			if (string.m_bytes.len() > 0 && string.m_bytes[string.m_bytes.len() - 1] != 0) {
+				string.m_bytes.push(0);
 			}
+			return string;
 		}
 
+		static inline String from(StringView view) {
+			String string;
+			string.m_bytes = Array<char>(view);
+			string.m_bytes.push(0);
+			return string;
+		}
 		static String from(WStringView string);
 
 		inline operator Slice<char const>() const {
@@ -94,7 +102,11 @@ namespace core::containers {
 			}
 			return result; 
 		}
-		inline operator StringView() const { return StringView(m_bytes); }
+		inline operator StringView() const { 
+			Slice<char const> bytes = m_bytes;
+			bytes.set_len(len());
+			return StringView(bytes); 
+		}
 
 		NO_DISCARD inline char* ptr() { return m_bytes.ptr(); }
 		NO_DISCARD inline char const* ptr() const { return m_bytes.ptr(); }
@@ -102,9 +114,12 @@ namespace core::containers {
 
 		NO_DISCARD inline usize len() const { return m_bytes.len() > 0 ? m_bytes.len() - 1 : 0; }
 		NO_DISCARD inline usize cap() const { return m_bytes.cap(); }
-		inline void set_len(usize len) { m_bytes.set_len(len + 1); }
+		inline void set_len(usize len) { 
+			m_bytes[len] = 0;
+			m_bytes.set_len(len + 1);
+		}
 
-		NO_DISCARD inline Chars chars() const { return Chars(m_bytes); }
+		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_bytes); }
 
 		inline void reserve(usize amount) { m_bytes.reserve(amount); }
 		String& push(Char c);
@@ -117,8 +132,12 @@ namespace core::containers {
 	class WString {
 	public:
 		inline constexpr WString() : m_chars() {}
-		inline explicit WString(WStringView view) : m_chars(Array<wchar_t>(view)) {}
 
+		static inline WString from(WStringView view) {
+			WString string;
+			string.m_chars = Array<wchar_t>(view);
+			return string;
+		}
 		static WString from(StringView string);
 
 		inline operator Slice<wchar_t const>() const {
@@ -128,7 +147,11 @@ namespace core::containers {
 			}
 			return result; 
 		}
-		inline operator WStringView() const { return WStringView(m_chars); }
+		inline operator WStringView() const {
+			Slice<wchar_t const> bytes = m_chars;
+			bytes.set_len(len());
+			return WStringView(bytes);
+		}
 
 		NO_DISCARD inline wchar_t* ptr() { return m_chars.ptr(); }
 		NO_DISCARD inline wchar_t const* ptr() const { return m_chars.ptr(); }
@@ -136,7 +159,10 @@ namespace core::containers {
 
 		NO_DISCARD inline usize len() const { return m_chars.len() > 0 ? m_chars.len() - 1 : 0; }
 		NO_DISCARD inline usize cap() const { return m_chars.cap(); }
-		inline void set_len(usize len) { m_chars.set_len(len + 1); }
+		inline void set_len(usize len) { 
+			m_chars[len] = 0;
+			m_chars.set_len(len + 1);
+		}
 
 		inline wchar_t* begin() { return m_chars.begin(); }
 		inline wchar_t* end() { return m_chars.end(); }
@@ -157,7 +183,7 @@ namespace core::containers {
 }
 
 using core::containers::Char;
-using core::containers::Chars;
+using core::containers::CharsIterator;
 using core::containers::StringView;
 using core::containers::String;
 using core::containers::WStringView;

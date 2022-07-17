@@ -1,16 +1,16 @@
 project "game"
 	kind "WindowedApp"
-    language "C++"
+	language "C++"
 
-    files { "**.hpp", "**.cpp" }
+	files { "**.hpp", "**.cpp" }
 
-    vpaths { ["*"] = { "**.hpp", "**.cpp" } }
-    includedirs { "../../runtime/*", "../../third_party/*" }
+	vpaths { ["*"] = { "**.hpp", "**.cpp" } }
+	includedirs { "../../runtime/*", "../../third_party/*" }
 
-    links { "core", "gpu", "fbx" }
+	links { "core", "gpu", "fbx" }
 
-    cppdialect "C++17"
+	cppdialect "C++17"
 
 	flags { "FatalWarnings" }
 
-    debugdir "../../../"
+	debugdir "../../../"

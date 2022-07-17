@@ -47,11 +47,11 @@ namespace core::containers {
 		return len + 1;
 	}
 
-	bool Chars::should_continue() const {
+	bool CharsIterator::should_continue() const {
 		return m_string.len() > 0 && m_index < m_string.len() && m_decoder_state != utf8_reject;
 	}
 
-	void Chars::next() {
+	void CharsIterator::next() {
 		VERIFY(should_continue());
 
 		for (; m_index < m_string.len(); m_index += 1) {
@@ -67,7 +67,7 @@ namespace core::containers {
 		m_index += 1;
 	}
 
-	Char Chars::get() const {
+	Char CharsIterator::get() const {
 		usize get_index = m_index;
 		u32 get_state = m_decoder_state;
 		u32 get_codepoint = m_codepoint;

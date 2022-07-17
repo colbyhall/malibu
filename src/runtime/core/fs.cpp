@@ -12,6 +12,6 @@ namespace core::fs {
 		bytes.set_len(size);
 		file.read({ (u8*)bytes.ptr(), bytes.len() });
 		bytes.push(0);
-		return String(core::move(bytes));
+		return String::from(core::move(bytes));
 	}
 }
