@@ -37,6 +37,7 @@ namespace gpu {
 	};
 
 	enum class CullMode : u8 {
+		None,
 		Front,
 		Back
 	};
@@ -102,7 +103,7 @@ namespace gpu {
 
 		DrawMode draw_mode = DrawMode::Fill;
 		f32 line_width = 1.f;
-		BitFlag<CullMode> cull_mode = CullMode::Back;
+		CullMode cull_mode = CullMode::None;
 
 		bool blend_enabled = false;
 

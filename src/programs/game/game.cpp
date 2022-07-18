@@ -85,6 +85,112 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 	};
 }
 
+class Canvas {
+public:
+	static Canvas make() { return Canvas{}; }
+
+	Canvas& line(Vec3f32 a, Vec3f32 b, f32 width, LinearColor color) {
+		const auto a_to_b = b - a;
+		if (a_to_b.len_sq() <= core::math::NEAR_ZERO) return *this;
+
+		auto forward = a_to_b.normalize().unwrap();
+		auto up = Vec3f32::up();
+		auto right = forward.cross(up);
+
+		if (forward.dot(up) > 0.7f) {
+			if (forward.dot(Vec3f32::right()) > 0.7f) {
+				right = Vec3f32::forward();
+				up = right.cross(forward);
+			} else {
+				right = Vec3f32::right();
+				up = right.cross(forward);
+			}
+		}
+
+		Vec3f32::orthonormal_basis(forward, up, right);
+
+		const auto half_width = width * 0.5f;
+
+		// Draw the horizontal plane
+		{
+			const auto bl = a - right * half_width;
+			const auto br = a + right * half_width;
+			const auto tl = b - right * half_width;
+			const auto tr = b + right * half_width;
+
+			m_vertices.push(fbx::Vertex{
+				bl,
+				{ color.r, color.g, color.b }
+			});
+			m_vertices.push(fbx::Vertex{
+				tl,
+				{ color.r, color.g, color.b }
+			});
+			m_vertices.push(fbx::Vertex{
+				tr,
+				{ color.r, color.g, color.b }
+			});
+
+			m_vertices.push(fbx::Vertex{
+				bl,
+				{ color.r, color.g, color.b }
+			});
+			m_vertices.push(fbx::Vertex{
+				tr,
+				{ color.r, color.g, color.b }
+			});
+			m_vertices.push(fbx::Vertex{
+				br,
+				{ color.r, color.g, color.b }
+			});
+		}
+
+		// Draw the vertical plane
+		{
+			const auto bl = a - up * half_width;
+			const auto br = a + up * half_width;
+			const auto tl = b - up * half_width;
+			const auto tr = b + up * half_width;
+
+			m_vertices.push(fbx::Vertex{
+				bl,
+				{ color.r, color.g, color.b }
+			});
+			m_vertices.push(fbx::Vertex{
+				tl,
+				{ color.r, color.g, color.b }
+			});
+			m_vertices.push(fbx::Vertex{
+				tr,
+				{ color.r, color.g, color.b }
+			});
+
+			m_vertices.push(fbx::Vertex{
+				bl,
+				{ color.r, color.g, color.b }
+			});
+			m_vertices.push(fbx::Vertex{
+				tr,
+				{ color.r, color.g, color.b }
+			});
+			m_vertices.push(fbx::Vertex{
+				br,
+				{ color.r, color.g, color.b }
+			});
+		}
+
+		return *this;
+	}
+
+	inline Slice<fbx::Vertex const> vertices() const { return m_vertices; }
+
+private:
+	inline Canvas() {}
+
+	Array<fbx::Vertex> m_vertices;
+};
+
+
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -118,54 +224,53 @@ int WINAPI WinMain(
 
 	auto scene0 = fbx::load_fbx_scene("res/bee.fbx").unwrap();
 	auto& bee = scene0.meshes[0];
-	auto& bee_skeleton = scene0.skeletons[0];
-
-	for (auto& bone : bee_skeleton.bones) {
-		char buffer[256];
-		sprintf_s(buffer, "%s %f %f %f \n", bone.name.ptr(), bone.position.x, bone.position.y, bone.position.z);
-		OutputDebugStringA(buffer);
-	}
-
-	auto scene1 = fbx::load_fbx_scene("res/box.fbx").unwrap();
-	auto& box = scene1.meshes[0];
-
-	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();
-	auto vertex_binary = gpu::compile_hlsl(shader, gpu::ShaderType::Vertex).unwrap();
-	auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
-
-	auto pixel_binary = gpu::compile_hlsl(shader, gpu::ShaderType::Pixel).unwrap();
-	auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
-
-	gpu::GraphicsPipelineConfig config = {};
-	config.color_attachments.push(gpu::Format::RGBA_U8);
-	config.depth_attachment = gpu::Format::Depth24_Stencil8;
-	config.vertex_shader = core::move(vertex_shader);
-	config.pixel_shader = core::move(pixel_shader);
-
-	config.vertex_primitives.push(gpu::Primitive::Vec3f32);
-	config.vertex_primitives.push(gpu::Primitive::Vec3f32);
-
-	auto pipeline = gpu::GraphicsPipeline::make(core::move(config));
 
 	auto bee_vertices = gpu::Buffer::make(
 		gpu::BufferUsage::Vertex,
 		gpu::BufferKind::Upload,
-		bee.vertices.len(), 
+		bee.vertices.len(),
 		sizeof(fbx::Vertex)
 	);
-	bee_vertices.write([&bee](Slice<u8> slice){
+	bee_vertices.write([&bee](Slice<u8> slice) {
 		mem::copy(slice.ptr(), bee.vertices.ptr(), slice.len());
 	});
 
 	auto bee_indices = gpu::Buffer::make(
 		gpu::BufferUsage::Index,
 		gpu::BufferKind::Upload,
-		bee.indices.len(), 
+		bee.indices.len(),
 		sizeof(u32)
 	);
 	bee_indices.write([&bee](Slice<u8> slice) {
 		mem::copy(slice.ptr(), bee.indices.ptr(), slice.len());
 	});
+
+	auto& bee_skeleton = scene0.skeletons[0];
+
+	Canvas canvas = Canvas::make();
+	for (auto& bone : bee_skeleton.bones) {
+		char buffer[256];
+		sprintf_s(buffer, "%s %f %f %f \n", bone.name.ptr(), bone.position.x, bone.position.y, bone.position.z);
+		OutputDebugStringA(buffer);
+
+		if (bone.parent != -1) {
+			const auto& parent = bee_skeleton.bones[bone.parent];
+			canvas.line(parent.position, bone.position, 10.f, { 1.f, 1.f, 0.f, 1.f });
+		}
+	}
+
+	auto canvas_vertices = gpu::Buffer::make(
+		gpu::BufferUsage::Vertex,
+		gpu::BufferKind::Upload,
+		canvas.vertices().len(),
+		sizeof(fbx::Vertex)
+	);
+	canvas_vertices.write([&canvas](Slice<u8> slice) {
+		mem::copy(slice.ptr(), canvas.vertices().ptr(), slice.len());
+	});
+
+	auto scene1 = fbx::load_fbx_scene("res/box.fbx").unwrap();
+	auto& box = scene1.meshes[0];
 
 	auto box_vertices = gpu::Buffer::make(
 		gpu::BufferUsage::Vertex,
@@ -186,6 +291,47 @@ int WINAPI WinMain(
 	box_indices.write([&box](Slice<u8> slice) {
 		mem::copy(slice.ptr(), box.indices.ptr(), slice.len());
 	});
+
+
+	gpu::GraphicsPipelineConfig static_lit_config = {};
+	{
+		String source = fs::read_to_string("src/shaders/static_lit.hlsl").unwrap();
+		auto vertex_binary = gpu::compile_hlsl(source, gpu::ShaderType::Vertex).unwrap();
+		auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
+
+		auto pixel_binary = gpu::compile_hlsl(source, gpu::ShaderType::Pixel).unwrap();
+		auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
+
+		static_lit_config.color_attachments.push(gpu::Format::RGBA_U8);
+		static_lit_config.depth_attachment = gpu::Format::Depth24_Stencil8;
+		static_lit_config.vertex_shader = core::move(vertex_shader);
+		static_lit_config.pixel_shader = core::move(pixel_shader);
+
+		static_lit_config.cull_mode = gpu::CullMode::Back;
+
+		static_lit_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+		static_lit_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+	}
+	auto static_lit_pipeline = gpu::GraphicsPipeline::make(core::move(static_lit_config));
+
+	gpu::GraphicsPipelineConfig debug_config = {};
+	{
+		String source = fs::read_to_string("src/shaders/debug3d.hlsl").unwrap();
+		auto vertex_binary = gpu::compile_hlsl(source, gpu::ShaderType::Vertex).unwrap();
+		auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
+
+		auto pixel_binary = gpu::compile_hlsl(source, gpu::ShaderType::Pixel).unwrap();
+		auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
+
+		debug_config.color_attachments.push(gpu::Format::RGBA_U8);
+		debug_config.depth_attachment = gpu::Format::Depth24_Stencil8;
+		debug_config.vertex_shader = core::move(vertex_shader);
+		debug_config.pixel_shader = core::move(pixel_shader);
+
+		debug_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+		debug_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+	}
+	auto debug3d_pipeline = gpu::GraphicsPipeline::make(core::move(debug_config));
 
 	auto command_list = gpu::GraphicsCommandList::make();
 
@@ -268,14 +414,15 @@ int WINAPI WinMain(
 						1.f
 					).inverse().unwrap();
 
-					rp.set_pipeline(pipeline);
+					rp.set_pipeline(static_lit_pipeline);
 
 					rp.clear_color(LinearColor::BLACK);
 					rp.clear_depth_stencil(1.f, 0);
 
+					const auto local_to_projection = projection * axis_adjustment * view;
+
 					// Draw the bee
 					{
-						const auto local_to_projection = projection * axis_adjustment * view;
 						rp.push_constants(&local_to_projection);
 						rp.set_vertices(bee_vertices);
 						rp.set_indices(bee_indices);
@@ -283,17 +430,12 @@ int WINAPI WinMain(
 					}
 
 					rp.clear_depth_stencil(1.f, 0);
+					rp.set_pipeline(debug3d_pipeline);
 
-					// auto world = Mat4f32::identity();
-					for (auto& bone : bee_skeleton.bones) {
-						const auto local = Mat4f32::transform(bone.position, bone.rotation, bone.scale * 5.f);
-
-						// world = world * local;
-						const auto local_to_projection = projection * axis_adjustment * view * local;
-						rp.push_constants(&local_to_projection);
-						rp.set_vertices(box_vertices);
-						rp.set_indices(box_indices);
-						rp.draw_index(box_vertices.len());
+					// Draw all the debug information
+					{
+						rp.set_vertices(canvas_vertices);
+						rp.draw(canvas_vertices.len());
 					}
 				}
 			);

@@ -16,7 +16,7 @@ namespace core::math {
 
 		NO_DISCARD inline T len_sq() const { return i * i + j * j + k * k + w * w; }
 		NO_DISCARD inline T len() const { return math::sqrt(len_sq()); }
-		NO_DISCARD inline bool is_near_zero() const { return len_sq < math::NEAR_ZERO; }
+		NO_DISCARD inline bool is_near_zero() const { return len_sq() < math::NEAR_ZERO; }
 		NO_DISCARD Option<Quat> normalize() const;
 		NO_DISCARD inline Quat inverse() const { return Quat{ -i, -j, -k, w }; }
 		NO_DISCARD Vec3<T> rotate_vector(const Vec3<T>& xyz) const;
