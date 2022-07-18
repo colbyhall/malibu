@@ -76,19 +76,8 @@ void D3D12GraphicsCommandList::begin_render_pass(const gpu::Texture& color, Opti
 	rect.right = (LONG)color.size().width;
 	m_command_list->RSSetScissorRects(1, &rect);
 
-	const f32 clear_color[] = { 0.05f, 0.05f, 0.05f, 1.0f };
-	m_command_list->ClearRenderTargetView(interface.m_rtv_handle, clear_color, 0, nullptr);
-	
-	if (depth_handle) {
-		m_command_list->ClearDepthStencilView(
-			*depth_handle, 
-			D3D12_CLEAR_FLAG_DEPTH,
-			1.f,
-			0,
-			0,
-			nullptr
-		);
-	}
+	m_bound_color_buffer = interface.m_rtv_handle;
+	if (depth_handle) m_bound_depth_buffer = *depth_handle;
 }
 
 void D3D12GraphicsCommandList::set_scissor(Option<Rect2f32> scissor) {
@@ -96,11 +85,26 @@ void D3D12GraphicsCommandList::set_scissor(Option<Rect2f32> scissor) {
 }
 
 void D3D12GraphicsCommandList::clear_color(LinearColor color) {
-	TODO("Need to store the current bound attachements to clear");
+	const auto handle = m_bound_color_buffer.as_ref().unwrap();
+	const f32 clear_color0[] = { color.r, color.g, color.g, color.a };
+	m_command_list->ClearRenderTargetView(
+		handle,
+		clear_color0,
+		0,
+		nullptr
+	);
 }
 
-void D3D12GraphicsCommandList::clear_depth(f32 depth) {
-	TODO("Need to store the current bound attachements to clear");
+void D3D12GraphicsCommandList::clear_depth_stencil(f32 depth, u8 stencil) {
+	const auto handle = m_bound_depth_buffer.as_ref().unwrap();
+	m_command_list->ClearDepthStencilView(
+		handle,
+		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+		depth,
+		stencil,
+		0,
+		nullptr
+	);
 }
 
 void D3D12GraphicsCommandList::set_pipeline(const gpu::GraphicsPipeline& pipeline) {
@@ -154,7 +158,8 @@ void D3D12GraphicsCommandList::draw_indexed(usize index_count, usize first_index
 }
 
 void D3D12GraphicsCommandList::end_render_pass() {
-	// Do nothing
+	const auto ignore0 = m_bound_color_buffer.unwrap();
+	const auto ignore1 = m_bound_depth_buffer.unwrap();
 }
 
 void D3D12GraphicsCommandList::end_recording() {

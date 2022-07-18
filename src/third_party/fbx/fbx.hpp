@@ -17,15 +17,19 @@ namespace fbx {
 		int skeleton = -1;
 	};
 
-	struct SkeletonNode {
+	struct Bone {
 		String name;
+
 		int parent;
 		Array<usize> children;
+
+		Vec3f32 position;
+		Quatf32 rotation;
+		Vec3f32 scale;
 	};
 
 	struct Skeleton {
-		Array<SkeletonNode> nodes;
-		usize root;
+		Array<Bone> bones;
 	};
 
 	struct Scene {

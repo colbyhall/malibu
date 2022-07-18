@@ -40,7 +40,7 @@ public:
 	void begin_render_pass(const gpu::Texture& color, Option<const gpu::Texture&> depth) override;
 	void set_scissor(Option<Rect2f32> scissor) override;
 	void clear_color(LinearColor color) override;
-	void clear_depth(f32 depth) override;
+	void clear_depth_stencil(f32 depth, u8 stencil) override;
 	void set_pipeline(const gpu::GraphicsPipeline& pipeline) override;
 	void set_vertices(const gpu::Buffer& buffer) override;
 	void set_indices(const gpu::Buffer& buffer) override;
@@ -55,4 +55,7 @@ public:
 
 private:
 	ComPtr<ID3D12GraphicsCommandList> m_command_list;
+
+	Option<D3D12_CPU_DESCRIPTOR_HANDLE> m_bound_color_buffer;
+	Option<D3D12_CPU_DESCRIPTOR_HANDLE> m_bound_depth_buffer;
 };

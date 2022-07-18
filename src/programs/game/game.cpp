@@ -116,8 +116,18 @@ int WINAPI WinMain(
 
 	auto things = fs::read_directory("res");
 
-	auto scene = fbx::load_fbx_scene("res/bee.fbx").unwrap();
-	auto& mesh = scene.meshes[0];
+	auto scene0 = fbx::load_fbx_scene("res/bee.fbx").unwrap();
+	auto& bee = scene0.meshes[0];
+	auto& bee_skeleton = scene0.skeletons[0];
+
+	for (auto& bone : bee_skeleton.bones) {
+		char buffer[256];
+		sprintf_s(buffer, "%s %f %f %f \n", bone.name.ptr(), bone.position.x, bone.position.y, bone.position.z);
+		OutputDebugStringA(buffer);
+	}
+
+	auto scene1 = fbx::load_fbx_scene("res/box.fbx").unwrap();
+	auto& box = scene1.meshes[0];
 
 	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();
 	auto vertex_binary = gpu::compile_hlsl(shader, gpu::ShaderType::Vertex).unwrap();
@@ -137,24 +147,44 @@ int WINAPI WinMain(
 
 	auto pipeline = gpu::GraphicsPipeline::make(core::move(config));
 
-	auto vertices = gpu::Buffer::make(
+	auto bee_vertices = gpu::Buffer::make(
 		gpu::BufferUsage::Vertex,
 		gpu::BufferKind::Upload,
-		mesh.vertices.len(), 
+		bee.vertices.len(), 
 		sizeof(fbx::Vertex)
 	);
-	vertices.write([&mesh](Slice<u8> slice){
-		mem::copy(slice.ptr(), mesh.vertices.ptr(), slice.len());
+	bee_vertices.write([&bee](Slice<u8> slice){
+		mem::copy(slice.ptr(), bee.vertices.ptr(), slice.len());
 	});
 
-	auto indices = gpu::Buffer::make(
+	auto bee_indices = gpu::Buffer::make(
 		gpu::BufferUsage::Index,
 		gpu::BufferKind::Upload,
-		mesh.indices.len(), 
+		bee.indices.len(), 
 		sizeof(u32)
 	);
-	indices.write([&mesh](Slice<u8> slice) {
-		mem::copy(slice.ptr(), mesh.indices.ptr(), slice.len());
+	bee_indices.write([&bee](Slice<u8> slice) {
+		mem::copy(slice.ptr(), bee.indices.ptr(), slice.len());
+	});
+
+	auto box_vertices = gpu::Buffer::make(
+		gpu::BufferUsage::Vertex,
+		gpu::BufferKind::Upload,
+		box.vertices.len(),
+		sizeof(fbx::Vertex)
+	);
+	box_vertices.write([&box](Slice<u8> slice) {
+		mem::copy(slice.ptr(), box.vertices.ptr(), slice.len());
+	});
+
+	auto box_indices = gpu::Buffer::make(
+		gpu::BufferUsage::Index,
+		gpu::BufferKind::Upload,
+		box.indices.len(),
+		sizeof(u32)
+	);
+	box_indices.write([&box](Slice<u8> slice) {
+		mem::copy(slice.ptr(), box.indices.ptr(), slice.len());
 	});
 
 	auto command_list = gpu::GraphicsCommandList::make();
@@ -237,13 +267,34 @@ int WINAPI WinMain(
 						view_rotation,
 						1.f
 					).inverse().unwrap();
-					const auto local_to_projection = projection * axis_adjustment * view;
 
 					rp.set_pipeline(pipeline);
-					rp.push_constants(&local_to_projection);
-					rp.set_vertices(vertices);
-					rp.set_indices(indices);
-					rp.draw_index(indices.len());
+
+					rp.clear_color(LinearColor::BLACK);
+					rp.clear_depth_stencil(1.f, 0);
+
+					// Draw the bee
+					{
+						const auto local_to_projection = projection * axis_adjustment * view;
+						rp.push_constants(&local_to_projection);
+						rp.set_vertices(bee_vertices);
+						rp.set_indices(bee_indices);
+						rp.draw_index(bee_indices.len());
+					}
+
+					rp.clear_depth_stencil(1.f, 0);
+
+					// auto world = Mat4f32::identity();
+					for (auto& bone : bee_skeleton.bones) {
+						const auto local = Mat4f32::transform(bone.position, bone.rotation, bone.scale * 5.f);
+
+						// world = world * local;
+						const auto local_to_projection = projection * axis_adjustment * view * local;
+						rp.push_constants(&local_to_projection);
+						rp.set_vertices(box_vertices);
+						rp.set_indices(box_indices);
+						rp.draw_index(box_vertices.len());
+					}
 				}
 			);
 

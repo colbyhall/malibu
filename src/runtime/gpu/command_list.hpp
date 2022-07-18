@@ -30,7 +30,7 @@ namespace gpu {
 
 		virtual void set_scissor(Option<Rect2f32> scissor) = 0;
 		virtual void clear_color(LinearColor color) = 0;
-		virtual void clear_depth(f32 depth) = 0;
+		virtual void clear_depth_stencil(f32 depth, u8 stencil) = 0;
 		virtual void set_pipeline(const GraphicsPipeline& pipeline) = 0;
 		virtual void set_vertices(const Buffer& buffer) = 0;
 		virtual void set_indices(const Buffer& buffer) = 0;
@@ -51,6 +51,11 @@ namespace gpu {
 	public:
 		inline RenderPassRecorder& clear_color(LinearColor color) {
 			m_interface.clear_color(color);
+			return *this;
+		}
+
+		inline RenderPassRecorder& clear_depth_stencil(f32 depth, u8 stencil) {
+			m_interface.clear_depth_stencil(depth, stencil);
 			return *this;
 		}
 

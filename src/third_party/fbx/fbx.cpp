@@ -4,8 +4,6 @@
 #define FBXSDK_SHARED
 #include "fbxsdk.h"
 
-#include <Windows.h>
-
 namespace fbx {
 	class Context {
 	public:
@@ -34,14 +32,21 @@ namespace fbx {
 		const bool import_status = importer->Initialize(path.ptr(), -1, context.ios);
 		if (!import_status || !importer->IsFBX()) return core::fs::FileOpenError::NotFound;
 
+		// Create the scene and import the file into it
 		FbxScene* const scene = FbxScene::Create(context.manager, "Scene");
 		const bool status = importer->Import(scene);
 		VERIFY(status);
 
+		// Convert scene to use all of our coordinate systems
+		FbxAxisSystem::ECoordSystem coord_system = FbxAxisSystem::eRightHanded;
+		FbxAxisSystem::EUpVector up_vector = FbxAxisSystem::eZAxis;
+		FbxAxisSystem::EFrontVector front_vector = (FbxAxisSystem::EFrontVector)-FbxAxisSystem::eParityOdd;
+
+		FbxAxisSystem adjusted_axis_system = { up_vector, front_vector, coord_system };
+		adjusted_axis_system.ConvertScene(scene);
+
 		Scene result = {};
 
-		Array<Vertex> vertices;
-		Array<u32> indices;
 		const auto geometry_count = scene->GetGeometryCount();
 		for (
 			int geometry_index = 0;
@@ -58,8 +63,10 @@ namespace fbx {
 					continue;
 				}
 
-				vertices.reserve(mesh->GetControlPointsCount());
-				indices.reserve(mesh->GetPolygonCount() * 3);
+				Mesh output = {};
+				
+				output.vertices.reserve(mesh->GetControlPointsCount());
+				output.indices.reserve(mesh->GetPolygonCount() * 3);
 
 #if 0
 				const auto num_stacks = scene->GetSrcObjectCount<FbxAnimStack>();
@@ -100,7 +107,7 @@ namespace fbx {
 						Vec3f32 normal = {};
 						if (normal_element) {
 							const int normal_map_index = (normal_mapping_mode == FbxLayerElement::eByControlPoint) ?
-								control_point_index : (int)vertices.len();
+								control_point_index : (int)output.vertices.len();
 							const int normal_value_index = (normal_reference_mode == FbxLayerElement::eDirect) ?
 								normal_map_index : normal_element->GetIndexArray().GetAt(normal_map_index);
 
@@ -112,8 +119,8 @@ namespace fbx {
 							VERIFY(normal.len_sq() != 0.f);
 						}
 
-						indices.push((u32)vertices.len());
-						vertices.push(Vertex{
+						output.indices.push((u32)output.vertices.len());
+						output.vertices.push(Vertex{
 							{
 								(f32)control_point[0],
 								(f32)control_point[1],
@@ -129,6 +136,10 @@ namespace fbx {
 				if (mesh->GetDeformerCount(FbxDeformer::eSkin) > 0) {
 					auto* skin = (FbxSkin*)mesh->GetDeformer(0, FbxDeformer::eSkin);
 
+					Skeleton skeleton = {};
+					skeleton.bones.reserve(256); // FIXME: Make average number of bones
+
+					// Find the root node to start traversing
 					FbxNode* root = nullptr;
 					for (
 						int cluster_index = 0;
@@ -146,32 +157,85 @@ namespace fbx {
 						if (root) break;
 					}
 
-					auto position0 = root->GetGeometricTranslation(FbxNode::eSourcePivot);
-					auto rotation0 = root->GetGeometricRotation(FbxNode::eSourcePivot);
+					struct FbxBone {
+						int parent;
+						FbxNode* node;
+					};
+					// FIXME: Use a Queue here
+					Array<FbxBone> fbx_bones;
+					fbx_bones.reserve(16);
 
-					for (
-						int child_index = 0;
-						child_index < root->GetChildCount();
-						++child_index
-					) {
-						auto* child = root->GetChild(child_index);
+					// Add the root node which has no parent
+					fbx_bones.push(FbxBone{
+						-1, 
+						root
+					});
+
+					auto* pose = scene->GetPose(0);
+
+					while (fbx_bones.len() > 0) {
+						auto fbx_bone = fbx_bones.remove(0);
+
+						auto fbx_name = fbx_bone.node->GetNameOnly();
+						StringView name = fbx_name;
+
+						const auto pose_index = pose->Find(fbx_bone.node);
+						if (pose_index == -1) continue;
+
+						const auto non_affine_matrix = pose->GetMatrix(pose_index);
+						const auto unconverted_matrix = *(FbxAMatrix*)(double*)&non_affine_matrix;
 						
-						auto position1 = child->GetGeometricTranslation(FbxNode::eSourcePivot);
-						auto rotation1 = child->GetGeometricRotation(FbxNode::eSourcePivot);
+						FbxAMatrix correction_matrix;
+						correction_matrix.SetIdentity();
+						correction_matrix.SetR(FbxVector4(-90.0, -90.0, 0.0));
+						
+						const auto matrix = unconverted_matrix * correction_matrix;
+						const auto position = matrix.GetT();
+						const auto rotation = matrix.GetQ();
+						const auto scale = matrix.GetS();
+
+						const auto bone_index = skeleton.bones.len();
+						skeleton.bones.push(Bone{
+							String::from(name),
+
+							fbx_bone.parent,
+							{},
+
+							Vec3f32 { (f32)position[0], (f32)position[1], (f32)position[2] },
+							Quatf32 { (f32)rotation[0], (f32)rotation[1], (f32)rotation[2], (f32)rotation[3] },
+							Vec3f32 { (f32)scale[0], (f32)scale[1], (f32)scale[2] },
+						});
+
+						// Go to the parent and add the child index
+						if (fbx_bone.parent != -1) {
+							skeleton.bones[fbx_bone.parent].children.push(bone_index);
+						}
+
+						for (
+							int child_index = 0;
+							child_index < fbx_bone.node->GetChildCount();
+							++child_index
+							) {
+							auto* child = fbx_bone.node->GetChild(child_index);
+
+							if (child->GetSkeleton()) {
+								fbx_bones.push(FbxBone{
+									(int)bone_index,
+									child,
+								});
+							}
+						}
 					}
 
+					const auto skeleton_index = result.skeletons.len();
+					result.skeletons.push(core::move(skeleton));
+					output.skeleton = (int)skeleton_index;
 				}
 
+				result.meshes.push(core::move(output));
 			}
 		}
 
-		result.meshes.push(Mesh{
-			String::from("None"),
-			core::move(vertices),
-			core::move(indices),
-
-			-1,
-		});
 
 		return result;
 	}

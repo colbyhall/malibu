@@ -127,6 +127,20 @@ namespace core::containers {
 			insert(index, core::move(copy));
 		}
 
+		T remove(usize index) {
+			VERIFY(index < m_len);
+
+			T result = core::move(m_ptr[index]);
+			void* clear = &m_ptr[index];
+			mem::set(clear, 0, sizeof(T));
+			if (index < m_len - 1) {
+				auto* src = m_ptr + index;
+				mem::move(src, src + 1, (len() - index) * sizeof(T));
+			}
+			m_len -= 1;
+			return result;
+		}
+
 		inline usize push(T&& item) {
 			const auto index = len();
 			insert(index, core::move(item));

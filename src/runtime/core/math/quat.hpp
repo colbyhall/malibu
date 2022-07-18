@@ -9,6 +9,7 @@ namespace core::math {
 		T i, j, k, w;
 
 		inline constexpr Quat() : i(0), j(0), k(0), w(1) {}
+		inline explicit Quat(T _i, T _j, T _k, T _w) : i(_i), j(_j), k(_k), w(_w) {}
 		static constexpr Quat identity() { return {}; }
 		NO_DISCARD static Quat from_axis_angle(Vec3<T> axis, T theta);
 		NO_DISCARD static Quat from_euler(T pitch, T yaw, T roll);
@@ -23,7 +24,6 @@ namespace core::math {
 		Quat operator*(const Quat& rhs) const;
 
 	private:
-		inline explicit Quat(T _i, T _j, T _k, T _w) : i(_i), j(_j), k(_k), w(_w) {}
 	};
 
 	template <typename T>
