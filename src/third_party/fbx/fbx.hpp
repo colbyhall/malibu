@@ -4,18 +4,18 @@
 #include "fs.hpp"
 
 namespace fbx {
-    struct Vertex {
-        Vec3f32 position;
-        Vec3f32 normal;
-    };
+	struct Vertex {
+		Vec3f32 position;
+		Vec3f32 normal;
+	};
 
-    struct Mesh {
+	struct Mesh {
 		String name;
-        Array<Vertex> vertices;
-        Array<u32> indices;
+		Array<Vertex> vertices;
+		Array<u32> indices;
 
 		int skeleton = -1;
-    };
+	};
 
 	struct SkeletonNode {
 		String name;

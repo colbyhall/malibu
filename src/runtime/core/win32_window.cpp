@@ -43,7 +43,7 @@ namespace core::window {
 			} break;
 			case WM_INPUT: {
 				UINT dwSize = sizeof(RAWINPUT);
-    			static BYTE lpb[sizeof(RAWINPUT)];
+				static BYTE lpb[sizeof(RAWINPUT)];
 
 				GetRawInputData(
 					(HRAWINPUT)lParam, 

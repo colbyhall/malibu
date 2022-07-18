@@ -17,12 +17,12 @@ namespace core::mem {
 	};
 	
 	NonNull<void> alloc(Layout layout);
-    template <typename T>
-    NonNull<T> alloc(Layout layout = Layout::single<T>) {
-        VERIFY(layout.size % sizeof(T) == 0);
-        void* ptr = alloc(layout);
-        return reinterpret_cast<T*>(ptr);
-    }
+	template <typename T>
+	NonNull<T> alloc(Layout layout = Layout::single<T>) {
+		VERIFY(layout.size % sizeof(T) == 0);
+		void* ptr = alloc(layout);
+		return reinterpret_cast<T*>(ptr);
+	}
 	NonNull<void> realloc(NonNull<void> old_ptr, Layout old_layout, Layout new_layout);
 	void free(NonNull<void> ptr);
 

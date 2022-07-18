@@ -34,7 +34,7 @@ namespace gpu {
 		virtual void set_pipeline(const GraphicsPipeline& pipeline) = 0;
 		virtual void set_vertices(const Buffer& buffer) = 0;
 		virtual void set_indices(const Buffer& buffer) = 0;
-        virtual void push_constant(const void* ptr) = 0;
+		virtual void push_constant(const void* ptr) = 0;
 		// fn bind_constants(&mut self, name: &str, buffer: &Arc<backend::Buffer>, index: usize);
 		// fn bind_texture(&mut self, name: &str, texture: &Arc<backend::Texture>);
 		virtual void draw(usize vertex_count, usize first_vertex) = 0;
@@ -71,10 +71,10 @@ namespace gpu {
 			return *this;
 		}
 
-        inline RenderPassRecorder& push_constants(const void* ptr) {
-            m_interface.push_constant(ptr);
-            return *this;
-        }
+		inline RenderPassRecorder& push_constants(const void* ptr) {
+			m_interface.push_constant(ptr);
+			return *this;
+		}
 
 		inline RenderPassRecorder& draw(usize vertex_count, usize first_vertex = 0) {
 			m_interface.draw(vertex_count, first_vertex);

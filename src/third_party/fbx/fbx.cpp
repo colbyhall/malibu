@@ -4,6 +4,8 @@
 #define FBXSDK_SHARED
 #include "fbxsdk.h"
 
+#include <Windows.h>
+
 namespace fbx {
 	class Context {
 	public:
@@ -22,7 +24,7 @@ namespace fbx {
 		FbxIOSettings* ios;
 	};
 
-    Result<Scene, core::fs::FileOpenError> load_fbx_scene(core::fs::PathView path) {
+	Result<Scene, core::fs::FileOpenError> load_fbx_scene(core::fs::PathView path) {
 		auto& context = Context::the();
 
 		int sdk_maj, sdk_min, sdk_rev;
@@ -30,7 +32,7 @@ namespace fbx {
 
 		FbxImporter* const importer = FbxImporter::Create(context.manager, "");
 		const bool import_status = importer->Initialize(path.ptr(), -1, context.ios);
-        if (!import_status || !importer->IsFBX()) return core::fs::FileOpenError::NotFound;
+		if (!import_status || !importer->IsFBX()) return core::fs::FileOpenError::NotFound;
 
 		FbxScene* const scene = FbxScene::Create(context.manager, "Scene");
 		const bool status = importer->Import(scene);
@@ -38,9 +40,12 @@ namespace fbx {
 
 		Scene result = {};
 
+		Array<Vertex> vertices;
+		Array<u32> indices;
+		const auto geometry_count = scene->GetGeometryCount();
 		for (
 			int geometry_index = 0;
-			geometry_index < scene->GetGeometryCount();
+			geometry_index < geometry_count;
 			++geometry_index
 		) {
 			auto* geometry = scene->GetGeometry(geometry_index);
@@ -53,9 +58,7 @@ namespace fbx {
 					continue;
 				}
 
-				Array<Vertex> vertices;
 				vertices.reserve(mesh->GetControlPointsCount());
-				Array<u32> indices;
 				indices.reserve(mesh->GetPolygonCount() * 3);
 
 #if 0
@@ -105,6 +108,8 @@ namespace fbx {
 							normal.x = (f32)value[0];
 							normal.y = (f32)value[1];
 							normal.z = (f32)value[2];
+
+							VERIFY(normal.len_sq() != 0.f);
 						}
 
 						indices.push((u32)vertices.len());
@@ -157,16 +162,17 @@ namespace fbx {
 
 				}
 
-				result.meshes.push(Mesh{
-					String::from("None"),
-					core::move(vertices),
-					core::move(indices),
-
-					-1,
-				});
 			}
 		}
 
-        return result;
+		result.meshes.push(Mesh{
+			String::from("None"),
+			core::move(vertices),
+			core::move(indices),
+
+			-1,
+		});
+
+		return result;
 	}
 }

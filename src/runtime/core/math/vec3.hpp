@@ -9,7 +9,7 @@ namespace core::math {
 			struct { T x, y, z; };
 			struct { T width, height, depth; };
 			struct { T u, v, w; };
-            Vec2<T> xy;
+			Vec2<T> xy;
 			T xyz[3];
 		};
 

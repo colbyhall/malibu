@@ -110,13 +110,13 @@ int WINAPI WinMain(
 		WindowVisibility::Hidden,
 	}).unwrap();
 
-    auto& context = gpu::Context::the();
+	auto& context = gpu::Context::the();
 	const auto registered = context.register_window(g_window.as_ref().unwrap());
 	VERIFY(registered);
 
 	auto things = fs::read_directory("res");
 
-	auto scene = fbx::load_fbx_scene("res/humanoid.fbx").unwrap();
+	auto scene = fbx::load_fbx_scene("res/bee.fbx").unwrap();
 	auto& mesh = scene.meshes[0];
 
 	String shader = fs::read_to_string("src/shaders/triangle.hlsl").unwrap();
@@ -222,7 +222,7 @@ int WINAPI WinMain(
 						fov,
 						client.width / client.height, 
 						0.01f, 
-						1000.f
+						1000000.f
 					); 
 
 					const auto axis_adjustment = Mat4f32::from_columns(

@@ -43,7 +43,7 @@ namespace core::fs {
 			nullptr,
 			creation,
 			FILE_ATTRIBUTE_NORMAL,
-            nullptr
+			nullptr
 		);
 
 		const DWORD err = GetLastError();

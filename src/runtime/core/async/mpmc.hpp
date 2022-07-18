@@ -4,32 +4,32 @@
 #include "../memory.hpp"
 
 namespace core::async {
-    // Source: Dmitry Vyukov's MPMC
-    // http://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue
-    template <typename T>
-    class MPMCQueue {
-        struct CacheLinePad {
-            u8 internal[64];
-            CacheLinePad() : internal() {}
-        };
-        struct Cell {
-            Atomic<int> sequence;
-            Option<T> data;
-        };
+	// Source: Dmitry Vyukov's MPMC
+	// http://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue
+	template <typename T>
+	class MPMCQueue {
+		struct CacheLinePad {
+			u8 internal[64];
+			CacheLinePad() : internal() {}
+		};
+		struct Cell {
+			Atomic<int> sequence;
+			Option<T> data;
+		};
 
-    public:
-        static MPMCQueue make(usize size) {
-            // Verify that size is a power of 2
-            VERIFY(size >= 2 && (size & size - 1) == 0);
+	public:
+		static MPMCQueue make(usize size) {
+			// Verify that size is a power of 2
+			VERIFY(size >= 2 && (size & size - 1) == 0);
 
-            Cell* buffer = mem::alloc<Cell>(mem::Layout::array<Cell>(size));
-            for (usize i = 0; i < size; ++i) {
-                Cell& cell = buffer[i];
-                cell.sequence.store((int)i, Order::Relaxed);
-            }
+			Cell* buffer = mem::alloc<Cell>(mem::Layout::array<Cell>(size));
+			for (usize i = 0; i < size; ++i) {
+				Cell& cell = buffer[i];
+				cell.sequence.store((int)i, Order::Relaxed);
+			}
 
-            return MPMCQueue(buffer, (int)size);
-        }
+			return MPMCQueue(buffer, (int)size);
+		}
 
 		NO_COPY(MPMCQueue);
 
@@ -56,70 +56,70 @@ namespace core::async {
 			return *this;
 		}
 
-        ~MPMCQueue() {
-            if (m_buffer) {
-                // FIXME: Free elements
-                mem::free(m_buffer);
-            }
-        }
+		~MPMCQueue() {
+			if (m_buffer) {
+				// FIXME: Free elements
+				mem::free(m_buffer);
+			}
+		}
 
-        bool push(T&& t) const {
-            Cell* cell = nullptr;
-            auto pos = m_enqueue_pos.load();
-            for(;;) {
-                cell = &m_buffer[pos & m_buffer_mask];
-                const auto seq = cell->sequence.load();
-                const auto dif = seq - pos;
+		bool push(T&& t) const {
+			Cell* cell = nullptr;
+			auto pos = m_enqueue_pos.load();
+			for(;;) {
+				cell = &m_buffer[pos & m_buffer_mask];
+				const auto seq = cell->sequence.load();
+				const auto dif = seq - pos;
 
-                if (dif == 0) {
-                    if (!m_enqueue_pos.compare_exchange_weak(pos, pos + 1).is_set())
-                        break;
-                } else if (dif < 0) return false;
-                else pos = m_enqueue_pos.load();
-            }
-            cell->data = core::forward<T>(t);
-            cell->sequence.store(pos + 1);
-            return true;
-        }
+				if (dif == 0) {
+					if (!m_enqueue_pos.compare_exchange_weak(pos, pos + 1).is_set())
+						break;
+				} else if (dif < 0) return false;
+				else pos = m_enqueue_pos.load();
+			}
+			cell->data = core::forward<T>(t);
+			cell->sequence.store(pos + 1);
+			return true;
+		}
 
 		inline bool push(const T& t) const {
 			T copy = t;
 			return push(core::move(copy));
 		}
 
-        Option<T> pop() const {
-            Cell* cell = nullptr;
-            auto pos = m_dequeue_pos.load();
-            for (;;) {
-                cell = &m_buffer[pos & m_buffer_mask];
-                const auto seq = cell->sequence.load();
-                const auto dif = seq - (pos + 1);
+		Option<T> pop() const {
+			Cell* cell = nullptr;
+			auto pos = m_dequeue_pos.load();
+			for (;;) {
+				cell = &m_buffer[pos & m_buffer_mask];
+				const auto seq = cell->sequence.load();
+				const auto dif = seq - (pos + 1);
 
-                if (dif == 0) {
-                    if (!m_dequeue_pos.compare_exchange_weak(pos, pos + 1).is_set())
-                        break;
-                } else if (dif < 0) return Option<T>{};
-                else pos = m_dequeue_pos.load();
-            }
+				if (dif == 0) {
+					if (!m_dequeue_pos.compare_exchange_weak(pos, pos + 1).is_set())
+						break;
+				} else if (dif < 0) return Option<T>{};
+				else pos = m_dequeue_pos.load();
+			}
 			T t = cell->data.unwrap();
 			cell->sequence.store(pos + m_buffer_mask + 1);
 			return t;
-        }
+		}
 
-    private:
-        inline explicit MPMCQueue(Cell* buffer, int size) :
-            m_buffer(buffer),
-            m_buffer_mask(size - 1),
-            m_enqueue_pos(0),
-            m_dequeue_pos(0) {}
+	private:
+		inline explicit MPMCQueue(Cell* buffer, int size) :
+			m_buffer(buffer),
+			m_buffer_mask(size - 1),
+			m_enqueue_pos(0),
+			m_dequeue_pos(0) {}
 
-        ALLOW_UNUSED CacheLinePad pad0;
-        Cell* m_buffer;
+		ALLOW_UNUSED CacheLinePad pad0;
+		Cell* m_buffer;
 		int m_buffer_mask;
-        ALLOW_UNUSED CacheLinePad pad1;
-        Atomic<int> m_enqueue_pos;
-        ALLOW_UNUSED CacheLinePad pad2;
-        Atomic<int> m_dequeue_pos;
-        ALLOW_UNUSED CacheLinePad pad3;
-    };
+		ALLOW_UNUSED CacheLinePad pad1;
+		Atomic<int> m_enqueue_pos;
+		ALLOW_UNUSED CacheLinePad pad2;
+		Atomic<int> m_dequeue_pos;
+		ALLOW_UNUSED CacheLinePad pad3;
+	};
 }

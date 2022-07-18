@@ -30,8 +30,8 @@ namespace gpu {
 	public:
 		static const Context& the();
 
-        NO_DISCARD inline Backend backend() const { return m_interface->backend(); }
-        NO_DISCARD inline bool register_window(const Window& window) const { return m_interface->register_window(window); }
+		NO_DISCARD inline Backend backend() const { return m_interface->backend(); }
+		NO_DISCARD inline bool register_window(const Window& window) const { return m_interface->register_window(window); }
 		NO_DISCARD inline const Texture& back_buffer() const { return m_interface->back_buffer(); }
 		inline void present() const { return m_interface->present(); }
 

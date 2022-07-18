@@ -14,7 +14,7 @@ namespace core::time {
 		inline constexpr explicit Duration(u64 secs, u32 nanos) : m_secs(secs), m_nanos(nanos) { }
 
 		NO_DISCARD f32 as_secs_f32() const;
-        NO_DISCARD f64 as_secs_f64() const;
+		NO_DISCARD f64 as_secs_f64() const;
 
 	private:
 		u64 m_secs;

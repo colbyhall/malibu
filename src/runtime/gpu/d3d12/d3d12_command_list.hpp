@@ -44,7 +44,7 @@ public:
 	void set_pipeline(const gpu::GraphicsPipeline& pipeline) override;
 	void set_vertices(const gpu::Buffer& buffer) override;
 	void set_indices(const gpu::Buffer& buffer) override;
-    void push_constant(const void* ptr) override;
+	void push_constant(const void* ptr) override;
 	// fn bind_constants(&mut self, name: &str, buffer: &Arc<backend::Buffer>, index: usize);
 	// fn bind_texture(&mut self, name: &str, texture: &Arc<backend::Texture>);
 	void draw(usize vertex_count, usize first_vertex) override;
