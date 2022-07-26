@@ -72,7 +72,7 @@ namespace core::async {
 		}
 	}
 
-	void init_job_system() {
+	void job::init() {
 		auto count = logical_core_count();
 
 #if PLATFORM_WIN32
@@ -112,7 +112,7 @@ namespace core::async {
 		}
 	}
 
-	void shutdown_job_system() {
+	void job::shutdown() {
 		if (g_job_system) {
 			auto& job_system = g_job_system.as_ref().unwrap();
 			job_system.running.store(false);	

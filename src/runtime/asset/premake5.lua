@@ -1,4 +1,4 @@
-project "resources"
+project "asset"
     kind "StaticLib"
     language "C++"
 

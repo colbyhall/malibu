@@ -58,6 +58,8 @@ namespace core::async {
 		return future;
 	}
 
-	void init_job_system();
-	void shutdown_job_system();
+	namespace job {
+		void init();
+		void shutdown();
+	}
 }

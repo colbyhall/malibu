@@ -1,10 +1,10 @@
 project "core"
-    kind "StaticLib"
-    language "C++"
+	kind "StaticLib"
+	language "C++"
 
-    files { "**.hpp", "**.cpp" }
+	files { "**.hpp", "**.cpp" }
 
-    vpaths { ["*"] = { "**.hpp", "**.cpp" } }
+	vpaths { ["*"] = { "**.hpp", "**.cpp" } }
 
 	cppdialect "C++17"
 

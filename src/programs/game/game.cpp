@@ -7,6 +7,7 @@
 #include "containers/function.hpp"
 
 #include "async/job.hpp"
+#include "asset.hpp"
 
 #include "fbx.hpp"
 
@@ -57,7 +58,7 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 	case WindowEventType::Closed:
 	case WindowEventType::ExitRequested:
 		g_running = false;
-		async::shutdown_job_system();
+		async::job::shutdown();
 		break;
 	case WindowEventType::MouseMoved:
 		if (g_camera.capture_mouse) {
@@ -197,17 +198,8 @@ int WINAPI WinMain(
 	_In_ LPSTR lpCmdLine,
 	_In_ int nShowCmd
 ) {
-	async::init_job_system();
-
-#if 0
-	auto result = async::schedule2([]() -> u32 {
-		return 420;
-	});
-
-	while (!result.is_ready()) {
-		OutputDebugStringA("Waiting\n");
-	}
-#endif
+	async::job::init();
+	asset::init();
 
 	g_window = Window::make({
 		{ 1920, 1080 },
@@ -220,9 +212,7 @@ int WINAPI WinMain(
 	const auto registered = context.register_window(g_window.as_ref().unwrap());
 	VERIFY(registered);
 
-	auto things = fs::read_directory("res");
-
-	auto scene0 = fbx::load_fbx_scene("res/bee.fbx").unwrap();
+	auto scene0 = fbx::load_fbx_scene("assets/bee.fbx").unwrap();
 	auto& bee = scene0.meshes[0];
 
 	auto bee_vertices = gpu::Buffer::make(
@@ -269,7 +259,7 @@ int WINAPI WinMain(
 		mem::copy(slice.ptr(), canvas.vertices().ptr(), slice.len());
 	});
 
-	auto scene1 = fbx::load_fbx_scene("res/box.fbx").unwrap();
+	auto scene1 = fbx::load_fbx_scene("assets/box.fbx").unwrap();
 	auto& box = scene1.meshes[0];
 
 	auto box_vertices = gpu::Buffer::make(
