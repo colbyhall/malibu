@@ -56,6 +56,7 @@ namespace core::containers {
 		
 		inline void set_len(usize len) {
 			VERIFY(len <= m_cap);
+			// FIXME: Delete the items that are lost
 			m_len = len;
 		}
 

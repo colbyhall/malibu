@@ -191,6 +191,10 @@ private:
 	Array<fbx::Vertex> m_vertices;
 };
 
+class Texture : public asset::Asset {
+	ASSET_DECLARATION(Texture);
+};
+REGISTER_ASSET(Texture);
 
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,

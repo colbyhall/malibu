@@ -1,6 +1,7 @@
 #pragma once
 
 #include "array.hpp"
+#include "hash.hpp"
 
 namespace core::containers {
 	template<typename T>
@@ -48,9 +49,26 @@ namespace core::containers {
 		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_bytes); }
 		inline const char* operator*() const { return m_bytes.ptr(); }
 
+		inline bool operator==(const StringView& right) const {
+			if (len() != right.len()) return false;
+
+			for (usize i = 0; i < len(); i++) {
+				if (m_bytes[i] != right.m_bytes[i]) return false;
+			}
+
+			return true;
+		}
+		inline bool operator!=(const StringView& right) const {
+			return !(*this == right);
+		}
+
 	private:
 		Slice<char const> m_bytes;
 	};
+
+	inline u64 hash(StringView view) {
+		return hash::fnv1_hash(Slice<u8 const>((u8 const*)view.ptr(), view.len()));
+	}
 
 	class WStringView {
 	public:
