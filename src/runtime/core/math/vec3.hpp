@@ -17,6 +17,7 @@ namespace core::math {
 		inline constexpr Vec3() : x(0), y(0), z(0) { }
 		inline constexpr Vec3(T xyz) : x(xyz), y(xyz), z(xyz) { }
 		inline constexpr Vec3(T x, T y, T z) : u(x), v(y), w(z) { }
+		inline constexpr Vec3(Vec2<T> xy, T z = (T)0) : u(xy.x), v(xy.y), w(z) { }
 
 		static constexpr Vec3 forward() { return {1, 0, 0}; }
 		static constexpr Vec3 right() { return {0, 1, 0}; }

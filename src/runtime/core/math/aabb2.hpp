@@ -21,6 +21,22 @@ namespace core::math {
 			return AABB2<T> { location, half_size };
 		}
 
+		inline Point2<T> bottom_left() const { return m_location - m_half_size; }
+		inline Point2<T> top_right() const { return m_location + m_half_size; }
+
+		inline Point2<T> bottom_right() const { 
+			auto result = m_location;
+			result.x += m_half_size.x;
+			result.y -= m_half_size.y;
+			return result;
+		}
+		inline Point2<T> top_left() const {
+			auto result = m_location;
+			result.x -= m_half_size.x;
+			result.y += m_half_size.y;
+			return result;
+		}
+
 	private:
 		inline constexpr
 		AABB2(Point2<T> location, Vec2<T> half_size) : m_location(location), m_half_size(half_size) { }
