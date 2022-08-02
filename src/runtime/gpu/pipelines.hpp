@@ -3,7 +3,6 @@
 #include "resources.hpp"
 
 namespace gpu {
-
 	enum class ShaderType : u8 {
 		Vertex,
 		Pixel,

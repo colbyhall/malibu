@@ -133,8 +133,8 @@ namespace core::containers {
 		NO_DISCARD inline usize len() const { return m_bytes.len() > 0 ? m_bytes.len() - 1 : 0; }
 		NO_DISCARD inline usize cap() const { return m_bytes.cap(); }
 		inline void set_len(usize len) { 
-			m_bytes[len] = 0;
 			m_bytes.set_len(len + 1);
+			m_bytes[len] = 0;
 		}
 
 		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_bytes); }

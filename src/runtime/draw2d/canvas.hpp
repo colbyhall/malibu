@@ -25,6 +25,7 @@ namespace draw2d {
 				m_color,
 				uv
 			});
+			return *this;
 		}
 
 		inline Canvas& paint(const Shape& t) {

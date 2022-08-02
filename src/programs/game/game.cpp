@@ -11,6 +11,11 @@
 
 #include "fbx.hpp"
 
+#include "canvas.hpp"
+#include "basic_shapes.hpp"
+
+#include "dxc.hpp"
+
 using namespace core;
 using namespace core::window;
 using namespace core::time;
@@ -191,11 +196,6 @@ private:
 	Array<fbx::Vertex> m_vertices;
 };
 
-class Texture : public asset::Asset {
-	ASSET_DECLARATION(Texture);
-};
-REGISTER_ASSET(Texture);
-
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -290,10 +290,21 @@ int WINAPI WinMain(
 	gpu::GraphicsPipelineConfig static_lit_config = {};
 	{
 		String source = fs::read_to_string("src/shaders/static_lit.hlsl").unwrap();
-		auto vertex_binary = gpu::compile_hlsl(source, gpu::ShaderType::Vertex).unwrap();
+		dxc::Input vertex_input = {
+			source,
+			"vs_main",
+			gpu::ShaderType::Vertex
+		};
+		auto vertex_binary = dxc::compile(vertex_input).unwrap();
+		// auto vertex_binary = gpu::compile_hlsl(source, gpu::ShaderType::Vertex).unwrap();
 		auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
 
-		auto pixel_binary = gpu::compile_hlsl(source, gpu::ShaderType::Pixel).unwrap();
+		dxc::Input pixel_input = {
+			source,
+			"ps_main",
+			gpu::ShaderType::Pixel
+		};
+		auto pixel_binary = dxc::compile(pixel_input).unwrap();
 		auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
 
 		static_lit_config.color_attachments.push(gpu::Format::RGBA_U8);
@@ -308,7 +319,7 @@ int WINAPI WinMain(
 	}
 	auto static_lit_pipeline = gpu::GraphicsPipeline::make(core::move(static_lit_config));
 
-	gpu::GraphicsPipelineConfig debug_config = {};
+	gpu::GraphicsPipelineConfig debug3d_config = {};
 	{
 		String source = fs::read_to_string("src/shaders/debug3d.hlsl").unwrap();
 		auto vertex_binary = gpu::compile_hlsl(source, gpu::ShaderType::Vertex).unwrap();
@@ -317,15 +328,34 @@ int WINAPI WinMain(
 		auto pixel_binary = gpu::compile_hlsl(source, gpu::ShaderType::Pixel).unwrap();
 		auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
 
-		debug_config.color_attachments.push(gpu::Format::RGBA_U8);
-		debug_config.depth_attachment = gpu::Format::Depth24_Stencil8;
-		debug_config.vertex_shader = core::move(vertex_shader);
-		debug_config.pixel_shader = core::move(pixel_shader);
+		debug3d_config.color_attachments.push(gpu::Format::RGBA_U8);
+		debug3d_config.depth_attachment = gpu::Format::Depth24_Stencil8;
+		debug3d_config.vertex_shader = core::move(vertex_shader);
+		debug3d_config.pixel_shader = core::move(pixel_shader);
 
-		debug_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
-		debug_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+		debug3d_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+		debug3d_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
 	}
-	auto debug3d_pipeline = gpu::GraphicsPipeline::make(core::move(debug_config));
+	auto debug3d_pipeline = gpu::GraphicsPipeline::make(core::move(debug3d_config));
+
+	// gpu::GraphicsPipelineConfig gui_pipeline_config = {};
+	// {
+	// 	String source = fs::read_to_string("src/shaders/gui.hlsl").unwrap();
+	// 	auto vertex_binary = gpu::compile_hlsl(source, gpu::ShaderType::Vertex).unwrap();
+	// 	auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
+	// 
+	// 	auto pixel_binary = gpu::compile_hlsl(source, gpu::ShaderType::Pixel).unwrap();
+	// 	auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
+	// 
+	// 	gui_pipeline_config.color_attachments.push(gpu::Format::RGBA_U8);
+	// 	gui_pipeline_config.depth_attachment = gpu::Format::Depth24_Stencil8;
+	// 	gui_pipeline_config.vertex_shader = core::move(vertex_shader);
+	// 	gui_pipeline_config.pixel_shader = core::move(pixel_shader);
+	// 
+	// 	gui_pipeline_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+	// 	gui_pipeline_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+	// }
+	// auto gui_pipeline = gpu::GraphicsPipeline::make(core::move(gui_pipeline_config));
 
 	auto command_list = gpu::GraphicsCommandList::make();
 
