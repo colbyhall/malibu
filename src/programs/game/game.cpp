@@ -243,7 +243,7 @@ int WINAPI WinMain(
 
 	auto& bee_skeleton = scene0.skeletons[0];
 
-	Canvas canvas = Canvas::make();
+	Canvas canvas_3d = Canvas::make();
 	for (auto& bone : bee_skeleton.bones) {
 		char buffer[256];
 		sprintf_s(buffer, "%s %f %f %f \n", bone.name.ptr(), bone.position.x, bone.position.y, bone.position.z);
@@ -251,18 +251,18 @@ int WINAPI WinMain(
 
 		if (bone.parent != -1) {
 			const auto& parent = bee_skeleton.bones[bone.parent];
-			canvas.line(parent.position, bone.position, 10.f, { 1.f, 1.f, 0.f, 1.f });
+			canvas_3d.line(parent.position, bone.position, 10.f, { 1.f, 1.f, 0.f, 1.f });
 		}
 	}
 
-	auto canvas_vertices = gpu::Buffer::make(
+	auto canvas_3d_vertices = gpu::Buffer::make(
 		gpu::BufferUsage::Vertex,
 		gpu::BufferKind::Upload,
-		canvas.vertices().len(),
+		canvas_3d.vertices().len(),
 		sizeof(fbx::Vertex)
 	);
-	canvas_vertices.write([&canvas](Slice<u8> slice) {
-		mem::copy(slice.ptr(), canvas.vertices().ptr(), slice.len());
+	canvas_3d_vertices.write([&canvas_3d](Slice<u8> slice) {
+		mem::copy(slice.ptr(), canvas_3d.vertices().ptr(), slice.len());
 	});
 
 	auto scene1 = fbx::load_fbx_scene("assets/box.fbx").unwrap();
@@ -297,10 +297,10 @@ int WINAPI WinMain(
 			"vs_main",
 			gpu::ShaderType::Vertex
 		};
-		auto vertex_binary = dxc::compile(vertex_input).unwrap();
+		auto vertex_output = dxc::compile(vertex_input).unwrap();
 		auto vertex_shader = gpu::VertexShader::make(
-			core::move(vertex_binary.binary), 
-			core::move(vertex_binary.input_parameters)
+			core::move(vertex_output.binary), 
+			core::move(vertex_output.input_parameters)
 		);
 
 		dxc::Input pixel_input = {
@@ -308,8 +308,8 @@ int WINAPI WinMain(
 			"ps_main",
 			gpu::ShaderType::Pixel
 		};
-		auto pixel_binary = dxc::compile(pixel_input).unwrap();
-		auto pixel_shader = gpu::PixelShader::make(core::move(pixel_binary.binary));
+		auto pixel_output = dxc::compile(pixel_input).unwrap();
+		auto pixel_shader = gpu::PixelShader::make(core::move(pixel_output.binary));
 
 		gpu::GraphicsPipelineConfig static_lit_config = {
 			core::move(vertex_shader),
@@ -334,10 +334,10 @@ int WINAPI WinMain(
 			"vs_main",
 			gpu::ShaderType::Vertex
 		};
-		auto vertex_binary = dxc::compile(vertex_input).unwrap();
+		auto vertex_output = dxc::compile(vertex_input).unwrap();
 		auto vertex_shader = gpu::VertexShader::make(
-			core::move(vertex_binary.binary),
-			core::move(vertex_binary.input_parameters)
+			core::move(vertex_output.binary),
+			core::move(vertex_output.input_parameters)
 		);
 
 		dxc::Input pixel_input = {
@@ -345,8 +345,8 @@ int WINAPI WinMain(
 			"ps_main",
 			gpu::ShaderType::Pixel
 		};
-		auto pixel_binary = dxc::compile(pixel_input).unwrap();
-		auto pixel_shader = gpu::PixelShader::make(core::move(pixel_binary.binary));
+		auto pixel_output = dxc::compile(pixel_input).unwrap();
+		auto pixel_shader = gpu::PixelShader::make(core::move(pixel_output.binary));
 		
 		gpu::GraphicsPipelineConfig debug3d_config = {
 			core::move(vertex_shader), 
@@ -360,24 +360,53 @@ int WINAPI WinMain(
 	}
 	auto debug3d_pipeline = gpu::GraphicsPipeline::make(debug3d_config_opt.unwrap());
 
-	// gpu::GraphicsPipelineConfig gui_pipeline_config = {};
-	// {
-	// 	String source = fs::read_to_string("src/shaders/gui.hlsl").unwrap();
-	// 	auto vertex_binary = gpu::compile_hlsl(source, gpu::ShaderType::Vertex).unwrap();
-	// 	auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
-	// 
-	// 	auto pixel_binary = gpu::compile_hlsl(source, gpu::ShaderType::Pixel).unwrap();
-	// 	auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
-	// 
-	// 	gui_pipeline_config.color_attachments.push(gpu::Format::RGBA_U8);
-	// 	gui_pipeline_config.depth_attachment = gpu::Format::Depth24_Stencil8;
-	// 	gui_pipeline_config.vertex_shader = core::move(vertex_shader);
-	// 	gui_pipeline_config.pixel_shader = core::move(pixel_shader);
-	// 
-	// 	gui_pipeline_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
-	// 	gui_pipeline_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
-	// }
-	// auto gui_pipeline = gpu::GraphicsPipeline::make(core::move(gui_pipeline_config));
+	Option<gpu::GraphicsPipelineConfig> gui_pipeline_config_opt;
+	{
+		String source = fs::read_to_string("src/shaders/gui.hlsl").unwrap();
+
+		dxc::Input vertex_input = {
+			source,
+			"vs_main",
+			gpu::ShaderType::Vertex
+		};
+		auto vertex_output = dxc::compile(vertex_input).unwrap();
+		auto vertex_shader = gpu::VertexShader::make(
+			core::move(vertex_output.binary),
+			core::move(vertex_output.input_parameters)
+		);
+
+		dxc::Input pixel_input = {
+			source,
+			"ps_main",
+			gpu::ShaderType::Pixel
+		};
+		auto pixel_output = dxc::compile(pixel_input).unwrap();
+		auto pixel_shader = gpu::PixelShader::make(core::move(pixel_output.binary));
+
+		gpu::GraphicsPipelineConfig gui_pipeline_config = {
+			core::move(vertex_shader),
+			core::move(pixel_shader)
+		};
+
+		gui_pipeline_config.color_attachments.push(gpu::Format::RGBA_U8);
+		gui_pipeline_config.depth_attachment = gpu::Format::Depth24_Stencil8;
+
+		gui_pipeline_config_opt = core::move(gui_pipeline_config);
+	}
+	auto gui_pipeline = gpu::GraphicsPipeline::make(gui_pipeline_config_opt.unwrap());
+
+	auto canvas = draw2d::Canvas::make();
+	canvas.paint(draw2d::Rect(AABB2f32::from_min_max(10.f, 100.f)));
+
+	auto canvas_2d_vertices = gpu::Buffer::make(
+		gpu::BufferUsage::Vertex,
+		gpu::BufferKind::Upload,
+		canvas.vertices().len(),
+		sizeof(draw2d::Canvas::Vertex)
+	);
+	canvas_2d_vertices.write([&canvas](Slice<u8> slice) {
+		mem::copy(slice.ptr(), canvas.vertices().ptr(), slice.len());
+	});
 
 	auto command_list = gpu::GraphicsCommandList::make();
 
@@ -440,48 +469,73 @@ int WINAPI WinMain(
 				depth_buffer, 
 				[&](gpu::RenderPassRecorder& rp) {
 					const auto client = g_window.as_ref().unwrap().client_size().cast<f32>();
-					const auto projection = Mat4f32::perspective(
-						fov,
-						client.width / client.height, 
-						0.01f, 
-						1000000.f
-					); 
 
-					const auto axis_adjustment = Mat4f32::from_columns(
-						{ 0.0, 0.0, -1.0, 0.0 },
-						{ 1.0, 0.0, 0.0, 0.0 },
-						{ 0.0, 1.0, 0.0, 0.0 },
-						{ 0.0, 0.0, 0.0, 1.0 }
-					);
-
-					const auto view = Mat4f32::transform(
-						g_camera.position, 
-						view_rotation,
-						1.f
-					).inverse().unwrap();
-
-					rp.set_pipeline(static_lit_pipeline);
-
-					rp.clear_color(LinearColor::BLACK);
-					rp.clear_depth_stencil(1.f, 0);
-
-					const auto local_to_projection = projection * axis_adjustment * view;
-
-					// Draw the bee
+					// Draw all 3d objects from camera perspective
 					{
+						const auto projection = Mat4f32::perspective(
+							fov,
+							client.width / client.height, 
+							0.01f, 
+							1000000.f
+						); 
+
+						const auto axis_adjustment = Mat4f32::from_columns(
+							{ 0.0, 0.0, -1.0, 0.0 },
+							{ 1.0, 0.0, 0.0, 0.0 },
+							{ 0.0, 1.0, 0.0, 0.0 },
+							{ 0.0, 0.0, 0.0, 1.0 }
+						);
+
+						const auto view = Mat4f32::transform(
+							g_camera.position, 
+							view_rotation,
+							1.f
+						).inverse().unwrap();
+
+						rp.set_pipeline(static_lit_pipeline);
+
+						rp.clear_color(LinearColor::BLACK);
+						rp.clear_depth_stencil(1.f, 0);
+
+						const auto local_to_projection = projection * axis_adjustment * view;
+
+						// Draw the bee
 						rp.push_constants(&local_to_projection);
 						rp.set_vertices(bee_vertices);
 						rp.set_indices(bee_indices);
 						rp.draw_index(bee_indices.len());
+
+						// Draw all the debug information
+						rp.clear_depth_stencil(1.f, 0);
+						rp.set_pipeline(debug3d_pipeline);
+						rp.set_vertices(canvas_3d_vertices);
+						rp.draw(canvas_3d_vertices.len());
 					}
 
-					rp.clear_depth_stencil(1.f, 0);
-					rp.set_pipeline(debug3d_pipeline);
-
-					// Draw all the debug information
+					// Draw gui
 					{
-						rp.set_vertices(canvas_vertices);
-						rp.draw(canvas_vertices.len());
+						const auto projection = Mat4f32::orthographic(
+							client.width, 
+							client.height, 
+							0.01f, 
+							1000000.f
+						);
+
+						const auto axis_adjustment = Mat4f32::identity();
+
+						const auto view = Mat4f32::transform(
+							{ -client.width / 2.f, -client.height / 2.f, 0.f },
+							Quatf32::identity(),
+							1.f
+						);
+
+						const auto local_to_projection = projection * view;
+
+						rp.clear_depth_stencil(1.f, 0);
+						rp.set_pipeline(gui_pipeline);
+						rp.push_constants(&local_to_projection);
+						rp.set_vertices(canvas_2d_vertices);
+						rp.draw(canvas_2d_vertices.len());
 					}
 				}
 			);

@@ -35,6 +35,7 @@ namespace draw2d {
 		}
 
 		inline Canvas& set_color(const LinearColor& color) { m_color = color; return *this; }
+		inline Slice<Vertex const> vertices() const { return m_vertices; }
 
 	private:
 		explicit Canvas() {}
