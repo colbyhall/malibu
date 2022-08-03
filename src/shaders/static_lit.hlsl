@@ -43,14 +43,15 @@ float geometry_smith(float3 n, float3 v, float3 l, float roughness) {
 struct PSInput
 {
 	float4 position : SV_POSITION;
-	float3 normal : COLOR;
+	float3 normal : NORMAL;
 };
 
-PSInput vs_main(float4 position : POSITION, float3 normal: COLOR)
+PSInput vs_main(float3 position : POSITION, float3 normal: NORMAL)
 {
 	PSInput result;
 
-	result.position = mul(local_to_projection, position);
+	float4 adjusted = float4(position.x, position.y, position.z, 1.0);
+	result.position = mul(local_to_projection, adjusted);
 	result.normal = normal;
 
 	return result;

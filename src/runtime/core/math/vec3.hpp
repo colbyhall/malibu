@@ -5,7 +5,7 @@
 
 namespace core::math {
 	template <typename T>
-	struct Vec3 {
+	struct alignas(16) Vec3 {
 		union {
 			struct { T x, y, z; };
 			struct { T width, height, depth; };

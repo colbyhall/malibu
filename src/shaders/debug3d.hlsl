@@ -8,11 +8,12 @@ struct PSInput
 	float3 color : COLOR;
 };
 
-PSInput vs_main(float4 position : POSITION, float3 color: COLOR)
+PSInput vs_main(float3 position : POSITION, float3 color: COLOR)
 {
 	PSInput result;
 
-	result.position = mul(local_to_projection, position);
+	float4 adjusted = float4(position.x, position.y, position.z, 1.0);
+	result.position = mul(local_to_projection, adjusted);
 	result.color = color;
 
 	return result;

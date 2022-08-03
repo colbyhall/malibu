@@ -2,95 +2,67 @@
 #include "d3d12_context.hpp"
 #include "d3d12_resources.hpp"
 
-#include "library.hpp"
-using namespace core::library;
-
-struct Dx12ShaderCompiler {
-	Library d3dcompiler;
-	pD3DCompile compile;
-
-	static Dx12ShaderCompiler make() {
-		Dx12ShaderCompiler ret;
-		ret.d3dcompiler = Library::open("d3dcompiler_47.dll").unwrap();
-		ret.compile = (pD3DCompile)ret.d3dcompiler.find("D3DCompile");
-		return ret;
-	}
-};
-
-Result<Array<u8>, String> gpu::compile_hlsl(StringView source, gpu::ShaderType type) {
-	static Dx12ShaderCompiler compiler = Dx12ShaderCompiler::make();
-
-	const char* entry_point = nullptr;
-	switch (type) {
-		case gpu::ShaderType::Vertex:
-			entry_point = "vs_main";
-			break;
-		case gpu::ShaderType::Pixel:
-			entry_point = "ps_main";
-			break;
-		default:
-			INVALID_CODE_PATH;
-			break;
-	}
-
-	const char* target = nullptr;
-	switch (type) {
-		case gpu::ShaderType::Vertex:
-			target = "vs_5_0";
-			break;
-		case gpu::ShaderType::Pixel:
-			target = "ps_5_0";
-			break;
-		default:
-			INVALID_CODE_PATH;
-			break;
-	}
-
-	ComPtr<ID3DBlob> binary;
-	ComPtr<ID3DBlob> error;
-	HRESULT result = (compiler.compile)(
-		source.ptr(),
-		source.len(),
-		nullptr,
-		nullptr,
-		nullptr,
-		entry_point,
-		target,
-		0,
-		0,
-		&binary,
-		&error
-	);
-
-	if (result != S_OK) {
-		String error_string;
-		error_string.reserve(error->GetBufferSize());
-		error_string.set_len(error->GetBufferSize());
-		core::mem::copy(error_string.ptr(), error->GetBufferPointer(), error_string.len());
-		error_string.ptr()[error_string.len()] = 0;
-		return error_string;
-	}
-
-	Array<u8> binary_buffer;
-	binary_buffer.reserve(binary->GetBufferSize());
-	binary_buffer.set_len(binary->GetBufferSize());
-	core::mem::copy(binary_buffer.ptr(), binary->GetBufferPointer(), binary_buffer.len());
-	
-	return binary_buffer;
-}
-
 D3D12GraphicsPipeline::D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config)
 : m_config(core::forward<gpu::GraphicsPipelineConfig>(config)) {
 	auto& context = gpu::Context::the().interface<D3D12Context>();
 
-	VERIFY(m_config.vertex_shader.is_set() && m_config.pixel_shader.is_set());
-
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {};
 	desc.pRootSignature = context.root_signature.Get();
 
+	// InputLayout
+	auto input_parameters = m_config.vertex_shader.input_parameters();
+
+	Array<D3D12_INPUT_ELEMENT_DESC> input_layout;
+	input_layout.reserve(input_parameters.len());
+
+	usize offset = 0;
+	for (int i = 0; i < input_parameters.len(); ++i) {
+		D3D12_INPUT_ELEMENT_DESC input = {};
+		// input.SemanticIndex = i;
+		input.SemanticName = input_parameters[i].semantic_name.ptr();
+
+		usize size_in_bytes = 0;
+		switch (input_parameters[i].primitive) {
+		case gpu::Primitive::Uint32:
+			input.Format = DXGI_FORMAT_R32_UINT;
+			size_in_bytes = 4;
+			break;
+		case gpu::Primitive::Int32:
+			input.Format = DXGI_FORMAT_R32_SINT;
+			size_in_bytes = 4;
+			break;
+		case gpu::Primitive::Float32:
+			input.Format = DXGI_FORMAT_R32_FLOAT;
+			size_in_bytes = 4;
+			break;
+		case gpu::Primitive::Vec2f32:
+			input.Format = DXGI_FORMAT_R32G32_FLOAT;
+			size_in_bytes = 8;
+			break;
+		case gpu::Primitive::Vec3f32:
+			input.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			size_in_bytes = 16;
+			break;
+		case gpu::Primitive::Vec4f32:
+			input.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			size_in_bytes = 16;
+			break;
+		case gpu::Primitive::Mat4f32:
+			PANIC("");
+			break;
+		}
+		input.AlignedByteOffset = (UINT)offset;
+		input.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+
+		input_layout.push(input);
+		offset += size_in_bytes;
+	}
+	desc.InputLayout.pInputElementDescs = input_layout.ptr();
+	desc.InputLayout.NumElements = (UINT)input_layout.len();
+
 	// Vertex shader
 	{
-		auto& shader = m_config.vertex_shader.as_ref().unwrap();
+		auto& shader = m_config.vertex_shader;
 		VERIFY(shader.type() == gpu::ShaderType::Vertex);
 		auto binary = shader.binary();
 		desc.VS.pShaderBytecode = binary.ptr();
@@ -99,7 +71,7 @@ D3D12GraphicsPipeline::D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& confi
 
 	// Pixel shader
 	{
-		auto& shader = m_config.pixel_shader.as_ref().unwrap();
+		auto& shader = m_config.pixel_shader;
 		VERIFY(shader.type() == gpu::ShaderType::Pixel);
 		auto binary = shader.binary();
 		desc.PS.pShaderBytecode = binary.ptr();
@@ -170,67 +142,13 @@ D3D12GraphicsPipeline::D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& confi
 		desc.DepthStencilState.StencilEnable = FALSE;
 	}
 
-	// TEMP FIX
-	const char* SemanticNames[] = {
-		"POSITION",
-		"COLOR"
-	};
-
-	// InputLayout
-	Array<D3D12_INPUT_ELEMENT_DESC> input_layout;
-	input_layout.reserve(m_config.vertex_primitives.len());
-	usize offset = 0;
-	for (int i = 0; i < m_config.vertex_primitives.len(); ++i) {
-		D3D12_INPUT_ELEMENT_DESC input = {};
-		// input.SemanticIndex = i;
-		input.SemanticName = SemanticNames[i];
-
-		usize size_in_bytes = 0;
-		switch (m_config.vertex_primitives[i]) {
-			case gpu::Primitive::Uint32:
-				input.Format = DXGI_FORMAT_R32_UINT;
-				size_in_bytes = 4;
-				break;
-			case gpu::Primitive::Int32:
-				input.Format = DXGI_FORMAT_R32_SINT;
-				size_in_bytes = 4;
-				break;
-			case gpu::Primitive::Float32:
-				input.Format = DXGI_FORMAT_R32_FLOAT;
-				size_in_bytes = 4;
-				break;
-			case gpu::Primitive::Vec2f32:
-				input.Format = DXGI_FORMAT_R32G32_FLOAT;
-				size_in_bytes = 8;
-				break;
-			case gpu::Primitive::Vec3f32:
-				input.Format = DXGI_FORMAT_R32G32B32_FLOAT;
-				size_in_bytes = 12;
-				break;
-			case gpu::Primitive::Vec4f32:
-				input.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				size_in_bytes = 16;
-				break;
-			case gpu::Primitive::Mat4f32:
-				PANIC("");
-				break;
-		}
-		input.AlignedByteOffset = (UINT)offset;
-		input.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-
-		input_layout.push(input);
-		offset += size_in_bytes;
-	}
-	desc.InputLayout.pInputElementDescs = input_layout.ptr();
-	desc.InputLayout.NumElements = (UINT)input_layout.len();
-
 	desc.NumRenderTargets = (UINT)m_config.color_attachments.len();
 	for (int i = 0; i < m_config.color_attachments.len(); ++i) {
 		desc.RTVFormats[i] = format_to_dxgi(m_config.color_attachments[i]);
 	}
 
-	if (m_config.depth_attachment) {
-		desc.DSVFormat = format_to_dxgi(m_config.depth_attachment.as_ref().unwrap());
+	if (m_config.depth_attachment != gpu::Format::Undefined) {
+		desc.DSVFormat = format_to_dxgi(m_config.depth_attachment);
 	}
 
 	desc.SampleMask = UINT_MAX;

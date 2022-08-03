@@ -1,6 +1,7 @@
 #pragma once
 
 #include "containers/non_null.hpp"
+#include "templates/type_traits.hpp"
 
 namespace core::mem {
 	struct Layout {
@@ -25,10 +26,23 @@ namespace core::mem {
 	}
 	NonNull<void> realloc(NonNull<void> old_ptr, Layout old_layout, Layout new_layout);
 	void free(NonNull<void> ptr);
-
-
 	
 	NonNull<void> copy(NonNull<void> dest, NonNull<void const> src, usize count);
 	NonNull<void> move(NonNull<void> dest, NonNull<void const> src, usize count);
 	NonNull<void> set(NonNull<void> ptr, u8 value, usize count);
+
+	u8 count_set_bits_in_byte(u8 b);
+	template <typename T>
+	inline u32 count_set_bits(T t) {
+		const usize size = sizeof(T);
+		void* ptr = &t;
+		u8 const* u8_casted = (u8 const*)ptr;
+
+		u32 result = 0;
+		for (usize i = 0; i < size; ++i) {
+			result += count_set_bits_in_byte(u8_casted[i]);
+		}
+
+		return result;
+	}
 }

@@ -10,6 +10,7 @@
 using Microsoft::WRL::ComPtr;
 
 #include <dxcapi.h>
+#include <d3d12shader.h>
 
 namespace dxc {
 	// From DXSampleHelper.h
@@ -21,7 +22,7 @@ namespace dxc {
 		}
 	}
 
-	Result<Array<u8>, String> compile(const Input& input) {
+	Result<Output, String> compile(const Input& input) {
 		ComPtr<IDxcUtils> utils;
 		throw_if_failed(DxcCreateInstance(
 			CLSID_DxcUtils, 
@@ -58,6 +59,9 @@ namespace dxc {
 			break;
 		}
 
+		args.push(L"-Qstrip_debug");
+		args.push(L"-Qstrip_reflect");
+
 		args.push(DXC_ARG_WARNINGS_ARE_ERRORS); //-WX
 		// args.push(DXC_ARG_DEBUG); //-Zi
 		// args.push(DXC_ARG_PACK_MATRIX_ROW_MAJOR);
@@ -90,6 +94,75 @@ namespace dxc {
 			}
 		}
 
+		Output shader_output;
+
+		if (result->HasOutput(DXC_OUT_REFLECTION)) {
+			ComPtr<IDxcBlob> output;
+			throw_if_failed(result->GetOutput(
+				DXC_OUT_REFLECTION,
+				IID_PPV_ARGS(output.GetAddressOf()),
+				nullptr
+			));
+			DxcBuffer reflection_buffer = {};
+			reflection_buffer.Ptr = output->GetBufferPointer();
+			reflection_buffer.Size = output->GetBufferSize();
+
+			ComPtr<ID3D12ShaderReflection> reflection;
+			throw_if_failed(utils->CreateReflection(
+				&reflection_buffer, 
+				IID_PPV_ARGS(reflection.GetAddressOf())
+			));
+
+			D3D12_SHADER_DESC shader_desc;
+			throw_if_failed(reflection->GetDesc(&shader_desc));
+
+			shader_output.input_parameters.reserve(shader_desc.InputParameters);
+
+			for (UINT i = 0; i < shader_desc.InputParameters; ++i) {
+				D3D12_SIGNATURE_PARAMETER_DESC param_desc;
+				throw_if_failed(reflection->GetInputParameterDesc(i, &param_desc));
+
+				String semantic_name;
+				semantic_name.push(param_desc.SemanticName);
+
+				const u32 num_bits = core::mem::count_set_bits(param_desc.Mask);
+
+				gpu::Primitive primitive;
+				switch (param_desc.ComponentType) {
+				case D3D_REGISTER_COMPONENT_UINT32:
+					primitive = gpu::Primitive::Uint32;
+					break;
+				case D3D_REGISTER_COMPONENT_SINT32:
+					primitive = gpu::Primitive::Int32;
+					break;
+				case D3D_REGISTER_COMPONENT_FLOAT32:
+					switch (num_bits) {
+					case 1: 
+						primitive = gpu::Primitive::Float32;
+						break;
+					case 2: 
+						primitive = gpu::Primitive::Vec2f32;
+						break;
+					case 3: 
+						primitive = gpu::Primitive::Vec3f32;
+						break;
+					case 4: 
+						primitive = gpu::Primitive::Vec4f32;
+						break;
+					}
+					break;
+				}
+
+				gpu::InputParameter input_parameter = {
+					param_desc.SemanticIndex,
+					core::move(semantic_name),
+					primitive
+				};
+				shader_output.input_parameters.push(core::move(input_parameter));
+			}
+
+		}
+
 		ComPtr<IDxcBlob> output;
 		throw_if_failed(result->GetOutput(
 			DXC_OUT_OBJECT, 
@@ -102,6 +175,8 @@ namespace dxc {
 		binary.set_len(output->GetBufferSize());
 		core::mem::copy(binary.ptr(), output->GetBufferPointer(), binary.len());
 
-		return binary;
+		shader_output.binary = core::move(binary);
+
+		return shader_output;
 	}
 }

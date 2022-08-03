@@ -212,6 +212,8 @@ int WINAPI WinMain(
 		WindowVisibility::Hidden,
 	}).unwrap();
 
+	auto size = sizeof(fbx::Vertex);
+
 	auto& context = gpu::Context::the();
 	const auto registered = context.register_window(g_window.as_ref().unwrap());
 	VERIFY(registered);
@@ -286,18 +288,20 @@ int WINAPI WinMain(
 		mem::copy(slice.ptr(), box.indices.ptr(), slice.len());
 	});
 
-
-	gpu::GraphicsPipelineConfig static_lit_config = {};
+	Option<gpu::GraphicsPipelineConfig> static_lit_config_opt;
 	{
 		String source = fs::read_to_string("src/shaders/static_lit.hlsl").unwrap();
+
 		dxc::Input vertex_input = {
 			source,
 			"vs_main",
 			gpu::ShaderType::Vertex
 		};
 		auto vertex_binary = dxc::compile(vertex_input).unwrap();
-		// auto vertex_binary = gpu::compile_hlsl(source, gpu::ShaderType::Vertex).unwrap();
-		auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
+		auto vertex_shader = gpu::VertexShader::make(
+			core::move(vertex_binary.binary), 
+			core::move(vertex_binary.input_parameters)
+		);
 
 		dxc::Input pixel_input = {
 			source,
@@ -305,38 +309,56 @@ int WINAPI WinMain(
 			gpu::ShaderType::Pixel
 		};
 		auto pixel_binary = dxc::compile(pixel_input).unwrap();
-		auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
+		auto pixel_shader = gpu::PixelShader::make(core::move(pixel_binary.binary));
+
+		gpu::GraphicsPipelineConfig static_lit_config = {
+			core::move(vertex_shader),
+			core::move(pixel_shader)
+		};
 
 		static_lit_config.color_attachments.push(gpu::Format::RGBA_U8);
 		static_lit_config.depth_attachment = gpu::Format::Depth24_Stencil8;
-		static_lit_config.vertex_shader = core::move(vertex_shader);
-		static_lit_config.pixel_shader = core::move(pixel_shader);
 
 		static_lit_config.cull_mode = gpu::CullMode::Back;
 
-		static_lit_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
-		static_lit_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+		static_lit_config_opt = core::move(static_lit_config);
 	}
-	auto static_lit_pipeline = gpu::GraphicsPipeline::make(core::move(static_lit_config));
+	auto static_lit_pipeline = gpu::GraphicsPipeline::make(static_lit_config_opt.unwrap());
 
-	gpu::GraphicsPipelineConfig debug3d_config = {};
+	Option<gpu::GraphicsPipelineConfig> debug3d_config_opt;
 	{
 		String source = fs::read_to_string("src/shaders/debug3d.hlsl").unwrap();
-		auto vertex_binary = gpu::compile_hlsl(source, gpu::ShaderType::Vertex).unwrap();
-		auto vertex_shader = gpu::Shader::make(core::move(vertex_binary), gpu::ShaderType::Vertex);
 
-		auto pixel_binary = gpu::compile_hlsl(source, gpu::ShaderType::Pixel).unwrap();
-		auto pixel_shader = gpu::Shader::make(core::move(pixel_binary), gpu::ShaderType::Pixel);
+		dxc::Input vertex_input = {
+			source,
+			"vs_main",
+			gpu::ShaderType::Vertex
+		};
+		auto vertex_binary = dxc::compile(vertex_input).unwrap();
+		auto vertex_shader = gpu::VertexShader::make(
+			core::move(vertex_binary.binary),
+			core::move(vertex_binary.input_parameters)
+		);
+
+		dxc::Input pixel_input = {
+			source,
+			"ps_main",
+			gpu::ShaderType::Pixel
+		};
+		auto pixel_binary = dxc::compile(pixel_input).unwrap();
+		auto pixel_shader = gpu::PixelShader::make(core::move(pixel_binary.binary));
+		
+		gpu::GraphicsPipelineConfig debug3d_config = {
+			core::move(vertex_shader), 
+			core::move(pixel_shader) 
+		};
 
 		debug3d_config.color_attachments.push(gpu::Format::RGBA_U8);
 		debug3d_config.depth_attachment = gpu::Format::Depth24_Stencil8;
-		debug3d_config.vertex_shader = core::move(vertex_shader);
-		debug3d_config.pixel_shader = core::move(pixel_shader);
 
-		debug3d_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
-		debug3d_config.vertex_primitives.push(gpu::Primitive::Vec3f32);
+		debug3d_config_opt = core::move(debug3d_config);
 	}
-	auto debug3d_pipeline = gpu::GraphicsPipeline::make(core::move(debug3d_config));
+	auto debug3d_pipeline = gpu::GraphicsPipeline::make(debug3d_config_opt.unwrap());
 
 	// gpu::GraphicsPipelineConfig gui_pipeline_config = {};
 	// {

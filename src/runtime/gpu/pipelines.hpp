@@ -14,20 +14,59 @@ namespace gpu {
 		virtual ShaderType type() const = 0;
 	};
 
-	class Shader {
+	enum class Primitive : u8 {
+		Uint32,
+		Int32,
+		Float32,
+		Vec2f32,
+		Vec3f32,
+		Vec4f32,
+		Mat4f32,
+	};
+
+	struct InputParameter {
+		u32 semantic_index;
+		String semantic_name;
+		Primitive primitive;
+	};
+
+	class VertexShaderInterface : public ShaderInterface {
 	public:
-		static Shader make(Array<u8>&& binary, ShaderType type);
+		ShaderType type() const override { return ShaderType::Vertex; }
+		virtual Slice<InputParameter const> input_parameters() const = 0;
+	};
+
+	class VertexShader {
+	public:
+		static VertexShader make(Array<u8>&& binary, Array<InputParameter>&& input_parameters);
+
+		inline Slice<const u8> binary() const { return m_interface->binary(); }
+		inline ShaderType type() const { return m_interface->type(); }
+		inline Slice<InputParameter const> input_parameters() const { return m_interface->input_parameters(); }
+
+	private:
+		VertexShader(SharedRef<VertexShaderInterface>&& interface) : m_interface(core::move(interface)) { }
+
+		SharedRef<VertexShaderInterface> m_interface;
+	};
+
+	class PixelShaderInterface : public ShaderInterface {
+	public:
+		ShaderType type() const override { return ShaderType::Pixel; }
+	};
+
+	class PixelShader {
+	public:
+		static PixelShader make(Array<u8>&& binary);
 
 		inline Slice<const u8> binary() const { return m_interface->binary(); }
 		inline ShaderType type() const { return m_interface->type(); }
 
 	private:
-		Shader(SharedRef<ShaderInterface>&& interface) : m_interface(core::move(interface)) { }
+		PixelShader(SharedRef<PixelShaderInterface>&& interface) : m_interface(core::move(interface)) { }
 
-		SharedRef<ShaderInterface> m_interface;
+		SharedRef<PixelShaderInterface> m_interface;
 	};
-
-	Result<Array<u8>, String> compile_hlsl(StringView source, ShaderType type);
 
 	enum class DrawMode : u8 {
 		Fill,
@@ -81,24 +120,12 @@ namespace gpu {
 		OneMinusSrcAlpha,
 	};
 
-	enum class Primitive : u8 {
-		Uint32,
-		Int32,
-		Float32,
-		Vec2f32,
-		Vec3f32,
-		Vec4f32,
-		Mat4f32,
-	};
-
 	struct GraphicsPipelineConfig {
+		VertexShader vertex_shader;
+		PixelShader pixel_shader;
+
 		Array<Format> color_attachments;
-		Option<Format> depth_attachment = Option<Format>{};
-
-		Option<Shader> vertex_shader = Option<Shader>{};
-		Option<Shader> pixel_shader = Option<Shader>{};
-
-		Array<Primitive> vertex_primitives;
+		Format depth_attachment = Format::Undefined;
 
 		DrawMode draw_mode = DrawMode::Fill;
 		f32 line_width = 1.f;
@@ -117,6 +144,10 @@ namespace gpu {
 		bool depth_test = false;
 		bool depth_write = false;
 		CompareOp depth_compare = CompareOp::Always;
+
+		inline GraphicsPipelineConfig(VertexShader&& in_vertex_shader, PixelShader&& in_pixel_shader) :
+			vertex_shader(core::forward<VertexShader>(in_vertex_shader)),
+			pixel_shader(core::forward<PixelShader>(in_pixel_shader)) {}
 	};
 
 	class GraphicsPipelineInterface {
