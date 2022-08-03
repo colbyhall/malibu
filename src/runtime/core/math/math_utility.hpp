@@ -35,4 +35,11 @@ namespace core::math {
 
 	f32 fmod(f32 numerator, f32 denominator);
 	f64 fmod(f64 numerator, f64 denominator);
+
+	inline f32 abs(f32 x) {
+		if (x < 0.f) {
+			return -x;
+		}
+		return x;
+	}
 }

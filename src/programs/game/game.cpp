@@ -103,14 +103,12 @@ public:
 		auto up = Vec3f32::up();
 		auto right = forward.cross(up);
 
-		if (forward.dot(up) > 0.7f) {
-			if (forward.dot(Vec3f32::right()) > 0.7f) {
-				right = Vec3f32::forward();
-				up = right.cross(forward);
-			} else {
-				right = Vec3f32::right();
-				up = right.cross(forward);
-			}
+		if (math::abs(forward.dot(up)) > 0.9f) {
+			right = Vec3f32::right();
+			up = forward.cross(right);
+			right = up.cross(forward);
+		} else {
+			up = right.cross(forward);
 		}
 
 		Vec3f32::orthonormal_basis(forward, up, right);
@@ -243,7 +241,43 @@ int WINAPI WinMain(
 
 	auto& bee_skeleton = scene0.skeletons[0];
 
-	Canvas canvas_3d = Canvas::make();
+	auto canvas_3d = Canvas::make();
+
+	const auto origin = Vec3f32{ 20.f, 0.f, 0.f };
+
+	canvas_3d.line(origin, origin + Vec3f32::forward() * 2.f, 0.2f, LinearColor::RED);
+	canvas_3d.line(origin, origin + Vec3f32::up() * 2.f, 0.2f, LinearColor::GREEN);
+	canvas_3d.line(origin, origin + Vec3f32::right() * 2.f, 0.2f, LinearColor::BLUE);
+
+	const Vec3f32 a = { 25.f, 0.f, 0.f };
+	const Vec3f32 b = { 30.f, 0.f, 25.f };
+
+	canvas_3d.line(a, b, 0.2f, LinearColor::WHITE);
+
+	const auto a_to_b = b - a;
+
+	auto forward = a_to_b.normalize().unwrap();
+	auto up = Vec3f32::up();
+	auto right = forward.cross(up);
+
+	if (math::abs(forward.dot(up)) > 0.9f) {
+		right = Vec3f32::right();
+		up = forward.cross(right);
+		right = up.cross(forward);
+	} else {
+		up = right.cross(forward);
+	}
+
+	Vec3f32::orthonormal_basis(forward, up, right);
+
+	canvas_3d.line(a, a + forward * 2.f, 0.2f, LinearColor::RED);
+	canvas_3d.line(a, a + up * 2.f, 0.2f, LinearColor::GREEN);
+	canvas_3d.line(a, a + right * 2.f, 0.2f, LinearColor::BLUE);
+
+	canvas_3d.line(b, b + forward * 2.f, 0.2f, LinearColor::RED);
+	canvas_3d.line(b, b + up * 2.f, 0.2f, LinearColor::GREEN);
+	canvas_3d.line(b, b + right * 2.f, 0.2f, LinearColor::BLUE);
+
 	for (auto& bone : bee_skeleton.bones) {
 		char buffer[256];
 		sprintf_s(buffer, "%s %f %f %f \n", bone.name.ptr(), bone.position.x, bone.position.y, bone.position.z);
