@@ -104,8 +104,9 @@ namespace gui {
 		inline gpu::Swapchain const & swapchain_ref() const { return m_swapchain; }
 		inline gpu::Swapchain& swapchain_mut() { return m_swapchain; }
 
-		// TODO: Make this private?
-		void paint();
+		// TODO: Make this private
+		void on_paint();
+		void on_resize();
 
 	private:
 		void set_widget_internal(SharedRef<Widget>&& widget);

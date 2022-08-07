@@ -146,27 +146,21 @@ namespace gui {
 			ExitProcess(0);
 			break;
 		case WM_PAINT:
-			window->paint();
-			break;
+			window->on_paint();
+			OutputDebugStringA("Painting Screen\n");
+			InvalidateRect(hWnd, nullptr, false);
+			return 0;
+		case WM_SIZE:
+		case WM_SIZING:
+			window->on_resize();
+			return 0;
+		default:
+			return DefWindowProcW(hWnd, Msg, wParam, lParam);
 		}
-
-		return DefWindowProcW(hWnd, Msg, wParam, lParam);
 	}
 
 	SharedRef<Window> Window::make(const WindowConfig& config) {
 		// TODO: This should be explicit
-		static bool first = true;
-		static auto shcore = Library::open("shcore.dll");
-		if (first) {
-			first = false;
-
-			if (shcore) {
-				auto& actual = shcore.as_mut().unwrap();
-				auto SetProcessDpiAwareness = (SetProcessDPIAwareness)actual.find("SetProcessDpiAwareness");
-				if (SetProcessDpiAwareness) SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
-			}
-		}
-
 		HINSTANCE hInstance = GetModuleHandleA(nullptr);
 
 		DWORD dwStyle = WS_OVERLAPPEDWINDOW;
@@ -185,9 +179,22 @@ namespace gui {
 		window_class.lpszClassName = L"window_class";
 		window_class.hIconSm = ::LoadIconW(hInstance, nullptr);
 
-		// FIXME: Return error when class registration failed
-		const ATOM atom = RegisterClassExW(&window_class);
-		VERIFY(atom != 0);
+		static bool first = true;
+		static auto shcore = Library::open("shcore.dll");
+		if (first) {
+			first = false;
+
+			if (shcore) {
+				auto& actual = shcore.as_mut().unwrap();
+				auto SetProcessDpiAwareness = (SetProcessDPIAwareness)actual.find("SetProcessDpiAwareness");
+				if (SetProcessDpiAwareness) SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
+			}
+
+			// FIXME: Return error when class registration failed
+			const ATOM atom = RegisterClassExW(&window_class);
+			VERIFY(atom != 0);
+		}
+
 
 		RECT adjusted_rect = { 0, 0, (LONG)config.size.width, (LONG)config.size.height };
 		AdjustWindowRect(&adjusted_rect, dwStyle, 0);

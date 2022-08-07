@@ -6,18 +6,11 @@
 namespace gui {
 	void Window::set_widget_internal(SharedRef<Widget>&& widget) {
 		m_widget = core::forward<SharedRef<Widget>>(widget);
-
-		const auto client_size = client().size().cast<f32>();
-
-		Layout layout = {};
-		layout.local_size = client_size;
-		layout.local_to_absolute = Mat3f32::identity();
-
-		auto& the_widget = m_widget.as_mut().unwrap();
-		the_widget->on_layout(layout);
+		on_resize();
+		on_paint();
 	}
 
-	void Window::paint() {
+	void Window::on_paint() {
 		if (m_widget) {
 			auto& widget = m_widget.as_ref().unwrap();
 
@@ -82,6 +75,19 @@ namespace gui {
 
 			command_list.submit();
 			m_swapchain.present();
+		}
+	}
+
+	void Window::on_resize() {
+		if (m_widget) {
+			const auto client_size = client().size().cast<f32>();
+
+			Layout layout = {};
+			layout.local_size = client_size;
+			layout.local_to_absolute = Mat3f32::identity();
+
+			auto& widget = m_widget.as_mut().unwrap();
+			widget->on_layout(layout);
 		}
 	}
 }

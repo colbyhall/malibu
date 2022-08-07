@@ -39,7 +39,8 @@ int WINAPI WinMain(
 	auto panel = gui::Panel::make(LinearColor::GREEN);
 	window->set_widget(panel);
 
-	bool first_show = true;
+	window->set_visibility(gui::Visibility::Visible);
+
 	auto last_frame = Instant::now();
 	f32 time = 0.f;
 	for (;;) {
@@ -51,11 +52,6 @@ int WINAPI WinMain(
 		const auto dt = delta.as_secs_f32();
 
 		gui::Window::pump_events();
-
-		if (first_show) {
-			first_show = false;
-			window->set_visibility(gui::Visibility::Visible);
-		}
 	}
 }
 
