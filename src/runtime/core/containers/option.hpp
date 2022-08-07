@@ -61,6 +61,7 @@ namespace core::containers {
 	class Option<T&> {
 	public:
 		inline constexpr explicit Option() : m_ptr(nullptr) {}
+		inline constexpr Option(NullPtr) : m_ptr(nullptr) {}
 		inline constexpr Option(T& t) : m_ptr(&t) { }
 
 		NO_DISCARD inline bool is_set() const { return m_ptr != nullptr; }

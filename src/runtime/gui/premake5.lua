@@ -6,11 +6,11 @@ project "gui"
 
     vpaths { ["*"] = { "**.hpp", "**.cpp" } }
 
-    includedirs { "../*" }
+    includedirs { "../*", "../../third_party/*" }
 
 	systemversion "latest"
 
-    links { "core", "gpu", "draw2d" }
+    links { "core", "gpu", "draw2d", "dxc" }
 
 	cppdialect "C++17"
 

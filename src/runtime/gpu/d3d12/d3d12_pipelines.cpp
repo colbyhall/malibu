@@ -135,7 +135,7 @@ D3D12GraphicsPipeline::D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& confi
 	}
 
 	// DepthStencilState
-	{
+	if (m_config.depth_attachment != gpu::Format::Undefined) {
 		desc.DepthStencilState.DepthEnable = TRUE;
 		desc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 		desc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;

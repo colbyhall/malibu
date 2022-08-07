@@ -10,7 +10,7 @@ namespace gpu {
 		Option<Unique<GraphicsCommandListInterface>> interface = NONE;
 		switch (context.backend()) {
 			case Backend::D3D12:
-				interface = Unique<GraphicsCommandListInterface>::make(D3D12GraphicsCommandList());
+				interface = Unique<GraphicsCommandListInterface>::make<D3D12GraphicsCommandList>();
 				break;
 		}
 

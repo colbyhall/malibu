@@ -7,23 +7,6 @@
 #include "async/mutex.hpp"
 #include "library.hpp"
 
-namespace core::window {
-	class Window;
-}
-
-struct D3D12Swapchain {
-	static constexpr usize frame_count = 2;
-
-	ComPtr<IDXGISwapChain3> handle;
-	
-	Array<gpu::Texture> back_buffers;
-	u8 current;
-	
-	ComPtr<ID3D12Fence> fence;
-	HANDLE fence_event;
-	u64 fence_value;
-};
-
 class D3D12DescriptorHeap {
 public:
 	explicit D3D12DescriptorHeap() = default;
@@ -56,11 +39,6 @@ class D3D12Context : public gpu::ContextInterface {
 public:
 
 	gpu::Backend backend() const override { return gpu::Backend::D3D12; }
-	bool register_window(void* window_handle) const override;
-	void present() const override;
-	const gpu::Texture& back_buffer() const override;
-
-	void wait_for_previous() const;
 
 	Library d3d12_library;
 	CreateDevice create_device;
@@ -79,8 +57,6 @@ public:
 #if BUILD_DEBUG
 	ComPtr<ID3D12Debug> debug_interface;
 #endif
-
-	mutable Option<D3D12Swapchain> swapchain;
 
 	explicit D3D12Context();
 };

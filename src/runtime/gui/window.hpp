@@ -5,7 +5,9 @@
 #include "templates/type_traits.hpp"
 #include "math/aabb2.hpp"
 
-#include "gui.hpp"
+#include "swapchain.hpp"
+
+#include "widget.hpp"
 
 namespace gui {
 	using WindowHandle = void*;
@@ -69,30 +71,51 @@ namespace gui {
 
 		NO_COPY(Window);
 
-		inline Window(Window&& m) noexcept
-			: m_handle(m.m_handle) {
+		inline Window(Window&& m) noexcept : 
+			m_handle(m.m_handle), 
+			m_swapchain(core::move(m.m_swapchain)), 
+			m_widget(core::move(m.m_widget)) 
+		{
 			m.m_handle = nullptr;
 		}
 
 		inline Window& operator=(Window&& m) noexcept {
 			Window w = core::move(*this);
 			m_handle = m.m_handle;
+			m_swapchain = core::move(m.m_swapchain);
+			m_widget = core::move(m.m_widget);
+
 			m.m_handle = 0;
 			return *this;
 		}
 
+		NO_DISCARD Rect2u32 client() const;
 		bool set_visibility(Visibility visibility);
 		bool set_cursor_lock(bool locked);
 		void set_cursor_visbility(bool visible);
-		void set_widget(SharedRef<Widget>&& widget);
+
+		Option<SharedRef<Widget> const&> widget() const { return m_widget.as_ref(); }
+
+		template <typename T>
+		void set_widget(const SharedRef<T>& widget) { set_widget_internal(widget.clone()); }
 
 		inline WindowHandle handle() const { return m_handle; }
-		NO_DISCARD Rect2u32 client() const;
+
+		inline gpu::Swapchain const & swapchain_ref() const { return m_swapchain; }
+		inline gpu::Swapchain& swapchain_mut() { return m_swapchain; }
+
+		// TODO: Make this private?
+		void paint();
 
 	private:
-		inline explicit Window(WindowHandle handle) : m_handle(handle) {}
+		void set_widget_internal(SharedRef<Widget>&& widget);
 
-		WindowHandle m_handle = nullptr;
+		inline explicit Window(WindowHandle handle, gpu::Swapchain&& swapchain) 
+			: m_handle(handle), m_swapchain(core::forward<gpu::Swapchain>(swapchain)) {}
+
+		WindowHandle m_handle;
+		gpu::Swapchain m_swapchain;
+
 		Option<SharedRef<Widget>> m_widget = NONE;
 	};
 }

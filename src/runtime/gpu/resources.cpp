@@ -14,12 +14,10 @@ namespace gpu {
 		Option<AtomicSharedRef<TextureInterface>> interface;
 		switch (context.backend()) {
 			case Backend::D3D12:
-				interface = AtomicSharedRef<TextureInterface>::make(
-					D3D12Texture(
-						usage, 
-						format, 
-						size
-					)
+				interface = AtomicSharedRef<TextureInterface>::make<D3D12Texture>(
+					usage, 
+					format, 
+					size
 				);
 				break;
 		}
@@ -38,13 +36,11 @@ namespace gpu {
 		Option<AtomicSharedRef<BufferInterface>> interface;
 		switch (context.backend()) {
 		case Backend::D3D12:
-			interface = AtomicSharedRef<BufferInterface>::make(
-				D3D12Buffer(
-					usage, 
-					kind, 
-					len, 
-					stride
-				)
+			interface = AtomicSharedRef<BufferInterface>::make<D3D12Buffer>(
+				usage, 
+				kind, 
+				len, 
+				stride
 			);
 			break;
 		}

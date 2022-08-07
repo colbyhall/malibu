@@ -9,9 +9,9 @@ namespace core::containers {
 	template <typename Base>
 	class Unique {
 	public:
-		template <typename Derived>
-		static Unique<Base> make(Derived&& derived) {
-			return Unique<Base>(core::forward<Derived>(derived));
+		template<typename Derived = Base, typename... Args>
+		static Unique<Base> make(Args&&... args) {
+			return Unique<Base>(Derived(forward<Args>(args)...));
 		}
 
 		template <typename Derived>

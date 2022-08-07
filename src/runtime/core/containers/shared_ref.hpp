@@ -7,21 +7,34 @@
 #include <new>
 
 namespace core::containers {
+	struct Counter {
+		usize strong_count;
+	};
+
 	template <typename Base>
 	class SharedRef {
-		struct Counter {
-			usize strong_count;
-		};
 	public:
-		template <typename Derived>
-		static SharedRef<Base> make(Derived&& derived) {
-			return SharedRef<Base>(core::forward<Derived>(derived));
+
+		template<typename Derived = Base, typename... Args>
+		static SharedRef<Base> make(Args&&... args) {
+			return SharedRef<Base>(Derived(forward<Args>(args)...));
 		}
 
 		template <typename Derived>
 		static SharedRef<Base> make(const Derived& derived) {
 			auto copy = derived;
 			return SharedRef<Base>(core::move(copy));
+		}
+
+		template <typename Derived>
+		SharedRef(SharedRef<Derived>&& derived) {
+			static_assert(core::is_base_of<Base, Derived> || core::is_same<Base, Derived>, "Base is not a base of Derived");
+			static_assert(!core::is_abstract<Derived>, "Derived must not be abstract");
+
+			m_counter = derived.m_counter;
+			m_ptr = derived.m_ptr;
+			derived.m_counter = nullptr;
+			derived.m_ptr = nullptr;
 		}
 
 		NO_COPY(SharedRef);
@@ -71,9 +84,15 @@ namespace core::containers {
 		NO_DISCARD inline Base* ptr() { return m_ptr; }
 		NO_DISCARD inline Base const* ptr() const { return m_ptr; }
 
+		// NO_DISCARD inline Counter* counter() { return m_counter; }
+		// NO_DISCARD inline Counter const* counter() const { return m_counter; }
+
 	private:
 		SharedRef() = default;
 		SharedRef(Counter* counter, Base* ptr) : m_counter(counter), m_ptr(ptr) {}
+
+		template<typename T>
+		friend class SharedRef;
 
 		template <typename Derived>
 		explicit SharedRef(Derived&& derived) {
@@ -97,9 +116,9 @@ namespace core::containers {
 			async::Atomic<usize> strong_count;
 		};
 	public:
-		template <typename Derived>
-		static AtomicSharedRef<Base> make(Derived&& derived) {
-			return AtomicSharedRef<Base>(core::forward<Derived>(derived));
+		template<typename Derived = Base, typename... Args>
+		static AtomicSharedRef<Base> make(Args&&... args) {
+			return AtomicSharedRef<Base>(Derived(forward<Args>(args)...));
 		}
 
 		template <typename Derived>

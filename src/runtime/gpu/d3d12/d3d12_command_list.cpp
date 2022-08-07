@@ -158,8 +158,13 @@ void D3D12GraphicsCommandList::draw_indexed(usize index_count, usize first_index
 }
 
 void D3D12GraphicsCommandList::end_render_pass() {
-	const auto ignore0 = m_bound_color_buffer.unwrap();
-	const auto ignore1 = m_bound_depth_buffer.unwrap();
+	if (m_bound_color_buffer) {
+		const auto ignore0 = m_bound_color_buffer.unwrap();
+	}
+
+	if (m_bound_depth_buffer) {
+		const auto ignore1 = m_bound_depth_buffer.unwrap();
+	}
 }
 
 void D3D12GraphicsCommandList::end_recording() {

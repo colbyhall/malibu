@@ -1,4 +1,66 @@
-﻿#include "core.hpp"
+﻿#if 1
+#include "core.hpp"
+#include "fs.hpp"
+#include "time.hpp"
+#include "math.hpp"
+#include "async/job.hpp"
+
+#include "asset.hpp"
+
+#include "gpu.hpp"
+
+#include "gui.hpp"
+#include "window.hpp"
+
+#define WIN32_LEAN_AND_MEAN
+#define WIN32_MEAN_AND_LEAN
+#include <windows.h>
+
+using namespace core;
+using namespace core::time;
+
+int WINAPI WinMain(
+	_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPSTR lpCmdLine,
+	_In_ int nShowCmd
+) {
+	async::job::init();
+	gpu::init();
+	asset::init();
+	gui::init();
+
+	auto window = gui::Window::make({
+		{ 1920, 1080 },
+		"Malibu",
+		gui::Visibility::Hidden,
+	});
+
+	auto panel = gui::Panel::make(LinearColor::GREEN);
+	window->set_widget(panel);
+
+	bool first_show = true;
+	auto last_frame = Instant::now();
+	f32 time = 0.f;
+	for (;;) {
+		const auto now = Instant::now();
+		const auto delta = now.duration_since(last_frame);
+		time += delta.as_secs_f32();
+		last_frame = now;
+
+		const auto dt = delta.as_secs_f32();
+
+		gui::Window::pump_events();
+
+		if (first_show) {
+			first_show = false;
+			window->set_visibility(gui::Visibility::Visible);
+		}
+	}
+}
+
+#else
+#include "core.hpp"
 #include "fs.hpp"
 #include "time.hpp"
 #include "math.hpp"
@@ -19,6 +81,8 @@ using namespace core::time;
 
 #include "canvas.hpp"
 #include "basic_shapes.hpp"
+
+#include "gui.hpp"
 
 #include "window.hpp"
 
@@ -203,6 +267,7 @@ int WINAPI WinMain(
 	async::job::init();
 	gpu::init();
 	asset::init();
+	gui::init();
 
 	auto window = gui::Window::make({
 		{ 1920, 1080 },
@@ -591,3 +656,4 @@ int WINAPI WinMain(
 
 	return 0;
 }
+#endif

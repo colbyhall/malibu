@@ -5,8 +5,9 @@
 #include "containers/shared_ref.hpp"
 #include "math.hpp"
 
-namespace gpu {
+class D3D12Swapchain;
 
+namespace gpu {
 	enum class Filter : u8 {
 		Nearest,
 		Linear
@@ -61,9 +62,6 @@ namespace gpu {
 
 	class Texture {
 	public:
-		// FIXME: Make this private
-		Texture(AtomicSharedRef<TextureInterface>&& interface) : m_interface(core::move(interface)) { }
-
 		static Texture make(
 			BitFlag<TextureUsage> usage,
 			Format format,
@@ -81,6 +79,10 @@ namespace gpu {
 		}
 
 	private:
+		Texture(AtomicSharedRef<TextureInterface>&& interface) : m_interface(core::move(interface)) { }
+
+		friend D3D12Swapchain;
+
 		AtomicSharedRef<TextureInterface> m_interface;
 	};
 

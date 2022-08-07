@@ -10,7 +10,10 @@ namespace gpu {
 		Option<AtomicSharedRef<VertexShaderInterface>> interface;
 		switch (context.backend()) {
 			case Backend::D3D12:
-				interface = AtomicSharedRef<VertexShaderInterface>::make(D3D12VertexShader(core::forward<Array<u8>>(binary), core::forward<Array<InputParameter>>(input_parameters)));
+				interface = AtomicSharedRef<VertexShaderInterface>::make<D3D12VertexShader>(
+					core::forward<Array<u8>>(binary), 
+					core::forward<Array<InputParameter>>(input_parameters)
+				);
 				break;
 		}
 
@@ -23,7 +26,7 @@ namespace gpu {
 		Option<AtomicSharedRef<PixelShaderInterface>> interface;
 		switch (context.backend()) {
 		case Backend::D3D12:
-			interface = AtomicSharedRef<PixelShaderInterface>::make(D3D12PixelShader(core::forward<Array<u8>>(binary)));
+			interface = AtomicSharedRef<PixelShaderInterface>::make<D3D12PixelShader>(core::forward<Array<u8>>(binary));
 			break;
 		}
 
@@ -36,7 +39,7 @@ namespace gpu {
 		Option<AtomicSharedRef<GraphicsPipelineInterface>> interface;
 		switch (context.backend()) {
 			case Backend::D3D12:
-				interface = AtomicSharedRef<GraphicsPipelineInterface>::make(D3D12GraphicsPipeline(core::move(config)));
+				interface = AtomicSharedRef<GraphicsPipelineInterface>::make<D3D12GraphicsPipeline>(core::forward<GraphicsPipelineConfig>(config));
 				break;
 		}
 
