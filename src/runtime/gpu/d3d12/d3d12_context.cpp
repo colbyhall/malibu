@@ -213,12 +213,14 @@ D3D12Context::D3D12Context() {
 	}
 }
 
-bool D3D12Context::register_window(const core::window::Window& window) const {
+bool D3D12Context::register_window(void* window_handle) const {
 	if (swapchain.is_set()) {
 		return false;
 	}
 
-	const auto size = window.client_size();
+	RECT rect;
+	GetClientRect((HWND)window_handle, &rect);
+	const Vec2u32 size = { (u32)(rect.right - rect.left), (u32)(rect.bottom - rect.top) };
 
 	DXGI_SWAP_CHAIN_DESC1 desc = {};
 	desc.BufferCount = D3D12Swapchain::frame_count;
@@ -232,7 +234,7 @@ bool D3D12Context::register_window(const core::window::Window& window) const {
 	ComPtr<IDXGISwapChain1> swapchain1;
 	throw_if_failed(factory->CreateSwapChainForHwnd(
 		queue.Get(),
-		(HWND)window.handle(),
+		(HWND)window_handle,
 		&desc,
 		nullptr,
 		nullptr,
@@ -240,7 +242,7 @@ bool D3D12Context::register_window(const core::window::Window& window) const {
 	));
 
 	throw_if_failed(factory->MakeWindowAssociation(
-		(HWND)window.handle(),
+		(HWND)window_handle,
 		DXGI_MWA_NO_ALT_ENTER
 	));
 
@@ -268,7 +270,7 @@ bool D3D12Context::register_window(const core::window::Window& window) const {
 
 		const Vec3u32 buffer_size = { size.width, size.height, 1 };
 
-		auto interface = SharedRef<gpu::TextureInterface>::make(D3D12Texture(
+		auto interface = AtomicSharedRef<gpu::TextureInterface>::make(D3D12Texture(
 			usage, 
 			gpu::Format::RGBA_U8, 
 			buffer_size, 
@@ -299,13 +301,13 @@ void D3D12Context::present() const {
 }
 
 const gpu::Texture& D3D12Context::back_buffer() const {
-	D3D12Swapchain& local = swapchain.as_ref().unwrap();
+	D3D12Swapchain& local = swapchain.as_mut().unwrap();
 	return local.back_buffers[local.current];
 }
 
 void D3D12Context::wait_for_previous() const {
 	D3D12Context& self = const_cast < D3D12Context& > (*this); // TODO: Thread safety
-	D3D12Swapchain& swapchain = self.swapchain.as_ref().unwrap();
+	D3D12Swapchain& swapchain = self.swapchain.as_mut().unwrap();
 
 	const auto fence_value = swapchain.fence_value;
 	throw_if_failed(self.queue->Signal(swapchain.fence.Get(), fence_value));

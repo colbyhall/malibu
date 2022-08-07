@@ -98,7 +98,7 @@ namespace core::async {
 				if (dif == 0) {
 					if (!m_dequeue_pos.compare_exchange_weak(pos, pos + 1).is_set())
 						break;
-				} else if (dif < 0) return Option<T>{};
+				} else if (dif < 0) return NONE;
 				else pos = m_dequeue_pos.load();
 			}
 			T t = cell->data.unwrap();

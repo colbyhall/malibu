@@ -11,10 +11,10 @@ namespace gpu {
 	) {
 		auto& context = Context::the();
 
-		Option<SharedRef<TextureInterface>> interface;
+		Option<AtomicSharedRef<TextureInterface>> interface;
 		switch (context.backend()) {
 			case Backend::D3D12:
-				interface = SharedRef<TextureInterface>::make(
+				interface = AtomicSharedRef<TextureInterface>::make(
 					D3D12Texture(
 						usage, 
 						format, 
@@ -35,10 +35,10 @@ namespace gpu {
 	) {
 		auto& context = Context::the();
 
-		Option<SharedRef<BufferInterface>> interface;
+		Option<AtomicSharedRef<BufferInterface>> interface;
 		switch (context.backend()) {
 		case Backend::D3D12:
-			interface = SharedRef<BufferInterface>::make(
+			interface = AtomicSharedRef<BufferInterface>::make(
 				D3D12Buffer(
 					usage, 
 					kind, 

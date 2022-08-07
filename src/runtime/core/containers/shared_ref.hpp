@@ -10,7 +10,7 @@ namespace core::containers {
 	template <typename Base>
 	class SharedRef {
 		struct Counter {
-			async::Atomic<usize> strong_count;
+			usize strong_count;
 		};
 	public:
 		template <typename Derived>
@@ -43,11 +43,95 @@ namespace core::containers {
 
 		SharedRef clone() const {
 			VERIFY(m_counter && m_ptr);
-			m_counter->strong_count.fetch_add(1);
+			m_counter->strong_count += 1;
 			return SharedRef{ m_counter, m_ptr };
 		}
 
 		~SharedRef() {
+			if (m_counter) {
+				m_counter->strong_count -= 1;
+
+				if (m_counter->strong_count == 0) {
+					mem::free(m_counter);
+					m_counter = nullptr;
+
+					m_ptr->~Base();
+					mem::free(m_ptr);
+					m_ptr = nullptr;
+				}
+			}
+		}
+
+		NO_DISCARD inline explicit operator Base const* () const { return m_ptr; }
+		NO_DISCARD inline Base* operator ->() { return m_ptr; }
+		NO_DISCARD inline Base& operator *() { return *m_ptr; }
+		NO_DISCARD inline Base const* operator ->() const { return m_ptr; }
+		NO_DISCARD inline Base const& operator *() const { return *m_ptr; }
+
+		NO_DISCARD inline Base* ptr() { return m_ptr; }
+		NO_DISCARD inline Base const* ptr() const { return m_ptr; }
+
+	private:
+		SharedRef() = default;
+		SharedRef(Counter* counter, Base* ptr) : m_counter(counter), m_ptr(ptr) {}
+
+		template <typename Derived>
+		explicit SharedRef(Derived&& derived) {
+			static_assert(core::is_base_of<Base, Derived> || core::is_same<Base, Derived>, "Base is not a base of Derived");
+			static_assert(!core::is_abstract<Derived>, "Derived must not be abstract");
+
+			void* counter = mem::alloc(mem::Layout::single<Counter>);
+			m_counter = new (counter) Counter{ 1 };
+
+			void* ptr = mem::alloc(mem::Layout::single<Derived>);
+			m_ptr = new (ptr) Derived(core::forward<Derived>(derived));
+		}
+
+		Counter* m_counter;
+		Base* m_ptr;
+	};
+
+	template <typename Base>
+	class AtomicSharedRef {
+		struct Counter {
+			async::Atomic<usize> strong_count;
+		};
+	public:
+		template <typename Derived>
+		static AtomicSharedRef<Base> make(Derived&& derived) {
+			return AtomicSharedRef<Base>(core::forward<Derived>(derived));
+		}
+
+		template <typename Derived>
+		static AtomicSharedRef<Base> make(const Derived& derived) {
+			auto copy = derived;
+			return AtomicSharedRef<Base>(core::move(copy));
+		}
+
+		NO_COPY(AtomicSharedRef);
+
+		AtomicSharedRef(AtomicSharedRef<Base>&& m) noexcept : m_counter(m.m_counter), m_ptr(m.m_ptr) {
+			m.m_ptr = nullptr;
+			m.m_counter = nullptr;
+		}
+		AtomicSharedRef<Base>& operator=(AtomicSharedRef<Base>&& m) noexcept {
+			AtomicSharedRef<Base> to_destroy = core::move(*this);
+			m_counter = m.m_counter;
+			m_ptr = m.m_ptr;
+
+			m.m_ptr = nullptr;
+			m.m_counter = nullptr;
+
+			return *this;
+		}
+
+		AtomicSharedRef clone() const {
+			VERIFY(m_counter && m_ptr);
+			m_counter->strong_count.fetch_add(1);
+			return AtomicSharedRef{ m_counter, m_ptr };
+		}
+
+		~AtomicSharedRef() {
 			if (m_counter) {
 				const auto strong = m_counter->strong_count.fetch_sub(1);
 
@@ -67,11 +151,11 @@ namespace core::containers {
 		NO_DISCARD inline Base const& operator *() const { return *m_ptr; }
 
 	private:
-		SharedRef() = default;
-		SharedRef(Counter* counter, Base* ptr) : m_counter(counter), m_ptr(ptr) {}
+		AtomicSharedRef() = default;
+		AtomicSharedRef(Counter* counter, Base* ptr) : m_counter(counter), m_ptr(ptr) {}
 
 		template <typename Derived>
-		explicit SharedRef(Derived&& derived) { 
+		explicit AtomicSharedRef(Derived&& derived) { 
 			static_assert(core::is_base_of<Base, Derived> || core::is_same<Base, Derived>, "Base is not a base of Derived");
 			static_assert(!core::is_abstract<Derived>, "Derived must not be abstract");
 
@@ -87,3 +171,4 @@ namespace core::containers {
 	};
 }
 using core::containers::SharedRef;
+using core::containers::AtomicSharedRef;

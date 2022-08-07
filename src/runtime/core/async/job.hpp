@@ -24,10 +24,10 @@ namespace core::async {
 		}
 
 	private:
-		explicit inline Future(SharedRef<Internal>&& result) 
+		explicit inline Future(AtomicSharedRef<Internal>&& result) 
 			: m_result(core::move(result)) {}
 		inline static Future make() { 
-			return Future(SharedRef<Internal>::make(Internal{
+			return Future(AtomicSharedRef<Internal>::make(Internal{
 				false,
 				{}
 			}));
@@ -43,7 +43,7 @@ namespace core::async {
 		template <typename F>
 		friend Future<ReturnType<F>> schedule2(F&& job);
 
-		SharedRef<Internal> m_result;
+		AtomicSharedRef<Internal> m_result;
 	};
 
 	void schedule(Job&&);

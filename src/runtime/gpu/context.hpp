@@ -20,7 +20,7 @@ namespace gpu {
 	class ContextInterface {
 	public:
 		virtual Backend backend() const = 0;
-		virtual bool register_window(const Window& window) const = 0;
+		virtual bool register_window(void* window_handle) const = 0;
 		virtual void present() const = 0;
 		virtual const Texture& back_buffer() const = 0;
 	};
@@ -31,7 +31,7 @@ namespace gpu {
 		static const Context& the();
 
 		NO_DISCARD inline Backend backend() const { return m_interface->backend(); }
-		NO_DISCARD inline bool register_window(const Window& window) const { return m_interface->register_window(window); }
+		NO_DISCARD inline bool register_window(void* window_handle) const { return m_interface->register_window(window_handle); }
 		NO_DISCARD inline const Texture& back_buffer() const { return m_interface->back_buffer(); }
 		inline void present() const { return m_interface->present(); }
 
@@ -42,10 +42,14 @@ namespace gpu {
 		}
 
 	private:
-		Context();
+		inline Context(Unique<ContextInterface>&& interface) 
+			: m_interface(core::forward< Unique<ContextInterface>>(interface)) {}
+
+		friend void init();
 
 		Unique<ContextInterface> m_interface;
 	};
 
+	void init();
 }
 

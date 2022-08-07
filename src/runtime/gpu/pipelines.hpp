@@ -45,9 +45,9 @@ namespace gpu {
 		inline Slice<InputParameter const> input_parameters() const { return m_interface->input_parameters(); }
 
 	private:
-		VertexShader(SharedRef<VertexShaderInterface>&& interface) : m_interface(core::move(interface)) { }
+		VertexShader(AtomicSharedRef<VertexShaderInterface>&& interface) : m_interface(core::move(interface)) { }
 
-		SharedRef<VertexShaderInterface> m_interface;
+		AtomicSharedRef<VertexShaderInterface> m_interface;
 	};
 
 	class PixelShaderInterface : public ShaderInterface {
@@ -63,9 +63,9 @@ namespace gpu {
 		inline ShaderType type() const { return m_interface->type(); }
 
 	private:
-		PixelShader(SharedRef<PixelShaderInterface>&& interface) : m_interface(core::move(interface)) { }
+		PixelShader(AtomicSharedRef<PixelShaderInterface>&& interface) : m_interface(core::move(interface)) { }
 
-		SharedRef<PixelShaderInterface> m_interface;
+		AtomicSharedRef<PixelShaderInterface> m_interface;
 	};
 
 	enum class DrawMode : u8 {
@@ -168,9 +168,9 @@ namespace gpu {
 		}
 
 	private:
-		GraphicsPipeline(SharedRef<GraphicsPipelineInterface>&& interface) : m_interface(core::move(interface)) { }
+		GraphicsPipeline(AtomicSharedRef<GraphicsPipelineInterface>&& interface) : m_interface(core::move(interface)) { }
 
-		SharedRef<GraphicsPipelineInterface> m_interface;
+		AtomicSharedRef<GraphicsPipelineInterface> m_interface;
 	};
 
 }

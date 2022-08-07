@@ -1,4 +1,6 @@
----------- Month of July 2022 Goals ----------
+---------- Month of August 2022 Goals ----------
+
+- Gui Framework
 
 - Skeletal Animation Prototype
 	[x] Load Skeleton
@@ -9,8 +11,8 @@
 - Asset System
 	[ ] Serialization
 	[ ] Data Conversion
-	[ ] GUID based
-	[ ] Handle based
+	[x] GUID based
+	[x] Handle based
 	[ ] Asset Pipeline
 
 - Job System

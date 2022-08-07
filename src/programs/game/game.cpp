@@ -1,5 +1,4 @@
 ﻿#include "core.hpp"
-#include "window.hpp"
 #include "fs.hpp"
 #include "time.hpp"
 #include "math.hpp"
@@ -11,16 +10,17 @@
 
 #include "fbx.hpp"
 
-#include "canvas.hpp"
-#include "basic_shapes.hpp"
-
-#include "dxc.hpp"
 
 using namespace core;
-using namespace core::window;
 using namespace core::time;
 
 #include "gpu.hpp"
+#include "dxc.hpp"
+
+#include "canvas.hpp"
+#include "basic_shapes.hpp"
+
+#include "window.hpp"
 
 #include <cstdio>
 
@@ -56,8 +56,7 @@ struct Input {
 
 static Input g_input = {};
 
-static Option<Window> g_window;
-
+#if 0
 void window_callback(WindowHandle window, const WindowEvent& event) {
 	switch (event.type) {
 	case WindowEventType::Closed:
@@ -90,6 +89,7 @@ void window_callback(WindowHandle window, const WindowEvent& event) {
 		break;
 	};
 }
+#endif
 
 class Canvas {
 public:
@@ -201,19 +201,19 @@ int WINAPI WinMain(
 	_In_ int nShowCmd
 ) {
 	async::job::init();
+	gpu::init();
 	asset::init();
 
-	g_window = Window::make({
+	auto window = gui::Window::make({
 		{ 1920, 1080 },
 		"Malibu",
-		window_callback,
-		WindowVisibility::Hidden,
-	}).unwrap();
+		gui::Visibility::Hidden,
+	});
 
 	auto size = sizeof(fbx::Vertex);
 
 	auto& context = gpu::Context::the();
-	const auto registered = context.register_window(g_window.as_ref().unwrap());
+	const auto registered = context.register_window(window->handle());
 	VERIFY(registered);
 
 	auto scene0 = fbx::load_fbx_scene("assets/bee.fbx").unwrap();
@@ -270,13 +270,13 @@ int WINAPI WinMain(
 
 	Vec3f32::orthonormal_basis(forward, up, right);
 
-	canvas_3d.line(a, a + forward * 2.f, 0.2f, LinearColor::RED);
-	canvas_3d.line(a, a + up * 2.f, 0.2f, LinearColor::GREEN);
-	canvas_3d.line(a, a + right * 2.f, 0.2f, LinearColor::BLUE);
+	canvas_3d.line(a, a + forward * 2.f, 0.02f, LinearColor::RED);
+	canvas_3d.line(a, a + up * 2.f, 0.02f, LinearColor::GREEN);
+	canvas_3d.line(a, a + right * 2.f, 0.02f, LinearColor::BLUE);
 
-	canvas_3d.line(b, b + forward * 2.f, 0.2f, LinearColor::RED);
-	canvas_3d.line(b, b + up * 2.f, 0.2f, LinearColor::GREEN);
-	canvas_3d.line(b, b + right * 2.f, 0.2f, LinearColor::BLUE);
+	canvas_3d.line(b, b + forward * 2.f, 0.02f, LinearColor::RED);
+	canvas_3d.line(b, b + up * 2.f, 0.02f, LinearColor::GREEN);
+	canvas_3d.line(b, b + right * 2.f, 0.02f, LinearColor::BLUE);
 
 	for (auto& bone : bee_skeleton.bones) {
 		char buffer[256];
@@ -322,7 +322,7 @@ int WINAPI WinMain(
 		mem::copy(slice.ptr(), box.indices.ptr(), slice.len());
 	});
 
-	Option<gpu::GraphicsPipelineConfig> static_lit_config_opt;
+	Option<gpu::GraphicsPipelineConfig> static_lit_config_opt = nullptr;
 	{
 		String source = fs::read_to_string("src/shaders/static_lit.hlsl").unwrap();
 
@@ -359,7 +359,7 @@ int WINAPI WinMain(
 	}
 	auto static_lit_pipeline = gpu::GraphicsPipeline::make(static_lit_config_opt.unwrap());
 
-	Option<gpu::GraphicsPipelineConfig> debug3d_config_opt;
+	Option<gpu::GraphicsPipelineConfig> debug3d_config_opt = nullptr;
 	{
 		String source = fs::read_to_string("src/shaders/debug3d.hlsl").unwrap();
 
@@ -462,7 +462,7 @@ int WINAPI WinMain(
 		const auto dt = delta.as_secs_f32();
 
 		mem::copy(g_input.last_keys_pressed, g_input.keys_pressed, 256);
-		Window::pump_events();
+		gui::Window::pump_events();
 
 		const auto view_rotation = Quatf32::from_euler(
 			g_camera.pitch,
@@ -502,7 +502,7 @@ int WINAPI WinMain(
 				back_buffer, 
 				depth_buffer, 
 				[&](gpu::RenderPassRecorder& rp) {
-					const auto client = g_window.as_ref().unwrap().client_size().cast<f32>();
+					const auto client = window->client().size().cast<f32>();
 
 					// Draw all 3d objects from camera perspective
 					{
@@ -585,7 +585,7 @@ int WINAPI WinMain(
 		context.present();
 		if (first_show) {
 			first_show = false;
-			g_window.as_ref().unwrap().set_visibility(WindowVisibility::Visible);
+			window->set_visibility(gui::Visibility::Visible);
 		}
 	}
 

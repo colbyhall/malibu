@@ -131,7 +131,7 @@ namespace gpu {
 
 		template <typename F>
 		inline void record(F&& callable) {
-			Unique<GraphicsCommandListInterface>& interface = m_interface.as_ref().unwrap();
+			Unique<GraphicsCommandListInterface>& interface = m_interface.as_mut().unwrap();
 			interface->begin_recording();
 			GraphicsCommandRecorder recorder(*interface);
 			callable(recorder);
@@ -139,7 +139,7 @@ namespace gpu {
 		}
 
 		inline void submit() {
-			Unique<GraphicsCommandListInterface>& interface = m_interface.as_ref().unwrap();
+			Unique<GraphicsCommandListInterface>& interface = m_interface.as_mut().unwrap();
 			interface->submit();
 		}
 

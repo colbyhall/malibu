@@ -3,11 +3,14 @@
 #include "../types.hpp"
 #include <new>
 
+#define NONE nullptr
+
 namespace core::containers {
 	template <typename T>
 	class Option {
 	public:
 		inline constexpr explicit Option() : m_set(false), m_data() {}
+		inline constexpr Option(NullPtr) : m_set(false), m_data() {}
 
 		inline Option(T&& t) : m_set(true), m_data() {
 			auto* p = m_data;
@@ -29,7 +32,7 @@ namespace core::containers {
 			return core::move(*p);
 		}
 
-		NO_DISCARD inline Option<T&> as_ref() {
+		NO_DISCARD inline Option<T&> as_mut() {
 			if (is_set()) {
 				auto* p = reinterpret_cast<T*>(&m_data[0]);
 				return Option<T&>(*p);

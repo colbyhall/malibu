@@ -9,7 +9,7 @@ namespace core::library {
 
 		void* handle = LoadLibraryW(wpath.ptr());
 		if (handle != nullptr) return Library { handle };
-		return Option<Library>();
+		return NONE;
 	}
 
 	Library::~Library() {

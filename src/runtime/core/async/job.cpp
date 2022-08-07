@@ -36,13 +36,13 @@ namespace core::async {
 			if (auto normal = normal_queue.pop()) return normal.unwrap();
 			if (auto low = low_queue.pop()) return low.unwrap();
 
-			return Option<Job> {};
+			return NONE;
 		}
 
 		void work_cycle() const {
 			while (running.load()) {
 				// Look for work
-				Option<Job> job;
+				Option<Job> job = NONE;
 				{
 					// High priority task override waiting fibers
 					if (auto high = high_queue.pop()) job = high.unwrap();
@@ -63,7 +63,7 @@ namespace core::async {
 		}
 	};
 
-	static Option<JobSystem> g_job_system;
+	static Option<JobSystem> g_job_system = NONE;
 
 	void schedule(Job&& job) {
 		if (g_job_system) {

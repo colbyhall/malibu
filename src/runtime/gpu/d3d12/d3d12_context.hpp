@@ -56,7 +56,7 @@ class D3D12Context : public gpu::ContextInterface {
 public:
 
 	gpu::Backend backend() const override { return gpu::Backend::D3D12; }
-	bool register_window(const core::window::Window& window) const override;
+	bool register_window(void* window_handle) const override;
 	void present() const override;
 	const gpu::Texture& back_buffer() const override;
 

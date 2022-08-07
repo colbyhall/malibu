@@ -176,10 +176,10 @@ namespace core {
 	constexpr typename RemoveReference<T>::Type&& move(T&& t) {
 		return static_cast<typename RemoveReference<T>::Type&&>(t);
 	}
+}
 
 #define NO_COPY(type) type(const type& t) = delete; type& operator=(const type& c) = delete
 #define NO_MOVE(type) type(type&& t) noexcept = delete; type& operator=(type&& c) noexcept = delete
-}
 
 #define VERIFY(n) core::assert(n)
 #define PANIC(msg) core::assert(false)

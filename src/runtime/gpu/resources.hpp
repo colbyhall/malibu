@@ -62,7 +62,7 @@ namespace gpu {
 	class Texture {
 	public:
 		// FIXME: Make this private
-		Texture(SharedRef<TextureInterface>&& interface) : m_interface(core::move(interface)) { }
+		Texture(AtomicSharedRef<TextureInterface>&& interface) : m_interface(core::move(interface)) { }
 
 		static Texture make(
 			BitFlag<TextureUsage> usage,
@@ -81,7 +81,7 @@ namespace gpu {
 		}
 
 	private:
-		SharedRef<TextureInterface> m_interface;
+		AtomicSharedRef<TextureInterface> m_interface;
 	};
 
 	enum class BufferUsage : u8 {
@@ -137,8 +137,8 @@ namespace gpu {
 		}
 
 	private:
-		Buffer(SharedRef<BufferInterface>&& interface) : m_interface(core::move(interface)) { }
+		Buffer(AtomicSharedRef<BufferInterface>&& interface) : m_interface(core::move(interface)) { }
 
-		SharedRef<BufferInterface> m_interface;
+		AtomicSharedRef<BufferInterface> m_interface;
 	};
 }
