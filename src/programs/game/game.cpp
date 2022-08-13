@@ -11,6 +11,7 @@
 
 #include "gui.hpp"
 #include "window.hpp"
+#include "list_element.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_MEAN_AND_LEAN
@@ -36,9 +37,27 @@ int WINAPI WinMain(
 		gui::Visibility::Hidden,
 	});
 
-	auto panel = gui::Panel::make(LinearColor::GREEN);
-	window->set_widget(panel);
+	auto list_a = gui::ListElement::make();
+	list_a->set_direction(gui::Direction::Horizontal);
+	{
+		auto list_b = gui::ListElement::make();
+		{
+			auto panel_a = gui::Panel::make(LinearColor::GREEN);
+			list_b->add_slot(panel_a.clone());
 
+			auto panel_b = gui::Panel::make(LinearColor::BLUE);
+			list_b->add_slot(panel_b.clone());
+
+			auto panel_c = gui::Panel::make(LinearColor::RED);
+			list_b->add_slot(panel_c.clone());
+		}
+		list_a->add_slot(list_b.clone());
+
+		auto panel = gui::Panel::make(LinearColor::WHITE);
+		list_a->add_slot(panel.clone());
+	}
+
+	window->set_element(list_a.clone());
 	window->set_visibility(gui::Visibility::Visible);
 
 	auto last_frame = Instant::now();

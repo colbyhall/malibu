@@ -7,7 +7,7 @@
 
 #include "swapchain.hpp"
 
-#include "widget.hpp"
+#include "element.hpp"
 
 namespace gui {
 	using WindowHandle = void*;
@@ -74,7 +74,7 @@ namespace gui {
 		inline Window(Window&& m) noexcept : 
 			m_handle(m.m_handle), 
 			m_swapchain(core::move(m.m_swapchain)), 
-			m_widget(core::move(m.m_widget)) 
+			m_element(core::move(m.m_element)) 
 		{
 			m.m_handle = nullptr;
 		}
@@ -83,7 +83,7 @@ namespace gui {
 			Window w = core::move(*this);
 			m_handle = m.m_handle;
 			m_swapchain = core::move(m.m_swapchain);
-			m_widget = core::move(m.m_widget);
+			m_element = core::move(m.m_element);
 
 			m.m_handle = 0;
 			return *this;
@@ -94,10 +94,8 @@ namespace gui {
 		bool set_cursor_lock(bool locked);
 		void set_cursor_visbility(bool visible);
 
-		Option<SharedRef<Widget> const&> widget() const { return m_widget.as_ref(); }
-
-		template <typename T>
-		void set_widget(const SharedRef<T>& widget) { set_widget_internal(widget.clone()); }
+		inline Option<SharedRef<Element> const&> element_ref() const { return m_element.as_ref(); }
+		void set_element(SharedRef<Element>&& element);
 
 		inline WindowHandle handle() const { return m_handle; }
 
@@ -109,7 +107,6 @@ namespace gui {
 		void on_resize();
 
 	private:
-		void set_widget_internal(SharedRef<Widget>&& widget);
 
 		inline explicit Window(WindowHandle handle, gpu::Swapchain&& swapchain) 
 			: m_handle(handle), m_swapchain(core::forward<gpu::Swapchain>(swapchain)) {}
@@ -117,6 +114,6 @@ namespace gui {
 		WindowHandle m_handle;
 		gpu::Swapchain m_swapchain;
 
-		Option<SharedRef<Widget>> m_widget = NONE;
+		Option<SharedRef<Element>> m_element = NONE;
 	};
 }

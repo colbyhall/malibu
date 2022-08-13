@@ -1,9 +1,16 @@
-#include "widget.hpp"
+#include "element.hpp"
 
 #include "basic_shapes.hpp"
 #include "math/aabb2.hpp"
 
 namespace gui {
+	Option<SlotBase const&> CompoundElement::slot_ref_at(usize index) const {
+		auto* mut_this = const_cast<CompoundElement*>(this);
+		auto result = mut_this->slot_mut_at(index);
+		if (result) return result.unwrap();
+		return NONE;
+	}
+
 	void Panel::on_paint(draw2d::Canvas& canvas) const {
 		auto& layout = m_layout.as_ref().unwrap();
 

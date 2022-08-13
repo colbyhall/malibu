@@ -4,15 +4,15 @@
 #include "gui.hpp"
 
 namespace gui {
-	void Window::set_widget_internal(SharedRef<Widget>&& widget) {
-		m_widget = core::forward<SharedRef<Widget>>(widget);
+	void Window::set_element(SharedRef<Element>&& element) {
+		m_element = core::forward<SharedRef<Element>>(element);
 		on_resize();
 		on_paint();
 	}
 
 	void Window::on_paint() {
-		if (m_widget) {
-			auto& widget = m_widget.as_ref().unwrap();
+		if (m_element) {
+			auto& widget = m_element.as_ref().unwrap();
 
 			auto canvas = draw2d::Canvas::make();
 			widget->on_paint(canvas);
@@ -79,14 +79,14 @@ namespace gui {
 	}
 
 	void Window::on_resize() {
-		if (m_widget) {
+		if (m_element) {
 			const auto client_size = client().size().cast<f32>();
 
 			Layout layout = {};
 			layout.local_size = client_size;
 			layout.local_to_absolute = Mat3f32::identity();
 
-			auto& widget = m_widget.as_mut().unwrap();
+			auto& widget = m_element.as_mut().unwrap();
 			widget->on_layout(layout);
 		}
 	}
