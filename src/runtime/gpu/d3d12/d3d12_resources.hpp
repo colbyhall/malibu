@@ -2,10 +2,14 @@
 
 #include "../resources.hpp"
 #include "d3d12_utility.hpp"
+#include "d3d12_context.hpp"
 
 inline DXGI_FORMAT format_to_dxgi(gpu::Format format) {
 	DXGI_FORMAT dxgi_format = DXGI_FORMAT_UNKNOWN;
 	switch (format) {
+		case gpu::Format::R_U8:
+			dxgi_format = DXGI_FORMAT_R8_UNORM;
+			break;
 		// RGB_U8,
 		// RGB_U8_SRGB,
 		case gpu::Format::RGBA_U8:
@@ -57,6 +61,7 @@ public:
 	BitFlag<gpu::TextureUsage> usage() const override { return m_usage; }
 	gpu::Format format() const override { return m_format; }
 	Vec3u32 size() const override { return m_size; }
+	u32 bindless() const override { return m_bindless_handle.index; }
 
 	ComPtr<ID3D12Resource> m_resource;
 	BitFlag<gpu::TextureUsage> m_usage;
@@ -65,6 +70,7 @@ public:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE m_rtv_handle;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_dsv_handle;
+	BindlessHandle m_bindless_handle;
 };
 
 class D3D12Buffer : public gpu::BufferInterface {

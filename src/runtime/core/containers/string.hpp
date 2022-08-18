@@ -11,30 +11,30 @@ namespace core::containers {
 		return 1 + string_length(string);
 	}
 
-	using Char = u32;
-	constexpr Char EOS = 0;
-	constexpr Char EOL = '\n';
-	constexpr Char UTF8_BOM = 0xfeff;
+	using Codepoint = u32;
+	constexpr Codepoint EOS = 0;
+	constexpr Codepoint EOL = '\n';
+	constexpr Codepoint UTF8_BOM = 0xfeff;
 
-	class CharsIterator;
+	class CodepointsIterator;
 
-	class CharsIterator {
+	class CodepointsIterator {
 	public:
-		inline explicit CharsIterator(Slice<char const> string) : m_string(string), m_index(0), m_decoder_state(0), m_codepoint(0) {}
+		inline explicit CodepointsIterator(Slice<char const> string) : m_string(string), m_index(0), m_decoder_state(0), m_codepoint(0) {}
 
 		inline explicit operator bool() const { return should_continue(); }
-		inline CharsIterator& operator++() { next(); return *this; }
-		inline Char operator*() const { return get(); }
+		inline CodepointsIterator& operator++() { next(); return *this; }
+		inline Codepoint operator*() const { return get(); }
 
 	private:
 		bool should_continue() const;
 		void next();
-		Char get() const;
+		Codepoint get() const;
 
 		Slice<char const> m_string;
 		usize m_index;
 		u32 m_decoder_state;
-		Char m_codepoint;
+		Codepoint m_codepoint;
 	};
 
 	class StringView {
@@ -46,7 +46,7 @@ namespace core::containers {
 		inline operator Slice<char const>() const { return m_bytes; }
 		NO_DISCARD inline char const* ptr() const { return m_bytes.ptr(); }
 		NO_DISCARD inline usize len() const { return m_bytes.len(); }
-		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_bytes); }
+		NO_DISCARD inline CodepointsIterator codepoints() const { return CodepointsIterator(m_bytes); }
 		inline const char* operator*() const { return m_bytes.ptr(); }
 
 		inline bool operator==(const StringView& right) const {
@@ -137,10 +137,10 @@ namespace core::containers {
 			m_bytes[len] = 0;
 		}
 
-		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_bytes); }
+		NO_DISCARD inline CodepointsIterator codepoints() const { return CodepointsIterator(m_bytes); }
 
 		inline void reserve(usize amount) { m_bytes.reserve(amount); }
-		String& push(Char c);
+		String& push(Codepoint c);
 		String& push(StringView string);
 		
 	private:
@@ -200,8 +200,8 @@ namespace core::containers {
 	};
 }
 
-using core::containers::Char;
-using core::containers::CharsIterator;
+using core::containers::Codepoint;
+using core::containers::CodepointsIterator;
 using core::containers::StringView;
 using core::containers::String;
 using core::containers::WStringView;

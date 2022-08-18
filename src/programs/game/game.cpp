@@ -13,6 +13,8 @@
 #include "window.hpp"
 #include "list_element.hpp"
 
+#include "font.hpp"
+
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
@@ -26,7 +28,7 @@ int WINAPI WinMain(
 	_In_ LPSTR lpCmdLine,
 	_In_ int nShowCmd
 ) {
-	async::job::init();
+	// async::job::init();
 	gpu::init();
 	asset::init();
 	gui::init();
@@ -37,6 +39,8 @@ int WINAPI WinMain(
 		gui::Visibility::Hidden,
 	});
 
+	auto text_element = gui::TextElement::make(String::from("Hello World"));
+
 	auto list_a = gui::ListElement::make();
 	list_a->set_direction(gui::Direction::Horizontal);
 	{
@@ -45,13 +49,13 @@ int WINAPI WinMain(
 			auto panel_a = gui::Panel::make(LinearColor::GREEN);
 			list_b->add_slot(panel_a.clone());
 
-			auto panel_b = gui::Panel::make(LinearColor::BLUE);
-			list_b->add_slot(panel_b.clone());
+			list_b->add_slot(text_element.clone());
 
 			auto panel_c = gui::Panel::make(LinearColor::RED);
 			list_b->add_slot(panel_c.clone());
 		}
 		list_a->add_slot(list_b.clone());
+
 
 		auto panel = gui::Panel::make(LinearColor::WHITE);
 		list_a->add_slot(panel.clone());
@@ -68,9 +72,13 @@ int WINAPI WinMain(
 		time += delta.as_secs_f32();
 		last_frame = now;
 
+		text_element->set_size(math::sin(time) * 20.f + 44.f);
+
 		const auto dt = delta.as_secs_f32();
 
 		gui::Window::pump_events();
+		
+		window->on_paint();
 	}
 }
 

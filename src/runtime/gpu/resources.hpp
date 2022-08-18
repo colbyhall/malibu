@@ -37,6 +37,8 @@ namespace gpu {
 
 	enum class Format : u16{
 		Undefined,
+		
+		R_U8,
 
 		RGB_U8,
 		RGB_U8_SRGB,
@@ -53,11 +55,14 @@ namespace gpu {
 		Depth24_Stencil8,
 	};
 
+	usize format_size_in_bytes(Format format);
+
 	class TextureInterface {
 	public:
 		virtual BitFlag<TextureUsage> usage() const = 0;
 		virtual Format format() const = 0;
 		virtual Vec3u32 size() const = 0;
+		virtual u32 bindless() const = 0;
 	};
 
 	class Texture {
@@ -71,12 +76,15 @@ namespace gpu {
 		NO_DISCARD inline BitFlag<TextureUsage> usage() const { return m_interface->usage(); }
 		NO_DISCARD inline Format format() const { return m_interface->format(); }
 		NO_DISCARD inline Vec3u32 size() const { return m_interface->size(); }
+		NO_DISCARD inline u32 bindless() const { return m_interface->bindless(); }
 
 		template <typename T = TextureInterface>
 		NO_DISCARD inline T const& interface() const {
 			static_assert(core::is_base_of<TextureInterface, T>, "T is not derived of TextureInterface");
 			return static_cast<const T&>(*m_interface);
 		}
+
+		inline Texture clone() const { return m_interface.clone(); }
 
 	private:
 		Texture(AtomicSharedRef<TextureInterface>&& interface) : m_interface(core::move(interface)) { }

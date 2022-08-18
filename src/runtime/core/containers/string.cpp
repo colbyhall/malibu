@@ -47,11 +47,11 @@ namespace core::containers {
 		return len + 1;
 	}
 
-	bool CharsIterator::should_continue() const {
+	bool CodepointsIterator::should_continue() const {
 		return m_string.len() > 0 && m_index < m_string.len() && m_decoder_state != utf8_reject;
 	}
 
-	void CharsIterator::next() {
+	void CodepointsIterator::next() {
 		VERIFY(should_continue());
 
 		for (; m_index < m_string.len(); m_index += 1) {
@@ -67,7 +67,7 @@ namespace core::containers {
 		m_index += 1;
 	}
 
-	Char CharsIterator::get() const {
+	Codepoint CodepointsIterator::get() const {
 		usize get_index = m_index;
 		u32 get_state = m_decoder_state;
 		u32 get_codepoint = m_codepoint;
@@ -87,11 +87,11 @@ namespace core::containers {
 		// FIXME: Do proper utf16 decode
 		String ret;
 		ret.reserve(string.len());
-		for (wchar_t c : string) ret.push((Char)c);
+		for (wchar_t c : string) ret.push((Codepoint)c);
 		return ret;
 	}
 
-	String& String::push(Char c) {
+	String& String::push(Codepoint c) {
 		// Encode the utf32 character to an utf8 multi width character
 		u8 local[4] = {};
 		u32 error;
@@ -125,7 +125,7 @@ namespace core::containers {
 		return *this;
 	}
 
-	static wchar_t utf32_to_utf16(Char c) {
+	static wchar_t utf32_to_utf16(Codepoint c) {
 		u32 h;
 		u32 l;
 
@@ -134,10 +134,10 @@ namespace core::containers {
 			l = c;
 			return c;
 		}
-		Char t = c - 0x10000;
+		Codepoint t = c - 0x10000;
 		h = (((t<<12)>>22) + 0xD800);
 		l = (((t<<22)>>22) + 0xDC00);
-		Char ret = ((h<<16) | ( l & 0x0000FFFF));
+		Codepoint ret = ((h<<16) | ( l & 0x0000FFFF));
 		return ret;
 	}
 
@@ -145,8 +145,8 @@ namespace core::containers {
 		WString result;
 		result.reserve(string.len());
 
-		for (auto chars = string.chars(); chars; ++chars) {
-			const Char c = *chars;
+		for (auto codepoints = string.codepoints(); codepoints; ++codepoints) {
+			const Codepoint c = *codepoints;
 			result.push(utf32_to_utf16(c));
 		}
 
@@ -180,8 +180,8 @@ namespace core::containers {
 		const usize slag = m_chars.cap() - m_chars.len();
 		if (slag < string.len()) m_chars.reserve(string.len());
 
-		for (auto chars = string.chars(); chars; ++chars) {
-			push(utf32_to_utf16(*chars));
+		for (auto codepoints = string.codepoints(); codepoints; ++codepoints) {
+			push(utf32_to_utf16(*codepoints));
 		}
 
 		return *this;

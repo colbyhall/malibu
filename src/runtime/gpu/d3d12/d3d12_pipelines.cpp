@@ -2,6 +2,57 @@
 #include "d3d12_context.hpp"
 #include "d3d12_resources.hpp"
 
+inline D3D12_BLEND convert_blend_factor(gpu::BlendFactor factor) {
+	switch (factor) {
+	case gpu::BlendFactor::Zero:
+		return D3D12_BLEND_ZERO;
+		break;
+	case gpu::BlendFactor::One:
+		return D3D12_BLEND_ONE;
+		break;
+	case gpu::BlendFactor::SrcColor:
+		return D3D12_BLEND_SRC_COLOR;
+		break;
+	case gpu::BlendFactor::OneMinusSrcColor:
+		return D3D12_BLEND_INV_SRC_COLOR;
+		break;
+	case gpu::BlendFactor::DstColor:
+		return D3D12_BLEND_DEST_COLOR;
+		break;
+	case gpu::BlendFactor::OneMinusDstColor:
+		return D3D12_BLEND_INV_DEST_COLOR;
+		break;
+	case gpu::BlendFactor::SrcAlpha:
+		return D3D12_BLEND_SRC_ALPHA;
+		break;
+	case gpu::BlendFactor::OneMinusSrcAlpha:
+		return D3D12_BLEND_INV_SRC_ALPHA;
+		break;
+	}
+	return D3D12_BLEND_ZERO;
+}
+
+inline D3D12_BLEND_OP convert_blend_op(gpu::BlendOp op) {
+	switch (op) {
+	case gpu::BlendOp::Add:
+		return D3D12_BLEND_OP_ADD;
+		break;
+	case gpu::BlendOp::Subtract:
+		return D3D12_BLEND_OP_SUBTRACT;
+		break;
+	case gpu::BlendOp::ReverseSubtract:
+		return D3D12_BLEND_OP_REV_SUBTRACT;
+		break;
+	case gpu::BlendOp::Min:
+		return D3D12_BLEND_OP_MIN;
+		break;
+	case gpu::BlendOp::Max:
+		return D3D12_BLEND_OP_MAX;
+		break;
+	}
+	return D3D12_BLEND_OP_ADD;
+}
+
 D3D12GraphicsPipeline::D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& config)
 : m_config(core::forward<gpu::GraphicsPipelineConfig>(config)) {
 	auto& context = gpu::Context::the().interface<D3D12Context>();
@@ -84,21 +135,18 @@ D3D12GraphicsPipeline::D3D12GraphicsPipeline(gpu::GraphicsPipelineConfig&& confi
 		blend.AlphaToCoverageEnable = FALSE;
 		blend.IndependentBlendEnable = FALSE;
 
-		const D3D12_RENDER_TARGET_BLEND_DESC def = {
-			FALSE,
-			FALSE,
-			
-			D3D12_BLEND_ONE, 
-			D3D12_BLEND_ZERO, 
-			D3D12_BLEND_OP_ADD,
-			
-			D3D12_BLEND_ONE, 
-			D3D12_BLEND_ZERO, 
-			D3D12_BLEND_OP_ADD,
-			
-			D3D12_LOGIC_OP_NOOP,
-			D3D12_COLOR_WRITE_ENABLE_ALL,
-		};
+		D3D12_RENDER_TARGET_BLEND_DESC def = {};
+		def.BlendEnable = m_config.blend_enabled;
+		// def.LogicOpEnable = m_config.blend_enabled;
+		def.SrcBlend  = convert_blend_factor(m_config.src_color_blend_factor);
+		def.DestBlend = convert_blend_factor(m_config.dst_color_blend_factor);
+		def.BlendOp   = convert_blend_op(m_config.color_blend_op);
+		def.SrcBlendAlpha = convert_blend_factor(m_config.src_alpha_blend_factor);
+		def.DestBlendAlpha = convert_blend_factor(m_config.dst_alpha_blend_factor);
+		def.BlendOpAlpha = convert_blend_op(m_config.alpha_blend_op);
+		def.LogicOp = D3D12_LOGIC_OP_NOOP;
+		def.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
 		for (int i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
 			blend.RenderTarget[i] = def;
 		}

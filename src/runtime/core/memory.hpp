@@ -27,8 +27,8 @@ namespace core::mem {
 	NonNull<void> realloc(NonNull<void> old_ptr, Layout old_layout, Layout new_layout);
 	void free(NonNull<void> ptr);
 	
-	NonNull<void> copy(NonNull<void> dest, NonNull<void const> src, usize count);
-	NonNull<void> move(NonNull<void> dest, NonNull<void const> src, usize count);
+	NonNull<void> copy(NonNull<void> dst, NonNull<void const> src, usize count);
+	NonNull<void> move(NonNull<void> dst, NonNull<void const> src, usize count);
 	NonNull<void> set(NonNull<void> ptr, u8 value, usize count);
 
 	u8 count_set_bits_in_byte(u8 b);

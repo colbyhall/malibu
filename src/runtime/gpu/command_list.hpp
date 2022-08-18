@@ -100,6 +100,16 @@ namespace gpu {
 
 	class GraphicsCommandRecorder {
 	public:
+		inline GraphicsCommandRecorder& copy_buffer_to_texture(const Texture& dst, const Buffer& src) {
+			m_interface.copy_buffer_to_texture(dst, src);
+			return *this;
+		}
+
+		inline GraphicsCommandRecorder& copy_buffer_to_buffer(const Buffer& dst, const Buffer& src) {
+			m_interface.copy_buffer_to_buffer(dst, src);
+			return *this;
+		}
+
 		inline GraphicsCommandRecorder& texture_barrier(const Texture& texture, Layout old_layout, Layout new_layout) {
 			m_interface.texture_barrier(texture, old_layout, new_layout);
 			return *this;

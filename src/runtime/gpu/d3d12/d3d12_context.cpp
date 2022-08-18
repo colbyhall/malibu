@@ -2,7 +2,7 @@
 #include "d3d12_resources.hpp"
 #include "window.hpp"
 
-D3D12DescriptorHeap::D3D12DescriptorHeap(
+D3D12FreeSlotDescriptorHeap::D3D12FreeSlotDescriptorHeap(
 	ComPtr<ID3D12Device1> device,
 	D3D12_DESCRIPTOR_HEAP_TYPE type, 
 	usize cap,
@@ -11,7 +11,11 @@ D3D12DescriptorHeap::D3D12DescriptorHeap(
 	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
 	desc.NumDescriptors = (UINT)cap;
 	desc.Type = type;
-	desc.Flags = (D3D12_DESCRIPTOR_HEAP_FLAGS)shader_visible; // D3D12_DESCRIPTOR_HEAP_FLAG_NONE == 0, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE == 1
+	
+	// Use bool because
+	// D3D12_DESCRIPTOR_HEAP_FLAG_NONE = 0
+	// D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE = 1
+	desc.Flags = (D3D12_DESCRIPTOR_HEAP_FLAGS)shader_visible; 
 
 	throw_if_failed(device->CreateDescriptorHeap(
 		&desc,
@@ -26,25 +30,73 @@ D3D12DescriptorHeap::D3D12DescriptorHeap(
 	}
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE D3D12DescriptorHeap::alloc() {
-	for (int i = 0; i < m_cap; ++i) {
-		auto& slot = m_free_slots[i];
-		if (!slot) {
-			slot = true;
-			D3D12_CPU_DESCRIPTOR_HANDLE handle = m_heap->GetCPUDescriptorHandleForHeapStart();
-			handle.ptr += i * m_size;
-			return handle;
+D3D12_CPU_DESCRIPTOR_HANDLE D3D12FreeSlotDescriptorHeap::alloc() const {
+	for (;;) {
+		for (int i = 0; i < m_cap; ++i) {
+			const auto slot = m_free_slots[i].load();
+			if (!slot) {
+				if (m_free_slots[i].compare_exchange_weak(false, true)) {
+					D3D12_CPU_DESCRIPTOR_HANDLE handle = m_heap->GetCPUDescriptorHandleForHeapStart();
+					handle.ptr += i * m_size;
+					return handle;
+				}
+			}
 		}
 	}
-	PANIC("Descriptor Heap Full");
 	return {};
 }
 
-void D3D12DescriptorHeap::free(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+void D3D12FreeSlotDescriptorHeap::free(D3D12_CPU_DESCRIPTOR_HANDLE handle) const {
 	const D3D12_CPU_DESCRIPTOR_HANDLE start = m_heap->GetCPUDescriptorHandleForHeapStart();
 	const usize index = (handle.ptr - start.ptr) / m_size;
-	VERIFY(m_free_slots[index]);
-	m_free_slots[index] = false;
+	VERIFY(m_free_slots[index].load());
+	m_free_slots[index].store(false);
+}
+
+D3D12BindlessDescriptorHeap::D3D12BindlessDescriptorHeap(ComPtr<ID3D12Device1> device) {
+	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+	desc.NumDescriptors = D3D12BindlessDescriptorHeap::TEXTURE2D_COUNT;
+	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+	throw_if_failed(device->CreateDescriptorHeap(
+		&desc,
+		IID_PPV_ARGS(&m_heap)
+	));
+
+	m_size = device->GetDescriptorHandleIncrementSize(desc.Type);
+	m_free_slots.reserve(desc.NumDescriptors);
+	// TODO: memcpy this
+	for (UINT i = 0; i < desc.NumDescriptors; ++i) {
+		m_free_slots.push(false);
+	}
+}
+
+BindlessHandle D3D12BindlessDescriptorHeap::alloc_texture2d() const {
+	for (;;) {
+		for (int i = 0; i < D3D12BindlessDescriptorHeap::TEXTURE2D_COUNT; ++i) {
+			const auto slot = m_free_slots[i].load();
+			if (!slot) {
+				if (m_free_slots[i].compare_exchange_weak(false, true)) {
+					D3D12_CPU_DESCRIPTOR_HANDLE handle = m_heap->GetCPUDescriptorHandleForHeapStart();
+					handle.ptr += i * m_size;
+					return { handle, (u32)i };
+				}
+			}
+		}
+	}
+	return {};
+}
+
+void D3D12BindlessDescriptorHeap::free_texture2d(BindlessHandle handle) const {
+	const D3D12_CPU_DESCRIPTOR_HANDLE start = m_heap->GetCPUDescriptorHandleForHeapStart();
+	const usize index = (handle.descriptor_handle.ptr - start.ptr) / m_size;
+	VERIFY(m_free_slots[index].load());
+	m_free_slots[index].store(false);
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12BindlessDescriptorHeap::gpu_texture2d_table() const {
+	return m_heap->GetGPUDescriptorHandleForHeapStart();
 }
 
 D3D12Context::D3D12Context() {
@@ -159,23 +211,50 @@ D3D12Context::D3D12Context() {
 
 	// Resource Descriptors
 	{
+		D3D12_ROOT_PARAMETER push_constants = {};
+		push_constants.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+		push_constants.Constants.Num32BitValues = 16;
+
 		D3D12_DESCRIPTOR_RANGE texture2d_range = {};
 		texture2d_range.BaseShaderRegister = 0;
-		texture2d_range.NumDescriptors = -1;
+		texture2d_range.NumDescriptors = D3D12BindlessDescriptorHeap::TEXTURE2D_COUNT;
 		texture2d_range.OffsetInDescriptorsFromTableStart = 0;
 		texture2d_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-		texture2d_range.RegisterSpace = 1;
+		texture2d_range.RegisterSpace = 0;
 
-		D3D12_ROOT_PARAMETER param1 = {};
-		param1.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-		param1.Constants.RegisterSpace;
-		param1.Constants.Num32BitValues = 16;
-		param1.Constants.ShaderRegister;
+		D3D12_ROOT_PARAMETER texture2d_table = {};
+		texture2d_table.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+		texture2d_table.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+		texture2d_table.DescriptorTable.NumDescriptorRanges = 1;
+		texture2d_table.DescriptorTable.pDescriptorRanges = &texture2d_range;
+
+		D3D12_ROOT_PARAMETER root_params[] = {
+			push_constants,
+			texture2d_table
+		};
 
 		D3D12_ROOT_SIGNATURE_DESC desc = {};
-		desc.pParameters = &param1;
-		desc.NumParameters = 1;
+		desc.pParameters = root_params;
+		desc.NumParameters = 2; // COUNT_OF(root_params);
 		desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+		D3D12_STATIC_SAMPLER_DESC sampler = {};
+		sampler.Filter = D3D12_FILTER_ANISOTROPIC;
+		sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		sampler.MipLODBias = 0;
+		sampler.MaxAnisotropy = 0;
+		sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+		sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+		sampler.MinLOD = 0.0f;
+		sampler.MaxLOD = D3D12_FLOAT32_MAX;
+		sampler.ShaderRegister = 0;
+		sampler.RegisterSpace = 0;
+		sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+		desc.pStaticSamplers = &sampler;
+		desc.NumStaticSamplers = 1;
 
 		ComPtr<ID3DBlob> signature;
 		ComPtr<ID3DBlob> error;
@@ -192,23 +271,22 @@ D3D12Context::D3D12Context() {
 			IID_PPV_ARGS(&root_signature)
 		));
 
-		rtv_heap = D3D12DescriptorHeap(
+		rtv_heap = D3D12FreeSlotDescriptorHeap(
 			device, 
 			D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 
 			2048, 
 			false
 		);
-		dsv_heap = D3D12DescriptorHeap(
+		dsv_heap = D3D12FreeSlotDescriptorHeap(
 			device, 
 			D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 
 			2048, 
 			false
 		);
-		resource_descriptor_heap = D3D12DescriptorHeap(
-			device, 
-			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 
-			4096, 
-			true
-		);
+		bindless_heap = D3D12BindlessDescriptorHeap(device);
 	}
+}
+
+void D3D12Context::post_init() {
+	bindless_texture = gpu::Texture::make(gpu::TextureUsage::Sampled, gpu::Format::RGBA_U8, { 8, 8, 1});
 }

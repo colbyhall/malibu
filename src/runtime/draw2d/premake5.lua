@@ -6,11 +6,11 @@ project "draw2d"
 
     vpaths { ["*"] = { "**.hpp", "**.cpp" } }
 
-    includedirs { "../*" }
+    includedirs { "../*", "../../third_party/*" }
 
 	systemversion "latest"
 
-    links { "core" }
+    links { "core", "stb" }
 
 	cppdialect "C++17"
 

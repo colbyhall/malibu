@@ -39,10 +39,15 @@ namespace gui {
 		config.color_attachments.push(gpu::Format::RGBA_U8);
 		// config.depth_attachment = gpu::Format::Depth24_Stencil8;
 
+		config.blend_enabled = true;
+		config.src_color_blend_factor = gpu::BlendFactor::SrcAlpha;
+		config.dst_color_blend_factor = gpu::BlendFactor::OneMinusSrcAlpha;
+
 		auto pipeline = gpu::GraphicsPipeline::make(core::move(config));
 
 		g_manager = Manager{
 			core::move(pipeline),
+			draw2d::Font::import("assets/consola.ttf").unwrap()
 		};
 	}
 

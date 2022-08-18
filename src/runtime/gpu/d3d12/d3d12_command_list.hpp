@@ -3,21 +3,22 @@
 #include "../command_list.hpp"
 #include "d3d12_resources.hpp"
 
-inline
-D3D12_RESOURCE_STATES layout_to_resource_states(gpu::Layout layout) {
+inline D3D12_RESOURCE_STATES layout_to_resource_states(gpu::Layout layout) {
 	D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_COMMON;
 	switch (layout) {
 		case gpu::Layout::Undefined:
 			break;
 		case gpu::Layout::General:
-			state = D3D12_RESOURCE_STATE_COMMON;
+			state = D3D12_RESOURCE_STATE_GENERIC_READ;
 			break;
 		case gpu::Layout::ColorAttachment:
 			state = D3D12_RESOURCE_STATE_RENDER_TARGET;
 			break;
 		// case gpu::Layout::DepthAttachment:
 		// case gpu::Layout::TransferSrc:
-		// case gpu::Layout::TransferDst:
+		case gpu::Layout::TransferDst:
+			state = D3D12_RESOURCE_STATE_COPY_DEST;
+			break;
 		// case gpu::Layout::ShaderReadOnly:
 		case gpu::Layout::Present:
 			state = D3D12_RESOURCE_STATE_PRESENT;

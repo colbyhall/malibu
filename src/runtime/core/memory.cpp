@@ -31,12 +31,12 @@ namespace core::mem {
 		std::free(ptr);
 	}
 
-	NonNull<void> copy(NonNull<void> dest, NonNull<void const> src, usize count) {
-		return std::memcpy(dest, src, count);
+	NonNull<void> copy(NonNull<void> dst, NonNull<void const> src, usize count) {
+		return std::memcpy(dst, src, count);
 	}
 
-	NonNull<void> move(NonNull<void> dest, NonNull<void const> src, usize count) {
-		return std::memmove(dest, src, count);
+	NonNull<void> move(NonNull<void> dst, NonNull<void const> src, usize count) {
+		return std::memmove(dst, src, count);
 	}
 
 	NonNull<void> set(NonNull<void> ptr, u8 value, usize count) {

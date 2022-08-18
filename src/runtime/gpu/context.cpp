@@ -6,7 +6,9 @@ namespace gpu {
 	static Option<Context> g_context = NONE;
 
 	void init() {
-		g_context = Context(Unique<ContextInterface>::make<D3D12Context>());
+		auto interface = Unique<ContextInterface>::make<D3D12Context>();
+		g_context = Context(core::move(interface));
+		g_context.as_mut().unwrap().post_init();
 	}
 
 	const Context& Context::the() {

@@ -4,6 +4,36 @@
 #include "d3d12/d3d12_resources.hpp"
 
 namespace gpu {
+	usize format_size_in_bytes(Format format) {
+		switch (format) {
+		case gpu::Format::R_U8:
+			return 1;
+			break;
+			// RGB_U8,
+			// RGB_U8_SRGB,
+		case gpu::Format::RGBA_U8:
+		case gpu::Format::RGBA_U8_SRGB:
+			return 4;
+			break;
+		case gpu::Format::RGBA_F16:
+			return 4 * 2;
+			break;
+		case gpu::Format::RGBA_F32:
+			return 4 * 4;
+			break;
+			// BGR_U8_SRGB,
+			// Depth16,
+		case gpu::Format::Depth24_Stencil8:
+			return 4;
+			break;
+		default:
+			TODO("Unsupported format type");
+			break;
+		}
+
+		return 0;
+	}
+
 	Texture Texture::make(
 		BitFlag<TextureUsage> usage,
 		Format format,

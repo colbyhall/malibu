@@ -25,7 +25,6 @@ D3D12Texture::D3D12Texture(
 	}
 	VERIFY(dimension != D3D12_RESOURCE_DIMENSION_UNKNOWN);
 
-
 	const DXGI_FORMAT dxgi_format = format_to_dxgi(format);
 
 	if (resource == nullptr) {
@@ -85,6 +84,10 @@ D3D12Texture::D3D12Texture(
 	if (usage.is_set(gpu::TextureUsage::DepthAttachment)) {
 		m_dsv_handle = context.dsv_heap.alloc();
 		context.device->CreateDepthStencilView(m_resource.Get(), nullptr, m_dsv_handle);
+	}
+	if (usage.is_set(gpu::TextureUsage::Sampled)) {
+		m_bindless_handle = context.bindless_heap.alloc_texture2d();
+		context.device->CreateShaderResourceView(m_resource.Get(), nullptr, m_bindless_handle.descriptor_handle);
 	}
 }
 

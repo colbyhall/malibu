@@ -2,36 +2,54 @@ cbuffer bufs : register(b0) {
 	float4x4 local_to_projection;
 }
 
-struct PSInput
-{
+Texture2D texture2d_table[] : register(t0);
+SamplerState sampler_table : register(s0);
+
+struct PSInput {
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
+	float4 scissor : SCISSOR;
+	float2 uv : UV;
+	float2 screen_pos : SCREEN_POS;
+	uint tex2d : TEX;
 };
 
-PSInput vs_main(float3 position : POSITION, float4 color: COLOR, float2 uv: UV)
-{
+struct VSInput {
+	float3 position : POSITION;
+	float4 color : COLOR;
+	float4 scissor : SCISSOR;
+	float2 uv : UV;
+	uint tex2d : TEX;
+};
+
+PSInput vs_main(VSInput input) {
 	PSInput result;
 
-	result.position = mul(local_to_projection, float4(position, 1.0));
-	result.color = color;
+	result.position = mul(local_to_projection, float4(input.position, 1.0));
+	result.color = input.color;
+	result.scissor = input.scissor;
+	result.uv = input.uv;
+	result.screen_pos = input.position.xy;
+	result.tex2d = input.tex2d;
 
 	return result;
 }
 
-float4 ps_main(PSInput input) : SV_TARGET
-{
-	return float4(input.color.x, input.color.y, input.color.z, 1.f);
+float4 ps_main(PSInput input) : SV_TARGET {
+	bool in_scissor =
+		input.screen_pos.x >= input.scissor.x &&
+		input.screen_pos.y >= input.scissor.y &&
+		input.screen_pos.x <= input.scissor.z &&
+		input.screen_pos.y <= input.scissor.w;
 
-	// float3 color = input.color
-	// float3 a = float3(0.f, 0.f, 0.f);
-	// float3 b = float3(2.f, 3.f, -5.f);
-	// float3 light_direction = normalize(a - b);
-	// float3 light_color = float3(0.5f, 0.5f, 0.5f);
-	// float3 ambient = float3(0.1f, 0.1f, 0.1f);
-	// float3 diffuse = light_color * max(dot(input.normal, light_direction), 0.f);
-	// float3 final_color = color * (diffuse + ambient);
+	float4 output = input.color;
+	if (true) {
+		if (input.tex2d == 0) {
+			return input.color;
+		}
+		float dist_alpha_mask = texture2d_table[input.tex2d].Sample(sampler_table, input.uv, 0).x;
+		output.w *= smoothstep(0.6, 0.7, dist_alpha_mask);
+	}
+	return output;
 
-	// return float4(color.x, color.y, color.z, 1.f);
-	// return float4(input.normal.x, input.normal.y, input.normal.z, 1.f);
-	// return abs(float4(input.normal.x, input.normal.y, input.normal.z, 1.f));
 }

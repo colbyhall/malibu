@@ -42,7 +42,7 @@ namespace core::async {
 			T desired,
 			Order order = Order::SequentiallyConsistent
 		) const noexcept {
-			if (!m_atomic.compare_exchange_weak(expected, desired, to_std(order))) {
+			if (m_atomic.compare_exchange_weak(expected, desired, to_std(order))) {
 				return expected;
 			}
 			return Option<T> {};
@@ -53,7 +53,7 @@ namespace core::async {
 			T desired,
 			Order order = Order::SequentiallyConsistent
 		) const noexcept {
-			if (!m_atomic.compare_exchange_strong(expected, desired, to_std(order))) {
+			if (m_atomic.compare_exchange_strong(expected, desired, to_std(order))) {
 				return expected;
 			}
 			return Option<T> {};

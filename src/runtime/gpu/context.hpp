@@ -11,6 +11,7 @@ namespace gpu {
 	class ContextInterface {
 	public:
 		virtual Backend backend() const = 0;
+		virtual void post_init() = 0;
 	};
 
 	class Context {
@@ -29,6 +30,8 @@ namespace gpu {
 	private:
 		inline Context(Unique<ContextInterface>&& interface) 
 			: m_interface(core::forward< Unique<ContextInterface>>(interface)) {}
+
+		inline void post_init() { return m_interface->post_init(); }
 
 		friend void init();
 

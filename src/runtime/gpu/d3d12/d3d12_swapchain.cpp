@@ -73,6 +73,9 @@ gpu::Texture const& D3D12Swapchain::back_buffer() const {
 void D3D12Swapchain::present() {
 	throw_if_failed(m_swapchain->Present(1, 0));
 	wait_for_previous();
+
+	auto& context = gpu::Context::the().interface<D3D12Context>();
+	throw_if_failed(context.command_allocator->Reset());
 }
 
 void D3D12Swapchain::wait_for_previous() {

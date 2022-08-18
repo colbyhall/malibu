@@ -56,6 +56,9 @@ namespace core::types {
     static_assert(sizeof(isize) == 8, "isize should only be 8 bytes");
 
     using f32 = float;
+	constexpr f32 F32_MIN = 1.17549435e-38f;
+	constexpr f32 F32_MAX = 3.40282347e+38f;
+
     using f64 = double;
 
     static_assert(sizeof(f32) == 4, "f32 should only be 4 bytes");
@@ -185,3 +188,5 @@ namespace core {
 #define PANIC(msg) core::assert(false)
 #define TODO(msg) core::assert(false)
 #define INVALID_CODE_PATH DEBUG_TRAP
+
+#define COUNT_OF(arr) (sizeof(arr[0]) / sizeof(arr))

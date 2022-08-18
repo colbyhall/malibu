@@ -15,7 +15,7 @@ namespace core::fs {
 		inline operator StringView() const { return m_string; }
 		NO_DISCARD inline char const* ptr() const { return m_string.ptr(); }
 		NO_DISCARD inline usize len() const { return m_string.len(); }
-		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_string); }
+		NO_DISCARD inline CodepointsIterator codepoints() const { return CodepointsIterator(m_string); }
 
 	private:
 		StringView m_string;
@@ -34,7 +34,7 @@ namespace core::fs {
 		inline operator PathView() const { return PathView(m_string); }
 		NO_DISCARD inline char const* ptr() const { return m_string.ptr(); }
 		NO_DISCARD inline usize len() const { return m_string.len(); }
-		NO_DISCARD inline CharsIterator chars() const { return CharsIterator(m_string); }
+		NO_DISCARD inline CodepointsIterator codepoints() const { return CodepointsIterator(m_string); }
 
 	private:
 		String m_string;

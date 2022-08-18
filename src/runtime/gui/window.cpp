@@ -1,5 +1,6 @@
 #include "window.hpp"
 #include "command_list.hpp"
+#include "canvas.hpp"
 
 #include "gui.hpp"
 
@@ -40,7 +41,7 @@ namespace gui {
 					back_buffer,
 					NONE,
 					[&](gpu::RenderPassRecorder& rpr) {
-						const auto client = this->client().size().cast<f32>();
+						const auto client = this->client().size().cast<f32>() / 2.f;
 
 						const auto projection = Mat4f32::orthographic(
 							client.width,
@@ -56,7 +57,6 @@ namespace gui {
 						);
 
 						const auto local_to_projection = projection * view;
-
 
 						rpr.clear_color(LinearColor::BLACK);
 						rpr.set_pipeline(Manager::the().draw_pipeline);
@@ -80,7 +80,7 @@ namespace gui {
 
 	void Window::on_resize() {
 		if (m_element) {
-			const auto client_size = client().size().cast<f32>();
+			const auto client_size = client().size().cast<f32>() / 2.f;
 
 			Layout layout = {};
 			layout.local_size = client_size;

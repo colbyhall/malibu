@@ -145,11 +145,10 @@ namespace gui {
 		case WM_CLOSE:
 			ExitProcess(0);
 			break;
-		case WM_PAINT:
-			window->on_paint();
-			OutputDebugStringA("Painting Screen\n");
-			InvalidateRect(hWnd, nullptr, false);
-			return 0;
+		// case WM_PAINT:
+			// window->on_paint();
+			// OutputDebugStringA("Painting Screen\n");
+			// return 0;
 		case WM_SIZE:
 		case WM_SIZING:
 			window->on_resize();

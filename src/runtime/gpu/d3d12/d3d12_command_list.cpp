@@ -19,13 +19,43 @@ D3D12GraphicsCommandList::D3D12GraphicsCommandList() {
 void D3D12GraphicsCommandList::begin_recording() {
 	auto& context = gpu::Context::the().interface<D3D12Context>();
 
-	throw_if_failed(context.command_allocator->Reset());
+	// throw_if_failed(context.command_allocator->Reset());
 	throw_if_failed(m_command_list->Reset(context.command_allocator.Get(), nullptr));
 	m_command_list->SetGraphicsRootSignature(context.root_signature.Get());
+
+	auto* heap_ptr = context.bindless_heap.heap().Get();
+	m_command_list->SetDescriptorHeaps(1, &heap_ptr);
+
+	m_command_list->SetGraphicsRootDescriptorTable(
+		(UINT)D3D12BindlessDescriptorHeap::TEXTURE2D_INDEX, 
+		context.bindless_heap.gpu_texture2d_table()
+	);
 }
 
 void D3D12GraphicsCommandList::copy_buffer_to_texture(const gpu::Texture& dst, const gpu::Buffer& src) {
-	TODO("");
+	const auto& dst_interface = dst.interface<D3D12Texture>();
+	D3D12_TEXTURE_COPY_LOCATION dst_location = {};
+	dst_location.pResource = dst_interface.m_resource.Get();
+
+	const auto& src_interface = src.interface<D3D12Buffer>();
+	D3D12_TEXTURE_COPY_LOCATION src_location = {};
+	src_location.pResource = src_interface.m_resource.Get();
+
+	src_location.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+	src_location.PlacedFootprint.Footprint.Format = format_to_dxgi(dst.format());
+	src_location.PlacedFootprint.Footprint.Width = dst_interface.m_size.width;
+	src_location.PlacedFootprint.Footprint.Height = dst_interface.m_size.height;
+	src_location.PlacedFootprint.Footprint.Depth = dst_interface.m_size.depth;
+	src_location.PlacedFootprint.Footprint.RowPitch = (UINT)(gpu::format_size_in_bytes(dst_interface.m_format) * dst_interface.m_size.width);
+
+	m_command_list->CopyTextureRegion(
+		&dst_location,
+		0,
+		0,
+		0,
+		&src_location,
+		nullptr
+	);
 }
 
 void D3D12GraphicsCommandList::copy_buffer_to_buffer(const gpu::Buffer& dst, const gpu::Buffer& src) {
