@@ -56,7 +56,7 @@ namespace gui {
 		}
 	}
 
-	void ListElement::on_paint(draw2d::Canvas& canvas) const {
+	void ListElement::on_paint(draw::Canvas& canvas) const {
 		for (usize index = 0; index < m_slots.len(); ++index) {
 			m_slots[index].element_ref()->on_paint(canvas);
 		}

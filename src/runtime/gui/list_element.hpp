@@ -1,6 +1,7 @@
 #pragma once
 
 #include "element.hpp"
+#include "containers/array.hpp"
 
 namespace gui {
 	enum class Direction {
@@ -14,7 +15,7 @@ namespace gui {
 		class Slot : public SlotBase {
 		public:
 			inline Slot(SharedRef<Element>&& element) 
-			: SlotBase(core::forward<SharedRef<Element>>(element)) {}
+				: SlotBase(core::forward<SharedRef<Element>>(element)) {}
 		private:
 			Padding m_padding;
 			Margin m_margin;
@@ -32,7 +33,7 @@ namespace gui {
 
 		// Element Interface
 		void on_layout(const Layout& layout) override;
-		void on_paint(draw2d::Canvas& canvas) const override;
+		void on_paint(draw::Canvas& canvas) const override;
 		// ~Element Interface
 
 		// CompoundElement

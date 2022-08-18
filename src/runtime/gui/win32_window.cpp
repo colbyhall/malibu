@@ -6,6 +6,8 @@
 #include "library.hpp"
 using core::library::Library;
 
+#include "containers/wstring.hpp"
+
 typedef enum PROCESS_DPI_AWARENESS {
 	PROCESS_DPI_UNAWARE,
 	PROCESS_SYSTEM_DPI_AWARE,

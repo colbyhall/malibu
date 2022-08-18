@@ -6,7 +6,7 @@
 namespace gui {
 	struct Manager {
 		gpu::GraphicsPipeline draw_pipeline;
-		draw2d::Font consola;
+		draw::Font consola;
 
 		static Manager const& the();
 	};

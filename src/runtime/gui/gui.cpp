@@ -47,7 +47,7 @@ namespace gui {
 
 		g_manager = Manager{
 			core::move(pipeline),
-			draw2d::Font::import("assets/consola.ttf").unwrap()
+			draw::Font::import("assets/consola.ttf").unwrap()
 		};
 	}
 

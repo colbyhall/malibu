@@ -1,7 +1,7 @@
 group "runtime"
 
-include "core"
-include "gpu"
 include "asset"
-include "draw2d"
+include "core"
+include "draw"
+include "gpu"
 include "gui"

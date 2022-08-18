@@ -15,14 +15,14 @@ namespace gui {
 		if (m_element) {
 			auto& widget = m_element.as_ref().unwrap();
 
-			auto canvas = draw2d::Canvas::make();
+			auto canvas = draw::Canvas::make();
 			widget->on_paint(canvas);
 
 			auto vertices = gpu::Buffer::make(
 				gpu::BufferUsage::Vertex,
 				gpu::BufferKind::Upload,
 				canvas.vertices().len(),
-				sizeof(draw2d::Canvas::Vertex)
+				sizeof(draw::Canvas::Vertex)
 			);
 			vertices.write([&canvas](Slice<u8> slice) {
 				core::mem::copy(slice.ptr(), canvas.vertices().ptr(), slice.len());

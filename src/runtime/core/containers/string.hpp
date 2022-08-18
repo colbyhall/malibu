@@ -1,98 +1,10 @@
 #pragma once
 
+#include "string_view.hpp"
+#include "wstring_view.hpp"
 #include "array.hpp"
-#include "hash.hpp"
 
 namespace core::containers {
-	template<typename T>
-	constexpr usize string_length(const T* string) {
-		if (*string == 0) return 0;
-		string += 1;
-		return 1 + string_length(string);
-	}
-
-	using Codepoint = u32;
-	constexpr Codepoint EOS = 0;
-	constexpr Codepoint EOL = '\n';
-	constexpr Codepoint UTF8_BOM = 0xfeff;
-
-	class CodepointsIterator;
-
-	class CodepointsIterator {
-	public:
-		inline explicit CodepointsIterator(Slice<char const> string) : m_string(string), m_index(0), m_decoder_state(0), m_codepoint(0) {}
-
-		inline explicit operator bool() const { return should_continue(); }
-		inline CodepointsIterator& operator++() { next(); return *this; }
-		inline Codepoint operator*() const { return get(); }
-
-	private:
-		bool should_continue() const;
-		void next();
-		Codepoint get() const;
-
-		Slice<char const> m_string;
-		usize m_index;
-		u32 m_decoder_state;
-		Codepoint m_codepoint;
-	};
-
-	class StringView {
-	public:
-		inline constexpr StringView() : m_bytes() {}
-		inline constexpr StringView(Slice<char const> bytes) : m_bytes(bytes) {}
-		inline constexpr StringView(const char* ptr) : m_bytes({ ptr, string_length(ptr) }) {}
-
-		inline operator Slice<char const>() const { return m_bytes; }
-		NO_DISCARD inline char const* ptr() const { return m_bytes.ptr(); }
-		NO_DISCARD inline usize len() const { return m_bytes.len(); }
-		NO_DISCARD inline CodepointsIterator codepoints() const { return CodepointsIterator(m_bytes); }
-		inline const char* operator*() const { return m_bytes.ptr(); }
-
-		inline bool operator==(const StringView& right) const {
-			if (len() != right.len()) return false;
-
-			for (usize i = 0; i < len(); i++) {
-				if (m_bytes[i] != right.m_bytes[i]) return false;
-			}
-
-			return true;
-		}
-		inline bool operator!=(const StringView& right) const {
-			return !(*this == right);
-		}
-
-	private:
-		Slice<char const> m_bytes;
-	};
-
-	inline u64 hash(StringView view) {
-		return hash::fnv1_hash(Slice<u8 const>((u8 const*)view.ptr(), view.len()));
-	}
-
-	class WStringView {
-	public:
-		inline constexpr WStringView() : m_chars() {}
-		inline constexpr WStringView(Slice<wchar_t const> bytes) : m_chars(bytes) {}
-		inline constexpr WStringView(const wchar_t* ptr) : m_chars({ ptr, string_length(ptr) }) {}
-
-		inline operator Slice<wchar_t const>() const { return m_chars; }
-
-		NO_DISCARD inline wchar_t const* ptr() const { return m_chars.ptr(); }
-		NO_DISCARD inline usize len() const { return m_chars.len(); }
-		inline const wchar_t* operator*() const { return m_chars.ptr(); }
-
-		NO_DISCARD inline const wchar_t* begin() const { return m_chars.cbegin(); }
-        NO_DISCARD inline const wchar_t* end() const { return m_chars.cend(); }
-        NO_DISCARD inline const wchar_t* cbegin() const { return m_chars.cbegin(); }
-		NO_DISCARD ALLOW_UNUSED const wchar_t* cend() const { return m_chars.cend(); }
-
-		NO_DISCARD inline wchar_t operator[](usize index) const { return m_chars[index]; }
-
-	private:
-		Slice<wchar_t const> m_chars;
-	};
-
 	class String {
 	public:
 		inline constexpr String() : m_bytes() {}
@@ -146,63 +58,5 @@ namespace core::containers {
 	private:
 		Array<char> m_bytes;
 	};
-
-	class WString {
-	public:
-		inline constexpr WString() : m_chars() {}
-
-		static inline WString from(WStringView view) {
-			WString string;
-			string.m_chars = Array<wchar_t>(view);
-			return string;
-		}
-		static WString from(StringView string);
-
-		inline operator Slice<wchar_t const>() const {
-			Slice<wchar_t const> result = m_chars;
-			if (m_chars.len() > 0) {
-				result = result.shrink(1);
-			}
-			return result; 
-		}
-		inline operator WStringView() const {
-			Slice<wchar_t const> bytes = m_chars;
-			bytes.set_len(len());
-			return WStringView(bytes);
-		}
-
-		NO_DISCARD inline wchar_t* ptr() { return m_chars.ptr(); }
-		NO_DISCARD inline wchar_t const* ptr() const { return m_chars.ptr(); }
-		inline const wchar_t* operator*() const { return m_chars.ptr(); }
-
-		NO_DISCARD inline usize len() const { return m_chars.len() > 0 ? m_chars.len() - 1 : 0; }
-		NO_DISCARD inline usize cap() const { return m_chars.cap(); }
-		inline void set_len(usize len) { 
-			m_chars[len] = 0;
-			m_chars.set_len(len + 1);
-		}
-
-		inline wchar_t* begin() { return m_chars.begin(); }
-		inline wchar_t* end() { return m_chars.end(); }
-		inline const wchar_t* cbegin() const { return m_chars.cbegin(); }
-		inline const wchar_t* cend() const { return m_chars.cend(); }
-
-		NO_DISCARD inline wchar_t& operator[](usize index) { return m_chars[index]; }
-		NO_DISCARD inline wchar_t operator[](usize index) const { return m_chars[index]; }
-
-		inline void reserve(usize amount) { return m_chars.reserve(amount); }
-		WString& push(wchar_t w);
-		WString& push(WStringView string);
-		WString& push(StringView string);
-
-	private:
-		Array<wchar_t> m_chars;
-	};
 }
-
-using core::containers::Codepoint;
-using core::containers::CodepointsIterator;
-using core::containers::StringView;
 using core::containers::String;
-using core::containers::WStringView;
-using core::containers::WString;

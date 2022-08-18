@@ -2,10 +2,9 @@
 
 #include "math/vec2.hpp"
 #include "fs.hpp"
-
 #include "resources.hpp"
 
-namespace draw2d {
+namespace draw {
 	using namespace core;
 
 	struct Glyph {

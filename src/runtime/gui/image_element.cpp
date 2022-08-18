@@ -1,21 +1,9 @@
-#include "element.hpp"
-
-#include "basic_shapes.hpp"
-#include "text.hpp"
-#include "math/aabb2.hpp"
-
+#include "image_element.hpp"
 #include "canvas.hpp"
-#include "gui.hpp"
+#include "basic_shapes.hpp"
 
 namespace gui {
-	Option<SlotBase const&> CompoundElement::slot_ref_at(usize index) const {
-		auto* mut_this = const_cast<CompoundElement*>(this);
-		auto result = mut_this->slot_mut_at(index);
-		if (result) return result.unwrap();
-		return NONE;
-	}
-
-	void Panel::on_paint(draw::Canvas& canvas) const {
+	void ImageElement::on_paint(draw::Canvas& canvas) const {
 		auto& layout = m_layout.as_ref().unwrap();
 
 		const auto local_position = Vec3f32{ layout.local_position, 1.f };
@@ -28,6 +16,10 @@ namespace gui {
 		const auto max = min + absolute_size;
 
 		canvas.set_color(m_color);
-		canvas.paint(draw::Rect(AABB2f32::from_min_max(min, max)));
+
+		auto rect = draw::Rect(AABB2f32::from_min_max(min, max));
+		rect.set_texture(m_texture, m_uv0, m_uv1);
+
+		canvas.paint(rect);
 	}
 }

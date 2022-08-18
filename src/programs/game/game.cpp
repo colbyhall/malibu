@@ -9,11 +9,14 @@
 
 #include "gpu.hpp"
 
+#include "font.hpp"
+#include "text.hpp"
+
 #include "gui.hpp"
 #include "window.hpp"
 #include "list_element.hpp"
+#include "text_element.hpp"
 
-#include "font.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_MEAN_AND_LEAN
@@ -44,6 +47,7 @@ int WINAPI WinMain(
 	auto list_a = gui::ListElement::make();
 	list_a->set_direction(gui::Direction::Horizontal);
 	{
+		#if 0
 		auto list_b = gui::ListElement::make();
 		{
 			auto panel_a = gui::Panel::make(LinearColor::GREEN);
@@ -54,7 +58,8 @@ int WINAPI WinMain(
 			auto panel_c = gui::Panel::make(LinearColor::RED);
 			list_b->add_slot(panel_c.clone());
 		}
-		list_a->add_slot(list_b.clone());
+		#endif
+		list_a->add_slot(text_element.clone());
 
 
 		auto panel = gui::Panel::make(LinearColor::WHITE);
@@ -517,14 +522,14 @@ int WINAPI WinMain(
 	}
 	auto gui_pipeline = gpu::GraphicsPipeline::make(gui_pipeline_config_opt.unwrap());
 
-	auto canvas = draw2d::Canvas::make();
-	canvas.paint(draw2d::Rect(AABB2f32::from_min_max(10.f, 100.f)));
+	auto canvas = draw::Canvas::make();
+	canvas.paint(draw::Rect(AABB2f32::from_min_max(10.f, 100.f)));
 
 	auto canvas_2d_vertices = gpu::Buffer::make(
 		gpu::BufferUsage::Vertex,
 		gpu::BufferKind::Upload,
 		canvas.vertices().len(),
-		sizeof(draw2d::Canvas::Vertex)
+		sizeof(draw::Canvas::Vertex)
 	);
 	canvas_2d_vertices.write([&canvas](Slice<u8> slice) {
 		mem::copy(slice.ptr(), canvas.vertices().ptr(), slice.len());

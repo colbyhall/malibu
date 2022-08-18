@@ -7,7 +7,7 @@ project "game"
 	vpaths { ["*"] = { "**.hpp", "**.cpp" } }
 	includedirs { "../../runtime/*", "../../third_party/*" }
 
-	links { "core", "gpu", "fbx", "asset", "draw2d", "dxc", "gui" }
+	links { "core", "gpu", "fbx", "asset", "draw", "dxc", "gui" }
 
 	cppdialect "C++17"
 

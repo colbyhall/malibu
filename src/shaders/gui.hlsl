@@ -48,7 +48,7 @@ float4 ps_main(PSInput input) : SV_TARGET {
 			return input.color;
 		}
 		float dist_alpha_mask = texture2d_table[input.tex2d].Sample(sampler_table, input.uv, 0).x;
-		output.w *= smoothstep(0.6, 0.7, dist_alpha_mask);
+		output.w *= smoothstep(0.65, 0.7, dist_alpha_mask);
 	}
 	return output;
 

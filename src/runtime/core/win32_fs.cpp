@@ -1,5 +1,6 @@
 #include "fs.hpp"
 #include "win32.hpp"
+#include "containers/wstring.hpp"
 
 namespace core::fs {
 	Path cwd() {

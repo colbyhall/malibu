@@ -10,7 +10,7 @@ project "gui"
 
 	systemversion "latest"
 
-    links { "core", "gpu", "draw2d", "dxc" }
+    links { "core", "gpu", "draw", "dxc" }
 
 	cppdialect "C++17"
 

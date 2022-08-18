@@ -1,4 +1,4 @@
-project "draw2d"
+project "draw"
     kind "StaticLib"
     language "C++"
 
@@ -10,7 +10,7 @@ project "draw2d"
 
 	systemversion "latest"
 
-    links { "core", "stb" }
+    links { "core", "stb", "gpu", "asset" }
 
 	cppdialect "C++17"
 

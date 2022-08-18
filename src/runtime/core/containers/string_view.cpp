@@ -1,4 +1,4 @@
-#include "string.hpp"
+#include "string_view.hpp"
 
 namespace core::containers {
 	static const u8 utf8d[] = {
@@ -47,45 +47,39 @@ namespace core::containers {
 		return len + 1;
 	}
 
-	String String::from(WStringView string) {
-		// FIXME: Do proper utf16 decode
-		String ret;
-		ret.reserve(string.len());
-		for (wchar_t c : string) ret.push((Codepoint)c);
-		return ret;
+	bool CodepointsIterator::should_continue() const {
+		return m_string.len() > 0 && m_index < m_string.len() && m_decoder_state != utf8_reject;
 	}
 
-	String& String::push(Codepoint c) {
-		// Encode the utf32 character to an utf8 multi width character
-		u8 local[4] = {};
-		u32 error;
-		const usize char_len = utf8_encode(c, local, &error);
-		VERIFY(error != utf8_reject);
-		
-		// Preallocate enough space to add the bytes
-		const usize slag = m_bytes.cap() - m_bytes.len();
-		if (slag < char_len) m_bytes.reserve(char_len + 1);
+	void CodepointsIterator::next() {
+		VERIFY(should_continue());
 
-		// Add the null terminator if the string len was 0
-		if (m_bytes.len() == 0) m_bytes.push(0);
+		for (; m_index < m_string.len(); m_index += 1) {
+			const u8 c = m_string[m_index];
+			utf8_decode(&m_decoder_state, &m_codepoint, c);
 
-		// SPEED: Could be made faster if used mem::copy
-		for (usize i = 0; i < char_len; ++i) m_bytes.insert(m_bytes.len() - 1, local[i]);
+			if (m_decoder_state == utf8_reject) return;
+			if (m_decoder_state != utf8_accept) continue;
 
-		return *this;
+			break;
+		}
+
+		m_index += 1;
 	}
 
-	String& String::push(StringView string) {
-		// Preallocate enough space for the entire string to reduce allocations
-		const usize slag = m_bytes.cap() - m_bytes.len();
-		if (slag < string.len()) m_bytes.reserve(string.len());
+	Codepoint CodepointsIterator::get() const {
+		usize get_index = m_index;
+		u32 get_state = m_decoder_state;
+		u32 get_codepoint = m_codepoint;
+		for (; get_index < m_string.len(); get_index += 1) {
+			const u8 c = (u8)m_string[get_index];
+			utf8_decode(&get_state, &get_codepoint, c);
 
-		// Add the null terminator if the string len was 0
-		if (m_bytes.len() == 0) m_bytes.push(0);
+			if (get_state == utf8_reject) return 0xfffd;
+			if (get_state != utf8_accept) continue;
 
-		// SPEED: could be made faster if used mem::copy
-		for (int i = 0; i < string.len(); ++i) m_bytes.insert(m_bytes.len() - 1, string.ptr()[i]);
-
-		return *this;
+			break;
+		}
+		return get_codepoint;
 	}
 }

@@ -1,16 +1,11 @@
 #pragma once 
 
-#include "core.hpp"
-
 #include "math/mat3.hpp"
 #include "math/color.hpp"
-
 #include "containers/shared_ref.hpp"
 #include "containers/function.hpp"
 
-#include "resources.hpp"
-
-namespace draw2d {
+namespace draw {
 	class Canvas;
 	class Font;
 }
@@ -36,7 +31,7 @@ namespace gui {
 		NO_DISCARD inline Option<Layout> layout() const { return m_layout; }
 
 		virtual void on_layout(const Layout& layout) { m_layout = layout; };
-		virtual void on_paint(draw2d::Canvas& canvas) const {}
+		virtual void on_paint(draw::Canvas& canvas) const {}
 
 		Option<Layout> m_layout = nullptr;
 
@@ -120,7 +115,7 @@ public:																					\
 		DECLARE_ELEMENT(Panel, Element)
 
 	protected:
-		void on_paint(draw2d::Canvas& canvas) const override;
+		void on_paint(draw::Canvas& canvas) const override;
 
 	private:
 		Panel(LinearColor color) : m_color(color) {}
@@ -128,41 +123,7 @@ public:																					\
 		LinearColor m_color;
 	};
 
-	class ImageElement : public Element {
-		DECLARE_ELEMENT(ImageElement, Element);
 
-	protected:
-		// Element Interface
-		void on_paint(draw2d::Canvas& canvas) const override;
-		// ~Element Interface
-	private:
-		ImageElement(const gpu::Texture& texture, Vec2f32 uv0 = 0.f, Vec2f32 uv1 = 1.f)
-			: m_texture(texture.clone()), m_uv0(uv0), m_uv1(uv1), m_color(LinearColor::WHITE) {}
 
-		gpu::Texture m_texture;
-		Vec2f32 m_uv0;
-		Vec2f32 m_uv1;
-
-		LinearColor m_color;
-	};
-
-	class TextElement : public Element {
-		DECLARE_ELEMENT(TextElement, Element);
-
-		void set_size(f32 size);
-
-	protected:
-		// Element Interface
-		void on_paint(draw2d::Canvas& canvas) const override;
-		// ~Element Interface
-	private:
-		TextElement(String&& text);
-
-		String m_text;
-
-		const draw2d::Font& m_font;
-		f32 m_size;
-		LinearColor m_color;
-	};
 	
 }

@@ -1,5 +1,6 @@
 #include "library.hpp"
 #include "win32.hpp"
+#include "containers/wstring.hpp"
 
 namespace core::library {
 	Option<Library> Library::open(fs::PathView path) {

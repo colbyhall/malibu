@@ -6,7 +6,7 @@
 #define STB_RECT_PACK_IMPLEMENTATION
 #include "stb_rect_pack.h"
 
-namespace draw2d {
+namespace draw {
 	Option<Font> Font::import(fs::PathView path) {
 		auto result = fs::File::open(path, fs::FileFlags::Read);
 		if (!result.is_ok()) return NONE;

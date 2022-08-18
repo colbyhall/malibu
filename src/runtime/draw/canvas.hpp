@@ -7,7 +7,7 @@
 
 #include "shape.hpp"
 
-namespace draw2d {
+namespace draw {
 	class Canvas {
 	public:
 		struct Vertex {

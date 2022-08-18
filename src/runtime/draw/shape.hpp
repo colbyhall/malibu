@@ -1,6 +1,6 @@
 #pragma once
 
-namespace draw2d {
+namespace draw {
 	class Canvas;
 
 	class Shape {

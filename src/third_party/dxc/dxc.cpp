@@ -12,6 +12,8 @@ using Microsoft::WRL::ComPtr;
 #include <dxcapi.h>
 #include <d3d12shader.h>
 
+#include "containers/wstring.hpp"
+
 namespace dxc {
 	// From DXSampleHelper.h
 	// Source: https://github.com/Microsoft/DirectX-Graphics-Samples
