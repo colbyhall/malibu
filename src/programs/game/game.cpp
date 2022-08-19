@@ -42,7 +42,7 @@ int WINAPI WinMain(
 		gui::Visibility::Hidden,
 	});
 
-	auto text_element = gui::TextElement::make(String::from("Hello World"));
+	auto text_element = gui::TextElement::make(String::from("Hello World\nDo the thingy"));
 
 	auto list_a = gui::ListElement::make();
 	list_a->set_direction(gui::Direction::Horizontal);

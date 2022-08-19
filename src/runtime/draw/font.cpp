@@ -25,7 +25,7 @@ namespace draw {
 		Array<Glyph> glyphs;
 		glyphs.reserve(info.numGlyphs);
 
-		const auto scale = stbtt_ScaleForPixelHeight(&info, 22);
+		const auto scale = stbtt_ScaleForPixelHeight(&info, Font::SDF_SIZE);
 		const auto padding = 5;
 		const auto onedge_value = 180;
 		const auto pixel_dist_scale = (f32)onedge_value / (f32)padding;
@@ -86,9 +86,15 @@ namespace draw {
 			stbtt_FreeSDF(sdf_bitmap, nullptr);
 
 			const auto size = Vec2f32 { (f32) width, (f32)height };
-			const auto bearing = Vec2f32 { (f32)(xoff - padding), (f32)(yoff - padding) };
-			const auto uv0 = Vec2f32 { (f32)rect.x / (f32)atlas_size.width, (f32)rect.y / (f32)atlas_size.height };
-			const auto uv1 = Vec2f32{ (f32)(rect.x + rect.w) / (f32)atlas_size.width, (f32)(rect.y + rect.h) / (f32)atlas_size.height };
+			const auto bearing = Vec2f32 { (f32)(xoff), -(f32)((height + yoff)) };
+			const auto uv0 = Vec2f32 { 
+				(f32)rect.x / (f32)atlas_size.width, 
+				(f32)rect.y / (f32)atlas_size.height 
+			};
+			const auto uv1 = Vec2f32{ 
+				(f32)(rect.x + rect.w) / (f32)atlas_size.width, 
+				(f32)(rect.y + rect.h) / (f32)atlas_size.height 
+			};
 			glyphs.push(Glyph {
 				size,
 				bearing,
@@ -135,13 +141,44 @@ namespace draw {
 		}
 
 		return Font {
+			core::move(bytes),
+			&info,
 			core::move(glyphs),
 			core::move(codepoints_to_glyphs),
 			core::move(pixels_texture),
 			scaled_ascent,
 			scaled_descent,
 			scaled_line_gap,
+			scale
 		};
+	}
+
+	Font::Font(
+		Array<u8>&& bytes,
+		const stbtt_fontinfo* info,
+		Array<Glyph>&& glyphs,
+		Array<u32>&& codepoints_to_glyphs,
+		gpu::Texture&& atlas,
+		f32 ascent,
+		f32 descent,
+		f32 line_gap,
+		f32 scale
+	) :
+		m_bytes(core::move(bytes)),
+		m_glphys(core::move(glyphs)),
+		m_codepoints_to_glyphs(core::move(codepoints_to_glyphs)),
+		m_atlas(core::move(atlas)),
+		m_ascent(ascent),
+		m_descent(descent),
+		m_line_gap(line_gap),
+		m_scale(scale) {
+
+		m_info = new stbtt_fontinfo;
+		*m_info = *info;
+	}
+
+	f32 Font::find_kerning(Codepoint a, Codepoint b) const {
+		return (f32)stbtt_GetCodepointKernAdvance(m_info, (int)a, (int)b) * m_scale;
 	}
 }
 
