@@ -37,7 +37,7 @@ int WINAPI WinMain(
 	gui::init();
 
 	auto window = gui::Window::make({
-		{ 1920, 1080 },
+		{ 1280, 720 },
 		"Malibu",
 		gui::Visibility::Hidden,
 	});

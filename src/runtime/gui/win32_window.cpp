@@ -196,8 +196,9 @@ namespace gui {
 			VERIFY(atom != 0);
 		}
 
+		const auto dpi = (f32)GetDpiForSystem() / 96.f;
 
-		RECT adjusted_rect = { 0, 0, (LONG)config.size.width, (LONG)config.size.height };
+		RECT adjusted_rect = { 0, 0, (LONG)((f32)config.size.width * dpi), (LONG)((f32)config.size.height * dpi) };
 		AdjustWindowRect(&adjusted_rect, dwStyle, 0);
 
 		const int width = adjusted_rect.right - adjusted_rect.left;
@@ -251,7 +252,11 @@ namespace gui {
 	Rect2u32 Window::client() const {
 		RECT rect;
 		GetClientRect((HWND)m_handle, &rect);
-		return Rect2u32::from_min_max({ (u32)rect.left, (u32)rect.top }, { (u32)rect.right, (u32)rect.bottom });
+		const auto inv_dpi = 1.f / dpi();
+		return Rect2u32::from_min_max(
+			{ (u32)((f32)rect.left * inv_dpi), (u32)((f32)rect.top * inv_dpi) },
+			{ (u32)((f32)rect.right * inv_dpi), (u32)((f32)rect.bottom * inv_dpi) }
+		);
 	}
 
 	bool Window::set_visibility(Visibility visibility) {
@@ -277,5 +282,9 @@ namespace gui {
 
 	void Window::set_cursor_visbility(bool visible) {
 		ShowCursor(visible);
+	}
+
+	f32 Window::dpi() const {
+		return (f32)GetDpiForWindow((HWND)m_handle) / 96.f;
 	}
 }

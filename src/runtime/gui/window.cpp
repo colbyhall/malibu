@@ -41,7 +41,7 @@ namespace gui {
 					back_buffer,
 					NONE,
 					[&](gpu::RenderPassRecorder& rpr) {
-						const auto client = this->client().size().cast<f32>() / 2.f;
+						const auto client = this->client().size().cast<f32>();
 
 						const auto projection = Mat4f32::orthographic(
 							client.width,
@@ -80,7 +80,7 @@ namespace gui {
 
 	void Window::on_resize() {
 		if (m_element) {
-			const auto client_size = client().size().cast<f32>() / 2.f;
+			const auto client_size = client().size().cast<f32>();
 
 			Layout layout = {};
 			layout.local_size = client_size;

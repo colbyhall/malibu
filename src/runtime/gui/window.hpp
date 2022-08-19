@@ -98,6 +98,7 @@ namespace gui {
 		void set_element(SharedRef<Element>&& element);
 
 		inline WindowHandle handle() const { return m_handle; }
+		f32 dpi() const;
 
 		inline gpu::Swapchain const & swapchain_ref() const { return m_swapchain; }
 		inline gpu::Swapchain& swapchain_mut() { return m_swapchain; }
