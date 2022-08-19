@@ -56,6 +56,9 @@ void D3D12GraphicsCommandList::copy_buffer_to_texture(const gpu::Texture& dst, c
 		&src_location,
 		nullptr
 	);
+
+	m_textures_in_use.push(dst.clone());
+	m_buffers_in_use.push(src.clone());
 }
 
 void D3D12GraphicsCommandList::copy_buffer_to_buffer(const gpu::Buffer& dst, const gpu::Buffer& src) {
@@ -72,6 +75,8 @@ void D3D12GraphicsCommandList::texture_barrier(const gpu::Texture& texture, gpu:
 	barrier.Transition.StateBefore = layout_to_resource_states(old_layout);
 	barrier.Transition.StateAfter = layout_to_resource_states(new_layout);
 	m_command_list->ResourceBarrier(1, &barrier);
+
+	m_textures_in_use.push(texture.clone());
 }
 
 void D3D12GraphicsCommandList::begin_render_pass(const gpu::Texture& color, Option<const gpu::Texture&> depth) {
@@ -80,6 +85,7 @@ void D3D12GraphicsCommandList::begin_render_pass(const gpu::Texture& color, Opti
 		auto& depth_texture = depth.unwrap();
 		auto& interface = depth_texture.interface<D3D12Texture>();
 		depth_handle = &interface.m_dsv_handle;
+		// m_textures_in_use.push(depth_texture.clone());
 	}
 
 	const auto& interface = color.interface<D3D12Texture>();
@@ -108,6 +114,8 @@ void D3D12GraphicsCommandList::begin_render_pass(const gpu::Texture& color, Opti
 
 	m_bound_color_buffer = interface.m_rtv_handle;
 	if (depth_handle) m_bound_depth_buffer = *depth_handle;
+
+	// m_textures_in_use.push(color.clone());
 }
 
 void D3D12GraphicsCommandList::set_scissor(Option<Rect2f32> scissor) {
@@ -151,6 +159,7 @@ void D3D12GraphicsCommandList::set_vertices(const gpu::Buffer& buffer) {
 	view.StrideInBytes = (UINT)interface.m_stride;
 	view.SizeInBytes = (UINT)(interface.m_len * interface.m_stride);
 	m_command_list->IASetVertexBuffers(0, 1, &view);
+	m_buffers_in_use.push(buffer.clone());
 }
 
 void D3D12GraphicsCommandList::set_indices(const gpu::Buffer& buffer) {
@@ -160,8 +169,8 @@ void D3D12GraphicsCommandList::set_indices(const gpu::Buffer& buffer) {
 	view.BufferLocation = (UINT)interface.m_resource->GetGPUVirtualAddress();
 	view.SizeInBytes = (UINT)(interface.m_len * interface.m_stride);
 	view.Format = DXGI_FORMAT_R32_UINT; // All index buffers must be of u32
-
 	m_command_list->IASetIndexBuffer(&view);
+	m_buffers_in_use.push(buffer.clone());
 }
 
 void D3D12GraphicsCommandList::push_constant(const void* ptr) {
@@ -203,6 +212,29 @@ void D3D12GraphicsCommandList::end_recording() {
 
 void D3D12GraphicsCommandList::submit() {
 	auto& context = gpu::Context::the().interface<D3D12Context>();
+
 	ID3D12CommandList* ppCommandLists[] = { m_command_list.Get() };
 	context.queue->ExecuteCommandLists(1, ppCommandLists);
+
+	ComPtr<ID3D12Fence> fence;
+	throw_if_failed(context.device->CreateFence(
+		0,
+		D3D12_FENCE_FLAG_NONE,
+		IID_PPV_ARGS(&fence)
+	));
+	throw_if_failed(context.queue->Signal(fence.Get(), 1));
+
+	for (int i = 0; i < context.work_queue.len(); ++i) {
+		const auto value = context.work_queue[i].fence->GetCompletedValue();
+		if (value > 0) {
+			context.work_queue.remove(i);
+			i -= 1;
+		}
+	}
+
+	context.work_queue.push(D3D12QueuedWork{
+		fence,
+		core::move(m_textures_in_use),
+		core::move(m_buffers_in_use)
+	});
 }

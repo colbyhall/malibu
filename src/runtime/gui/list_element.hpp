@@ -9,18 +9,14 @@ namespace gui {
 		Horizontal
 	};
 
-	class ListElement : public CompoundElement {
-		DECLARE_ELEMENT(ListElement, CompoundElement);
+	class ListElement : public ContainerElement {
+		DECLARE_ELEMENT(ListElement, ContainerElement);
 
 		class Slot : public SlotBase {
 		public:
 			inline Slot(SharedRef<Element>&& element) 
 				: SlotBase(core::forward<SharedRef<Element>>(element)) {}
 		private:
-			Padding m_padding;
-			Margin m_margin;
-			Alignment2 m_alignment;
-			Sizing m_sizing;
 		};
 
 		void set_direction(Direction direction);
@@ -36,10 +32,10 @@ namespace gui {
 		void on_paint(draw::Canvas& canvas) const override;
 		// ~Element Interface
 
-		// CompoundElement
+		// CompoundElement Interface
 		Option<SlotBase&> slot_mut_at(usize index) override;
 		usize slot_count() const override;
-		// ~CompoundElement
+		// ~CompoundElement Interface
 
 	private:
 		Direction m_direction;

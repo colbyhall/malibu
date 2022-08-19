@@ -63,6 +63,7 @@ namespace gpu {
 		virtual Format format() const = 0;
 		virtual Vec3u32 size() const = 0;
 		virtual u32 bindless() const = 0;
+		virtual ~TextureInterface() {}
 	};
 
 	class Texture {
@@ -117,6 +118,7 @@ namespace gpu {
 		virtual Slice<u8> write() const = 0;
 		// virtual Slice<u8 const> read() const = 0;
 		virtual void unmap() const = 0;
+		virtual ~BufferInterface() {}
 	};
 
 	class Buffer {
@@ -132,6 +134,8 @@ namespace gpu {
 		NO_DISCARD inline BufferKind kind() const { return m_interface->kind(); }
 		NO_DISCARD inline usize len() const { return m_interface->len(); }
 		NO_DISCARD inline usize stride() const { return m_interface->stride(); }
+
+		inline Buffer clone() const { return m_interface.clone(); }
 
 		template <typename F>
 		void write(F&& callable) {

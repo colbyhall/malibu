@@ -53,24 +53,30 @@ public:
 		m_format(move.m_format),
 		m_size(move.m_size),
 		m_rtv_handle(move.m_rtv_handle),
-		m_dsv_handle(move.m_dsv_handle)
+		m_dsv_handle(move.m_dsv_handle),
+		m_bindless_handle(move.m_bindless_handle)
 	{
 		move.m_resource = nullptr;
+		move.m_rtv_handle = {};
+		move.m_dsv_handle = {};
+		move.m_bindless_handle = {};
+
 	}
 
 	BitFlag<gpu::TextureUsage> usage() const override { return m_usage; }
 	gpu::Format format() const override { return m_format; }
 	Vec3u32 size() const override { return m_size; }
 	u32 bindless() const override { return m_bindless_handle.index; }
+	~D3D12Texture() override;
 
 	ComPtr<ID3D12Resource> m_resource;
 	BitFlag<gpu::TextureUsage> m_usage;
 	gpu::Format m_format;
 	Vec3u32 m_size;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE m_rtv_handle;
-	D3D12_CPU_DESCRIPTOR_HANDLE m_dsv_handle;
-	BindlessHandle m_bindless_handle;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_rtv_handle = {};
+	D3D12_CPU_DESCRIPTOR_HANDLE m_dsv_handle = {};
+	BindlessHandle m_bindless_handle = {};
 };
 
 class D3D12Buffer : public gpu::BufferInterface {

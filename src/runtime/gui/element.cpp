@@ -8,8 +8,8 @@
 #include "gui.hpp"
 
 namespace gui {
-	Option<SlotBase const&> CompoundElement::slot_ref_at(usize index) const {
-		auto* mut_this = const_cast<CompoundElement*>(this);
+	Option<SlotBase const&> ContainerElement::slot_ref_at(usize index) const {
+		auto* mut_this = const_cast<ContainerElement*>(this);
 		auto result = mut_this->slot_mut_at(index);
 		if (result) return result.unwrap();
 		return NONE;

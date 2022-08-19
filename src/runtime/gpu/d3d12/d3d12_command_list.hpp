@@ -59,4 +59,7 @@ private:
 
 	Option<D3D12_CPU_DESCRIPTOR_HANDLE> m_bound_color_buffer;
 	Option<D3D12_CPU_DESCRIPTOR_HANDLE> m_bound_depth_buffer;
+
+	Array<gpu::Texture> m_textures_in_use;
+	Array<gpu::Buffer> m_buffers_in_use;
 };

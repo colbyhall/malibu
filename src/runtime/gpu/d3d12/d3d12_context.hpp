@@ -57,6 +57,12 @@ private:
 
 typedef HRESULT (__stdcall *PFN_D3D12_SERIALIZE_ROOT_SIGNATURE)(const D3D12_ROOT_SIGNATURE_DESC *root_signature_desc,D3D_ROOT_SIGNATURE_VERSION version,ID3DBlob **blob,ID3DBlob **error_blob);
 
+struct D3D12QueuedWork {
+	ComPtr<ID3D12Fence> fence;
+	Array<gpu::Texture> textures;
+	Array<gpu::Buffer> buffers;
+};
+
 class D3D12Context : public gpu::ContextInterface {
 	using Library = core::library::Library;
 
@@ -65,6 +71,8 @@ class D3D12Context : public gpu::ContextInterface {
 	using GetDebugInterface = PFN_D3D12_GET_DEBUG_INTERFACE;
 
 public:
+	explicit D3D12Context();
+
 	gpu::Backend backend() const override { return gpu::Backend::D3D12; }
 	void post_init() override;
 
@@ -84,10 +92,10 @@ public:
 	D3D12BindlessDescriptorHeap bindless_heap;
 	Option<gpu::Texture> bindless_texture;
 
+	mutable Array<D3D12QueuedWork> work_queue; // TODO: Make thread safe
 
 #if BUILD_DEBUG
 	ComPtr<ID3D12Debug> debug_interface;
 #endif
 
-	explicit D3D12Context();
 };

@@ -21,6 +21,17 @@ namespace core::containers {
 			new (p) T(t);
 		}
 
+		inline Option& operator=(T&& t) {
+			if (m_set) {
+				auto* p = reinterpret_cast<T*>(&m_data[0]);
+				p->~T();
+			}
+			auto* p = m_data;
+			m_set = true;
+			new (p) T(core::forward<T>(t));
+			return *this;
+		}
+
 		NO_DISCARD inline bool is_set() const { return m_set; }
 		explicit inline operator bool() const { return is_set(); }
 
@@ -50,7 +61,13 @@ namespace core::containers {
 			}
 		}
 		
-		// TODO: Destructor
+		~Option() {
+			if (m_set) {
+				auto* p = reinterpret_cast<T*>(&m_data[0]);
+				p->~T();
+				m_set = false;
+			}
+		}
 
 	private:
 		bool m_set;
@@ -71,8 +88,6 @@ namespace core::containers {
 			VERIFY(is_set());
 			return *m_ptr;
 		}
-		
-		// TODO: Destructor
 
 	private:
 		T* m_ptr;

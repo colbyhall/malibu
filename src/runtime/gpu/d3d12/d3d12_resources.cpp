@@ -91,6 +91,23 @@ D3D12Texture::D3D12Texture(
 	}
 }
 
+D3D12Texture::~D3D12Texture() {
+	auto& context = gpu::Context::the().interface<D3D12Context>();
+
+	if (m_rtv_handle.ptr) {
+		context.rtv_heap.free(m_rtv_handle);
+		m_rtv_handle = {};
+	}
+	if (m_dsv_handle.ptr) {
+		context.dsv_heap.free(m_dsv_handle);
+		m_dsv_handle = {};
+	}
+	if (m_bindless_handle.index) {
+		context.bindless_heap.free_texture2d(m_bindless_handle);
+		m_bindless_handle = {};
+	}
+}
+
 D3D12Buffer::D3D12Buffer(
 	BitFlag<gpu::BufferUsage> usage, 
 	gpu::BufferKind kind, 

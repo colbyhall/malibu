@@ -1,9 +1,10 @@
 #include "basic_shapes.hpp"
 #include "canvas.hpp"
+#include "resources.hpp"
 
 namespace draw {
 	void Rect::set_texture(const gpu::Texture& texture, Vec2f32 uv0, Vec2f32 uv1) {
-		m_texture = 1; // TODO: texture.bindless();
+		m_texture = texture.bindless();
 		m_uv0 = uv0;
 		m_uv1 = uv1;
 	}

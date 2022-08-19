@@ -11,10 +11,10 @@ namespace draw {
 		const f32 new_line = (m_font.ascent() - m_font.descent()) + m_font.line_gap();
 
 		auto position = origin;
-		position.y -= size * scale * 2.f;
+		position.y -= size * scale;
 
-		for (auto codepoints = m_text.codepoints(); codepoints; ++codepoints) {
-			auto c = *codepoints;
+		for (auto iter = m_text.codepoints(); iter; ++iter) {
+			auto c = *iter;
 
 			switch (c) {
 			case '\n': {
@@ -37,7 +37,7 @@ namespace draw {
 				canvas.paint(rect);
 				position.x += glyph.advance * scale;
 
-				auto peek = codepoints;
+				auto peek = iter;
 				if (peek && !m_monospace) {
 					++peek;
 

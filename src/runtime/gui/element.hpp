@@ -62,8 +62,8 @@ public:																					\
 		SharedRef<Element> m_element;
 	};
 
-	class CompoundElement : public Element {
-		DECLARE_ABSTRACT_ELEMENT(CompoundElement, Element);
+	class ContainerElement : public Element {
+		DECLARE_ABSTRACT_ELEMENT(ContainerElement, Element);
 
 		Option<SlotBase const&> slot_ref_at(usize index) const;
 		virtual Option<SlotBase&> slot_mut_at(usize index) = 0;

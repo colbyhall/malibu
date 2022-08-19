@@ -223,7 +223,6 @@ namespace gui {
 			hInstance,
 			nullptr
 		);
-		// FIXME: Error
 		VERIFY(handle != INVALID_HANDLE_VALUE);
 
 		RAWINPUTDEVICE rid;
@@ -232,7 +231,7 @@ namespace gui {
 		rid.dwFlags = RIDEV_INPUTSINK;
 		rid.hwndTarget = handle;
 		const auto rid_success = RegisterRawInputDevices(&rid, 1, sizeof(rid));
-		VERIFY(rid_success); // FIXME: Do error handling
+		VERIFY(rid_success);
 
 		if (config.visibility == Visibility::Visible) ShowWindow(handle, SW_SHOWNORMAL);
 

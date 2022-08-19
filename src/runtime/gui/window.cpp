@@ -8,7 +8,7 @@ namespace gui {
 	void Window::set_element(SharedRef<Element>&& element) {
 		m_element = core::forward<SharedRef<Element>>(element);
 		on_resize();
-		on_paint();
+		// on_paint();
 	}
 
 	void Window::on_paint() {
