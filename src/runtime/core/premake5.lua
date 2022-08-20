@@ -2,9 +2,9 @@ project "core"
 	kind "StaticLib"
 	language "C++"
 
-	files { "**.hpp", "**.cpp" }
+	files { "**.hpp", "**.cpp", "**.lua", "**.natvis" }
 
-	vpaths { ["*"] = { "**.hpp", "**.cpp" } }
+	vpaths { ["*"] = { "**.hpp", "**.cpp", "**.lua", "**.natvis" } }
 
 	cppdialect "C++17"
 
