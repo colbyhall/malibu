@@ -37,7 +37,6 @@ namespace gui {
 		};
 
 		config.color_attachments.push(gpu::Format::RGBA_U8);
-		// config.depth_attachment = gpu::Format::Depth24_Stencil8;
 
 		config.blend_enabled = true;
 		config.src_color_blend_factor = gpu::BlendFactor::SrcAlpha;

@@ -32,10 +32,10 @@ namespace gui {
 		void on_paint(draw::Canvas& canvas) const override;
 		// ~Element Interface
 
-		// CompoundElement Interface
+		// ContainerElement Interface
 		Option<SlotBase&> slot_mut_at(usize index) override;
 		usize slot_count() const override;
-		// ~CompoundElement Interface
+		// ~ContainerElement Interface
 
 	private:
 		Direction m_direction;

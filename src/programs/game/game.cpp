@@ -16,6 +16,7 @@
 #include "window.hpp"
 #include "list_element.hpp"
 #include "text_element.hpp"
+#include "overlap_element.hpp"
 
 
 #define WIN32_LEAN_AND_MEAN
@@ -36,37 +37,28 @@ int WINAPI WinMain(
 	asset::init();
 	gui::init();
 
+	auto list = gui::ListElement::make();
+	list->set_direction(gui::Direction::Horizontal);
+
+	auto text_element = gui::TextElement::make(String::from("Hello World\nDo the thingy"));
+	list->add_slot(text_element.clone());
+
+	auto overlap = gui::OverlapElement::make();
+	auto panel = gui::Panel::make(LinearColor::GREEN);
+	auto text_element2 = gui::TextElement::make(String::from("Ding Dong"));
+	text_element2->set_size(32.f);
+	overlap->add_slot(panel.clone());
+	overlap->add_slot(text_element2.clone());
+
+	list->add_slot(overlap.clone());
+
 	auto window = gui::Window::make({
 		{ 1280, 720 },
 		"Malibu",
 		gui::Visibility::Hidden,
 	});
 
-	auto text_element = gui::TextElement::make(String::from("Hello World\nDo the thingy"));
-
-	auto list_a = gui::ListElement::make();
-	list_a->set_direction(gui::Direction::Horizontal);
-	{
-		#if 0
-		auto list_b = gui::ListElement::make();
-		{
-			auto panel_a = gui::Panel::make(LinearColor::GREEN);
-			list_b->add_slot(panel_a.clone());
-
-			list_b->add_slot(text_element.clone());
-
-			auto panel_c = gui::Panel::make(LinearColor::RED);
-			list_b->add_slot(panel_c.clone());
-		}
-		#endif
-		list_a->add_slot(text_element.clone());
-
-
-		auto panel = gui::Panel::make(LinearColor::WHITE);
-		list_a->add_slot(panel.clone());
-	}
-
-	window->set_element(list_a.clone());
+	window->set_element(list.clone());
 	window->set_visibility(gui::Visibility::Visible);
 
 	auto last_frame = Instant::now();
@@ -74,14 +66,13 @@ int WINAPI WinMain(
 	for (;;) {
 		const auto now = Instant::now();
 		const auto delta = now.duration_since(last_frame);
-		time += delta.as_secs_f32();
+		const auto dt = delta.as_secs_f32();
+		time += dt;
 		last_frame = now;
 
-		text_element->set_size(math::sin(time) * 20.f + 44.f);
-
-		const auto dt = delta.as_secs_f32();
-
 		gui::Window::pump_events();
+
+		text_element->set_size(math::sin(time) * 20.f + 44.f);
 		
 		window->on_paint();
 	}
