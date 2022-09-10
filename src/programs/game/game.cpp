@@ -10,14 +10,12 @@
 #include "gpu.hpp"
 
 #include "font.hpp"
-#include "text.hpp"
 
 #include "gui.hpp"
 #include "window.hpp"
-#include "list_element.hpp"
-#include "text_element.hpp"
-#include "overlap_element.hpp"
-
+#include "list.hpp"
+#include "text.hpp"
+#include "overlap.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_MEAN_AND_LEAN
@@ -37,15 +35,15 @@ int WINAPI WinMain(
 	asset::init();
 	gui::init();
 
-	auto list = gui::ListElement::make();
+	auto list = gui::List::make();
 	list->set_direction(gui::Direction::Horizontal);
 
-	auto text_element = gui::TextElement::make(String::from("Hello World\nDo the thingy"));
+	auto text_element = gui::Text::make(String::from("Hello World\nDo the thingy"));
 	list->add_slot(text_element.clone());
 
-	auto overlap = gui::OverlapElement::make();
+	auto overlap = gui::Overlap::make();
 	auto panel = gui::Panel::make(LinearColor::GREEN);
-	auto text_element2 = gui::TextElement::make(String::from("Ding Dong"));
+	auto text_element2 = gui::Text::make(String::from("Ding Dong"));
 	text_element2->set_size(32.f);
 	overlap->add_slot(panel.clone());
 	overlap->add_slot(text_element2.clone());

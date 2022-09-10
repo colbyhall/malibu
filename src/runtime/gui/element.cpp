@@ -1,15 +1,14 @@
 #include "element.hpp"
 
-#include "basic_shapes.hpp"
-#include "text.hpp"
+#include "shape.hpp"
 #include "math/aabb2.hpp"
 
 #include "canvas.hpp"
 #include "gui.hpp"
 
 namespace gui {
-	Option<SlotBase const&> ContainerElement::slot_ref_at(usize index) const {
-		auto* mut_this = const_cast<ContainerElement*>(this);
+	Option<SlotBase const&> Container::slot_ref_at(usize index) const {
+		auto* mut_this = const_cast<Container*>(this);
 		auto result = mut_this->slot_mut_at(index);
 		if (result) return result.unwrap();
 		return NONE;

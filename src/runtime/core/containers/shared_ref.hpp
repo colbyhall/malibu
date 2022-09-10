@@ -14,7 +14,6 @@ namespace core::containers {
 	template <typename Base>
 	class SharedRef {
 	public:
-
 		template<typename Derived = Base, typename... Args>
 		static SharedRef<Base> make(Args&&... args) {
 			return SharedRef<Base>(Derived(forward<Args>(args)...));

@@ -62,7 +62,7 @@ public:																					\
 		SharedRef<Element> m_element;
 	};
 
-	class ContainerElement : public Element {
+	class Container : public Element {
 		DECLARE_ABSTRACT_ELEMENT(ContainerElement, Element);
 
 		Option<SlotBase const&> slot_ref_at(usize index) const;

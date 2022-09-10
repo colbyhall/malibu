@@ -1,29 +1,29 @@
-#include "list_element.hpp"
+#include "list.hpp"
 
 namespace gui {
-	void ListElement::insert_slot(usize index, SharedRef<Element>&& child) {
+	void List::insert_slot(usize index, SharedRef<Element>&& child) {
 		Slot slot = core::forward<SharedRef<Element>>(child);
 		m_slots.insert(index, core::move(slot));
 	}
 
-	void ListElement::insert_slot(usize index, SharedRef<Element>&& child, FunctionRef<void(Slot&)>&& add) {
+	void List::insert_slot(usize index, SharedRef<Element>&& child, FunctionRef<void(Slot&)>&& add) {
 		Slot slot = core::forward<SharedRef<Element>>(child);
 		add(slot);
 		m_slots.insert(index, core::move(slot));
 	}
 
-	void ListElement::add_slot(SharedRef<Element>&& child) {
+	void List::add_slot(SharedRef<Element>&& child) {
 		Slot slot = core::forward<SharedRef<Element>>(child);
 		m_slots.push(core::move(slot));
 	}
 
-	void ListElement::add_slot(SharedRef<Element>&& child, FunctionRef<void(Slot&)>&& add) {
+	void List::add_slot(SharedRef<Element>&& child, FunctionRef<void(Slot&)>&& add) {
 		Slot slot = core::forward<SharedRef<Element>>(child);
 		add(slot);
 		m_slots.push(core::move(slot));
 	}
 
-	void ListElement::set_direction(Direction direction) {
+	void List::set_direction(Direction direction) {
 		if (m_direction != direction) {
 			m_direction = direction;
 
@@ -33,7 +33,7 @@ namespace gui {
 		}
 	}
 
-	void ListElement::on_layout(const Layout& layout) {
+	void List::on_layout(const Layout& layout) {
 		Element::on_layout(layout);
 
 		Vec2f32 size;
@@ -56,18 +56,18 @@ namespace gui {
 		}
 	}
 
-	void ListElement::on_paint(draw::Canvas& canvas) const {
+	void List::on_paint(draw::Canvas& canvas) const {
 		for (usize index = 0; index < m_slots.len(); ++index) {
 			m_slots[index].element_ref()->on_paint(canvas);
 		}
 	}
 
-	Option<SlotBase&> ListElement::slot_mut_at(usize index) {
+	Option<SlotBase&> List::slot_mut_at(usize index) {
 		if (index >= slot_count()) return NONE;
 		return m_slots[index];
 	}
 
-	usize ListElement::slot_count() const {
+	usize List::slot_count() const {
 		return m_slots.len();
 	}
 }

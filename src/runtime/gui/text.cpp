@@ -1,9 +1,20 @@
-#include "image_element.hpp"
+#include "text.hpp"
+#include "gui.hpp"
 #include "canvas.hpp"
-#include "basic_shapes.hpp"
+#include "shape.hpp"
 
 namespace gui {
-	void ImageElement::on_paint(draw::Canvas& canvas) const {
+	Text::Text(String&& text) :
+		m_text(core::move(text)),
+		m_font(gui::Manager::the().consola),
+		m_size(16.f),
+		m_color(LinearColor::WHITE) {}
+
+	void Text::set_size(f32 size) {
+		m_size = size;
+	}
+
+	void Text::on_paint(draw::Canvas& canvas) const {
 		auto& layout = m_layout.as_ref().unwrap();
 
 		const auto local_position = Vec3f32{ layout.local_position, 1.f };
@@ -17,9 +28,7 @@ namespace gui {
 
 		canvas.set_color(m_color);
 
-		auto rect = draw::Rect(AABB2f32::from_min_max(min, max));
-		rect.set_texture(m_texture, m_uv0, m_uv1);
-
-		canvas.paint(rect);
+		const auto bounds = Rect2f32::from_min_max(min, max);
+		canvas.paint(draw::Text{ m_text, bounds, m_font, m_size });
 	}
 }

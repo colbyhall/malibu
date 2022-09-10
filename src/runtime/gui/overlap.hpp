@@ -4,8 +4,8 @@
 #include "containers/array.hpp"
 
 namespace gui {
-	class OverlapElement : public ContainerElement {
-		DECLARE_ELEMENT(OverlapElement, CompoundElement);
+	class Overlap : public Container {
+		DECLARE_ELEMENT(Overlap, Container);
 
 		class Slot : public SlotBase {
 		public:

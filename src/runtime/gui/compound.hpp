@@ -3,8 +3,8 @@
 #include "element.hpp"
 
 namespace gui {
-	class CompoundElement : public ContainerElement {
-		DECLARE_ABSTRACT_ELEMENT(CompoundElement, ContainerElement);
+	class Compound : public Container {
+		DECLARE_ABSTRACT_ELEMENT(Compound, Container);
 
 		class Slot : public SlotBase {
 		public:

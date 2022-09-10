@@ -5,7 +5,6 @@
 #include "core.hpp"
 
 namespace asset {
-
 	class AssetRegistration {
 	public:
 		AssetRegistration(StringView name);

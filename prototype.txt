@@ -1,0 +1,40 @@
+Action Adventure Game
+Third Person
+Procedural Character Animation
+Parkour
+Surfing
+Player has melee combat
+Enemy has projectiles
+Stealth gameplay
+
+Skeletal Animation Task
+------------------------------------------
+1. Create a character mesh and skeletal rig
+2. Load and draw a mesh
+3. Load and draw a skeleton
+4. Load and draw an animation
+
+Character Movement Task
+--------------------------------------
+1. Entity Component System
+2. Integrate jolt physics system
+3. Walking, Jumping, Falling
+
+Character Animation Task, Skeletal Animation Task
+--------------------------
+Depends on Character Movement Task
+1. Try out key frame procedural animation technique with different blending for walking, jumping, falling
+
+Art style
+--------------------
+Bright saturated colors
+Low poly models but high model count
+Old technology
+Ocean
+Beach
+Island of mystery
+
+Player Character Ideas
+-------------------------
+Teenage boy with brunette hair. Shorts and a T shirt
+Should there be a dog?

@@ -5,8 +5,8 @@
 #include "math/color.hpp"
 
 namespace gui {
-	class TextElement : public Element {
-		DECLARE_ELEMENT(TextElement, Element);
+	class Text : public Element {
+		DECLARE_ELEMENT(Text, Element);
 
 		void set_size(f32 size);
 
@@ -14,8 +14,9 @@ namespace gui {
 		// Element Interface
 		void on_paint(draw::Canvas& canvas) const override;
 		// ~Element Interface
+
 	private:
-		TextElement(String&& text);
+		Text(String&& text);
 
 		String m_text;
 

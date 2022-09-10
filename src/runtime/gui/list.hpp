@@ -9,8 +9,8 @@ namespace gui {
 		Horizontal
 	};
 
-	class ListElement : public ContainerElement {
-		DECLARE_ELEMENT(ListElement, ContainerElement);
+	class List : public Container {
+		DECLARE_ELEMENT(List, Container);
 
 		class Slot : public SlotBase {
 		public:

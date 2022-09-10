@@ -27,4 +27,8 @@ namespace asset {
 	void init() {
 
 	}
+
+	void query() {
+
+	}
 }

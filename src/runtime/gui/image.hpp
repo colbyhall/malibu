@@ -5,8 +5,8 @@
 #include "math/color.hpp"
 
 namespace gui {
-	class ImageElement : public Element {
-		DECLARE_ELEMENT(ImageElement, Element);
+	class Image : public Element {
+		DECLARE_ELEMENT(Image, Element);
 
 	protected:
 		// Element Interface
@@ -14,7 +14,7 @@ namespace gui {
 		// ~Element Interface
 
 	private:
-		ImageElement(const gpu::Texture& texture, Vec2f32 uv0 = 0.f, Vec2f32 uv1 = 1.f)
+		Image(const gpu::Texture& texture, Vec2f32 uv0 = 0.f, Vec2f32 uv1 = 1.f)
 			: m_texture(texture.clone()), m_uv0(uv0), m_uv1(uv1), m_color(LinearColor::WHITE) {}
 
 		gpu::Texture m_texture;
